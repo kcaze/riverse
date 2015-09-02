@@ -1,0 +1,1 @@
+Monsters Reversed is a retro arcade-style action puzzle video game in the style of Tetris and Dr. Mario. Puzzle game enthusiasts will feel right at home as you score points by forming rows where all the pieces are the same color. The core mechanic is simple but difficult to master: change pieces to the opposite color by bounding them as in Reversi.
