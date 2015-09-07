@@ -1,5 +1,4 @@
-
-//TODO: Each entry of the board should be associated with a piece! Then you can actually query things properly. All logic is handled instantaneously with no blocking. Animation is asynchronous, but chained with promises to guarantee that they are executed in order. Minor graphical glitches might occur when shooting an orb as a row drops or is cleared, but they shouldn't be very noticeable.
+var previous_time;
 
 var scene_game = (function () {
   var state;
@@ -17,6 +16,37 @@ var scene_game = (function () {
     Blue: 2
   };
   var normal_piece_types = [PieceTypes.Red, PieceTypes.Blue];
+
+  function pause() {
+    kz.pause();
+    // copy over game picture at pause time
+    graphics.pause_context.clearRect(
+      0,
+      0,
+      graphics.pause_canvas.width,
+      graphics.pause_canvas.height
+    );
+    graphics.pause_context.drawImage(
+      kz.canvas,
+      0,
+      0
+    );
+    kz.tween({
+      object: graphics,
+      property: 'pause_alpha',
+      value: 0.75,
+      duration: 50,
+    });
+  }
+
+  function resume() {
+    kz.tween({
+      object: graphics,
+      property: 'pause_alpha',
+      value: 0,
+      duration: 50,
+    }).then(kz.resume);
+  }
 
   function blankPromise() {
     return new Promise(function (resolve) {
@@ -249,6 +279,7 @@ var scene_game = (function () {
               pieceTypeFlipImages(piece_type).reverse());
           piece.actions_promise = piece.actions_promise.then(function () {
             return new Promise(function(resolve) {
+              // with the current way pause is set up, this doesn't pause :(
               var intervalID;
               function updatePieceImage() {
                 if (piece.frameIndex < piece.images.length-1) {
@@ -328,6 +359,8 @@ var scene_game = (function () {
         'repeat'),
       board_canvas: document.createElement('canvas'),
       info_canvas: document.createElement('canvas'),
+      pause_canvas: document.createElement('canvas'),
+      pause_alpha: 0,
       gameover_canvas: document.createElement('canvas'),
       gameover_background_alpha: 0,
       gameover_text_alpha: 0
@@ -345,6 +378,10 @@ var scene_game = (function () {
     graphics.gameover_canvas.height = 400;
     graphics.gameover_context = graphics.gameover_canvas.getContext('2d');
 
+    graphics.pause_canvas.width = 400;
+    graphics.pause_canvas.height = 400;
+    graphics.pause_context = graphics.pause_canvas.getContext('2d');
+
   // intialize state
     state = {
       alive: true,
@@ -354,7 +391,7 @@ var scene_game = (function () {
       next_row_interval: config.next_row_interval,
       next_row_time: 0
     };
-    state.next_row_time = performance.now() + state.next_row_interval;
+    state.next_row_time = kz.performance.now() + state.next_row_interval;
     // initialize board
     for (var yy = 0; yy < config.board_height; yy++) {
       state.board.push([]);
@@ -393,7 +430,7 @@ var scene_game = (function () {
         200
       ],
       current_frame: 0,
-      animate_timer: performance.now(),
+      animate_timer: kz.performance.now(),
       animate: function (now) {
         var dt = now - this.animate_timer;
         if (dt > this.frame_lengths[this.current_frame]) {
@@ -517,20 +554,9 @@ var scene_game = (function () {
       // draw board line
     graphics.board_context.save();
     graphics.board_context.globalAlpha = 1;
-    graphics.board_context.lineWidth = 2;
-    graphics.board_context.setLineDash([5, 4]);
-    graphics.board_context.strokeStyle = '#6f1a00';
-    graphics.board_context.beginPath();
-    graphics.board_context.moveTo(
-      0,
-      config.board_height * config.grid_size - 1
-    );
-    graphics.board_context.lineTo(
-      config.board_width * config.grid_size,
-      config.board_height * config.grid_size - 1
-    );
-    graphics.board_context.stroke();
-    graphics.board_context.strokeStyle = '#923e00';
+    graphics.board_context.lineWidth = 1;
+    graphics.board_context.setLineDash([2, 4]);
+    graphics.board_context.strokeStyle = '#8ed4a5';
     graphics.board_context.beginPath();
     graphics.board_context.moveTo(
       0,
@@ -578,20 +604,6 @@ var scene_game = (function () {
       graphics.info_canvas.width,
       32
     );
-        // portrait box
-    graphics.info_context.fillRect(
-      65,
-      215,
-      graphics.info_canvas.width-65,
-      165
-    );
-        // timer box
-    graphics.info_context.fillRect(
-      13,
-      380,
-      32,
-      -165
-    );
 
       // draw text
     graphics.info_context.textAlign = 'center';
@@ -604,13 +616,6 @@ var scene_game = (function () {
     graphics.info_context.fillText('NEXT', 100, 48);
     graphics.info_context.strokeText('SCORE', 100, 130);
     graphics.info_context.fillText('SCORE', 100, 130);
-
-    graphics.info_context.font = '20px silom';
-    graphics.info_context.lineWidth = 4;
-    graphics.info_context.strokeText('MONSTER', 130, 205);
-    graphics.info_context.fillText('MONSTER', 130, 205);
-    graphics.info_context.strokeText('TIME', 30, 205);
-    graphics.info_context.fillText('TIME', 30, 205);
 
     graphics.info_context.textAlign = 'center';
     graphics.info_context.font = '24px silom';
@@ -632,20 +637,6 @@ var scene_game = (function () {
         70
       );
     }
-    graphics.info_context.drawImage(
-      kz.resources.images.portrait_maduse,
-      70,
-      200
-    );
-
-      // draw timer
-    graphics.info_context.fillStyle = 'rgba(253, 209, 86, 1)';
-    graphics.info_context.fillRect(
-      13,
-      380,
-      32,
-      -165 * (state.next_row_time - now) / state.next_row_interval
-    );
 
     // main context drawing
     kz.context.fillStyle = graphics.background_pattern;
@@ -656,9 +647,33 @@ var scene_game = (function () {
       10 + graphics.board_canvas.width + 20,
       0
     );
+
+      // timer box
+    kz.context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    kz.context.fillRect(
+      10,
+      8,
+      graphics.board_canvas.width,
+      5
+    );
+    kz.context.fillStyle = 'rgba(142, 212, 165, 1)';
+    kz.context.fillRect(
+      10,
+      8,
+      graphics.board_canvas.width * (state.next_row_time - now) / state.next_row_interval,
+      5
+    );
   }
 
   function preUpdateAlive(now) {
+    for (var ii = 0; ii < kz.events.length; ii++) {
+      if (kz.events[ii].kztype == 'keypress' &&
+          kz.events[ii].which == kz.KEYS.ESCAPE) {
+        pause();
+        kz.events = [];
+        return;
+      }
+    }
     kz.processEvents();
     state.player.animate(now);
     if (state.next_row_time < now) {
@@ -666,6 +681,26 @@ var scene_game = (function () {
       state.next_row_time = now + state.next_row_interval;
     }
     clearRow();
+  }
+
+  function drawPause(now) {
+    kz.context.clearAll();
+    kz.context.save();
+    kz.context.globalAlpha = 1;
+    kz.context.drawImage(
+      graphics.pause_canvas,
+      0,
+      0
+    );
+    kz.context.globalAlpha = graphics.pause_alpha;
+    kz.context.fillStyle = '#000000';
+    kz.context.fillRect(
+      0,
+      0,
+      kz.canvas.width,
+      kz.canvas.height
+    );
+    kz.context.restore();
   }
 
   function drawDead(now) {
@@ -721,13 +756,31 @@ var scene_game = (function () {
     kz.events = [];
   }
 
+  function preUpdatePause(now) {
+    for (var ii = 0; ii < kz.events.length; ii++) {
+      if (kz.events[ii].kztype == 'keypress' &&
+          kz.events[ii].which == kz.KEYS.ESCAPE) {
+        resume();
+      }
+    }
+    kz.events = [];
+  }
+
   var scene_game = new kz.Scene();
   scene_game.initialize = initialize;
   scene_game.draw = function (now) {
-    state.alive ? drawAlive(now) : drawDead(now);
+    if (!kz.paused) {
+      state.alive ? drawAlive(now) : drawDead(now);
+    } else {
+      drawPause(now);
+    }
   };
   scene_game.preUpdate = function (now) {
-    state.alive ? preUpdateAlive(now) : preUpdateDead(now);
+    if (!kz.paused) {
+      state.alive ? preUpdateAlive(now) : preUpdateDead(now);
+    } else {
+      preUpdatePause(now);
+    }
   };
   scene_game.exit = function () {
     //kz.resources.sounds.bgm.stop();

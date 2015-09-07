@@ -35,25 +35,25 @@ var scene_main_menu = (function () {
     kz.context.lineWidth = 6;
     kz.context.strokeText(
       'MONSTERS',
-      kz.canvas.width / 2, 
+      kz.canvas.width / 2,
       110
     );
     kz.context.fillText(
       'MONSTERS',
-      kz.canvas.width / 2, 
+      kz.canvas.width / 2,
       110
     );
     kz.context.strokeText(
       'REVERSED',
-      kz.canvas.width / 2, 
+      kz.canvas.width / 2,
       170
     );
     kz.context.fillText(
       'REVERSED',
-      kz.canvas.width / 2, 
+      kz.canvas.width / 2,
       170
     );
-    kz.context.restore();  
+    kz.context.restore();
 
     if (graphics.press_space_visible) {
       kz.context.save();
@@ -66,12 +66,12 @@ var scene_main_menu = (function () {
       kz.context.lineWidth = 2;
       kz.context.strokeText(
         'PRESS   Z',
-        kz.canvas.width / 2, 
+        kz.canvas.width / 2,
         250
       );
       kz.context.fillText(
         'PRESS   Z',
-        kz.canvas.width / 2, 
+        kz.canvas.width / 2,
         250
       );
       kz.context.restore();
@@ -86,7 +86,7 @@ var scene_main_menu = (function () {
     kz.context.lineWidth = 2;
     kz.context.fillText(
       'BY KCAZE (HERMAN CHAU)',
-      kz.canvas.width / 2, 
+      kz.canvas.width / 2,
       380
     );
     kz.context.restore();

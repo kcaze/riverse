@@ -75,6 +75,7 @@ kz.loadSounds = function (queue) {
 /*^ Keys */
 kz.KEYS = {
   ENTER: 13,
+  ESCAPE: 27,
   SPACE: 32,
   LEFT: 37,
   RIGHT: 39,
@@ -317,9 +318,9 @@ kz.initialize = function (canvas_id) {
 };
 
 kz.tick = function (now) {
-  kz.scene.preUpdate(now);
-  kz.scene.draw(now);
-  kz.scene.postUpdate(now);
+  kz.scene.preUpdate(kz.performance.now());
+  kz.scene.draw(kz.performance.now());
+  kz.scene.postUpdate(kz.performance.now());
   window.requestAnimationFrame(kz.tick);
 };
 
@@ -333,5 +334,26 @@ kz.run = function (scene) {
   kz.scene.initialize();
   kz.alive = true;
   window.requestAnimationFrame(kz.tick);
+};
+
+kz.performance = Object.create(performance);
+kz.performance.pauseTime = 0;
+kz.performance.now = function () {
+  if (kz.paused) {
+      return kz.pauseNow;
+  } else {
+    return performance.now() - kz.performance.pauseTime;
+  }
+}
+kz.paused = false;
+kz.pauseTime = 0;
+kz.pause = function () {
+  kz.pauseNow = kz.performance.now();
+  kz.pauseTime = performance.now();
+  kz.paused = true;
+};
+kz.resume = function () {
+  kz.performance.pauseTime += performance.now() - kz.pauseTime;
+  kz.paused = false;
 };
 /*$ Essential functions such as tick and run */
