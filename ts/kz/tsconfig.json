@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "noImplicitAny": true,
+    "removeComments": true,
+    "out": "kz.js"
+  },
+  "files": [
+    "kz.ts",
+    "kz_entity.ts",
+    "kz_event.ts",
+    "kz_graphics.ts",
+    "kz_input.ts",
+    "kz_scene.ts"
+  ]
+}

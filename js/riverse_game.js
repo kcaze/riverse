@@ -26,7 +26,7 @@ var scene_game = (function () {
 
   function randomPieceType(piece_type_array) {
     var length = piece_type_array.length;
-    // TODO: This has a very small positive probability of returning 
+    // TODO: This has a very small positive probability of returning
     // piece_type_array[length]. Maybe worth fixing.
     return piece_type_array[Math.floor(Math.random()*length)];
   }
@@ -37,6 +37,8 @@ var scene_game = (function () {
       x: x,
       y: y,
       type: piece_type,
+      images: [pieceTypeImage(piece_type)],
+      frameIndex: 0,
       alpha: 1,
       actions_promise: blankPromise()
     });
@@ -48,6 +50,23 @@ var scene_game = (function () {
         return kz.resources.images.piece_red;
       case PieceTypes.Blue:
         return kz.resources.images.piece_blue;
+    }
+  }
+
+  function pieceTypeFlipImages(piece_type) {
+    switch (piece_type) {
+      case PieceTypes.Red:
+        return [
+          kz.resources.images.piece_red,
+          kz.resources.images.piece_red1,
+          kz.resources.images.piece_red2
+        ];
+      case PieceTypes.Blue:
+        return [
+          kz.resources.images.piece_blue,
+          kz.resources.images.piece_blue1,
+          kz.resources.images.piece_blue2
+        ];
     }
   }
 
@@ -72,16 +91,16 @@ var scene_game = (function () {
       }
     );*/
 
-    // copy over game picture at losing time 
+    // copy over game picture at losing time
     graphics.gameover_context.clearRect(
-      0, 
-      0, 
+      0,
+      0,
       graphics.gameover_canvas.width,
       graphics.gameover_canvas.height
     );
     graphics.gameover_context.drawImage(
-      kz.canvas, 
-      0, 
+      kz.canvas,
+      0,
       0
     );
     // fade to black
@@ -145,9 +164,15 @@ var scene_game = (function () {
     // animation
     //kz.resources.sounds.sfx1.play();
     // animate fade away of row pieces
+    // ensure that all row piece animations have finished
+    var row_promise  = [];
+    row_pieces.forEach(function (piece) {
+      row_promise.push(piece.actions_promise);
+    })
+    row_promise = Promise.all(row_promise);
     var promises = [];
     row_pieces.forEach(function (piece) {
-      var promise = piece.actions_promise.then(function () {
+      var promise = row_promise.then(function () {
         return kz.tween({
           object: piece,
           property: 'alpha',
@@ -213,15 +238,31 @@ var scene_game = (function () {
         y = board_y + length * dy;
       }
       if (!reverse) continue;
-      for (var jj = 1; jj <= length; jj++) {
+      for (var jj = 1; jj < length; jj++) {
         var xx = board_x + jj * dx;
         var yy = board_y + jj * dy;
         state.board[yy][xx].piece_type = piece_type;
         var piece = state.board[yy][xx].piece;
         // ugh, creating a closure to capture the piece variable
         (function (piece) {
+          piece.images = pieceTypeFlipImages(piece.type).concat(
+              pieceTypeFlipImages(piece_type).reverse());
           piece.actions_promise = piece.actions_promise.then(function () {
-            piece.type = piece_type;
+            return new Promise(function(resolve) {
+              var intervalID;
+              function updatePieceImage() {
+                if (piece.frameIndex < piece.images.length-1) {
+                  piece.frameIndex++;
+                } else {
+                  piece.type = piece_type;
+                  piece.frameIndex = 0;
+                  piece.images = [pieceTypeImage(piece.type)];
+                  clearInterval(intervalID);
+                  resolve();
+                }
+              }
+              intervalID = setInterval(updatePieceImage, 30);
+            });
           });
         })(piece);
       }
@@ -244,7 +285,7 @@ var scene_game = (function () {
 
     // update board
     for (var xx = 0; xx < config.board_width; xx++) {
-      if (state.board[config.board_height-1][xx].piece_type 
+      if (state.board[config.board_height-1][xx].piece_type
           != PieceTypes.Empty) {
         lose();
         return;
@@ -335,7 +376,7 @@ var scene_game = (function () {
             piece_type: PieceTypes.Empty
           });
         }
-      } 
+      }
     }
     // initialize player
     state.player = new kz.Entity({
@@ -414,7 +455,7 @@ var scene_game = (function () {
 
         var target_y = config.board_height-1;
         while (target_y > 0) {
-          if (state.board[target_y-1][this.x].piece_type 
+          if (state.board[target_y-1][this.x].piece_type
               != PieceTypes.Empty) {
             break;
           }
@@ -428,7 +469,7 @@ var scene_game = (function () {
         state.board[target_y][this.x] = {
           piece_type: piece_type,
           piece: piece
-        }; 
+        };
         reverse(this.x, target_y);
 
         piece.actions_promise = piece.actions_promise.then(function () {
@@ -452,8 +493,8 @@ var scene_game = (function () {
     // clear contexts
     kz.context.clearAll();
     graphics.board_context.clearRect(
-      0, 
-      0, 
+      0,
+      0,
       graphics.board_canvas.width,
       graphics.board_canvas.height
     );
@@ -468,9 +509,9 @@ var scene_game = (function () {
       // background translucent box
     graphics.board_context.fillStyle = 'rgba(0, 0, 0, 0.5)';
     graphics.board_context.fillRect(
-      0, 
-      0, 
-      graphics.board_canvas.width, 
+      0,
+      0,
+      graphics.board_canvas.width,
       graphics.board_canvas.height
     );
       // draw board line
@@ -481,22 +522,22 @@ var scene_game = (function () {
     graphics.board_context.strokeStyle = '#6f1a00';
     graphics.board_context.beginPath();
     graphics.board_context.moveTo(
-      0, 
+      0,
       config.board_height * config.grid_size - 1
     );
     graphics.board_context.lineTo(
-      config.board_width * config.grid_size, 
+      config.board_width * config.grid_size,
       config.board_height * config.grid_size - 1
     );
     graphics.board_context.stroke();
     graphics.board_context.strokeStyle = '#923e00';
     graphics.board_context.beginPath();
     graphics.board_context.moveTo(
-      0, 
+      0,
       config.board_height * config.grid_size - 2
     );
     graphics.board_context.lineTo(
-      config.board_width * config.grid_size, 
+      config.board_width * config.grid_size,
       config.board_height * config.grid_size - 2
     );
     graphics.board_context.stroke();
@@ -511,7 +552,7 @@ var scene_game = (function () {
       if (!piece.type) continue;
       graphics.board_context.globalAlpha = piece.alpha;
       graphics.board_context.drawImage(
-        pieceTypeImage(piece.type),
+        piece.images[piece.frameIndex],
         piece.x,
         piece.y
       );
@@ -525,24 +566,24 @@ var scene_game = (function () {
     graphics.info_context.fillStyle = 'rgba(0, 0, 0, 0.5)';
         // next pieces box
     graphics.info_context.fillRect(
-      0, 
-      65, 
-      graphics.info_canvas.width, 
+      0,
+      65,
+      graphics.info_canvas.width,
       27
     );
         // score box
     graphics.info_context.fillRect(
-      0, 
-      145, 
-      graphics.info_canvas.width, 
-      32 
+      0,
+      145,
+      graphics.info_canvas.width,
+      32
     );
         // portrait box
     graphics.info_context.fillRect(
-      65, 
-      215, 
-      graphics.info_canvas.width-65, 
-      165 
+      65,
+      215,
+      graphics.info_canvas.width-65,
+      165
     );
         // timer box
     graphics.info_context.fillRect(
@@ -588,15 +629,15 @@ var scene_game = (function () {
       graphics.info_context.drawImage(
         pieceTypeImage(state.player.next[ii]),
         22+ii*config.grid_size,
-        70 
+        70
       );
     }
     graphics.info_context.drawImage(
       kz.resources.images.portrait_maduse,
       70,
-      200 
+      200
     );
-      
+
       // draw timer
     graphics.info_context.fillStyle = 'rgba(253, 209, 86, 1)';
     graphics.info_context.fillRect(
@@ -606,13 +647,13 @@ var scene_game = (function () {
       -165 * (state.next_row_time - now) / state.next_row_interval
     );
 
-    // main context drawing 
+    // main context drawing
     kz.context.fillStyle = graphics.background_pattern;
     kz.context.fillRect(0, 0, kz.canvas.width, kz.canvas.height);
     kz.context.drawImage(graphics.board_canvas, 10, 20);
     kz.context.drawImage(
-      graphics.info_canvas, 
-      10 + graphics.board_canvas.width + 20, 
+      graphics.info_canvas,
+      10 + graphics.board_canvas.width + 20,
       0
     );
   }
@@ -652,12 +693,12 @@ var scene_game = (function () {
     kz.context.fillStyle = '#ffa100';
     kz.context.lineWidth = 6;
     kz.context.strokeText(
-      'GAME OVER', 
-      kz.canvas.width / 2, 
+      'GAME OVER',
+      kz.canvas.width / 2,
       kz.canvas.height / 2);
     kz.context.fillText(
-      'GAME OVER', 
-      kz.canvas.width / 2, 
+      'GAME OVER',
+      kz.canvas.width / 2,
       kz.canvas.height / 2);
     kz.context.restore();
   }

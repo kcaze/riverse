@@ -6,8 +6,8 @@ var resources = {
     'piece_blue1': 'images/piece_blue1.gif',
     'piece_blue2': 'images/piece_blue2.gif',
     'piece_red': 'images/piece_red0.gif',
-    'piece_red1': 'images/piece_red0.gif',
-    'piece_red2': 'images/piece_red0.gif',
+    'piece_red1': 'images/piece_red1.gif',
+    'piece_red2': 'images/piece_red2.gif',
     'portrait_maduse': 'images/gggg.gif',
     'shooter_0': 'images/shooter0.gif',
     'shooter_1': 'images/shooter1.gif',
@@ -27,6 +27,6 @@ var resources = {
 };
 
 kz.loadResources(resources).then(function () {
-  kz.initialize('g');
+  kz.initialize('canvas');
   kz.run(scene_main_menu);
 });

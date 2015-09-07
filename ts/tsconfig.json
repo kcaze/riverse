@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "removeComments": true,
+    "out": "riverse.js"
+  },
+  "files": [
+    "riverse.ts"
+  ]
+}

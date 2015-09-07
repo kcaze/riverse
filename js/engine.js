@@ -114,7 +114,7 @@ kz.tween = function (tween) {
   var old_value = tween.object[tween.property];
   var new_value = tween.value;
   var duration = tween.duration
-    ? tween.duration 
+    ? tween.duration
     : Math.abs(new_value - old_value) / tween.rate;
 
   return new Promise(function (resolve) {
@@ -174,9 +174,9 @@ kz.Entity = function (properties) {
 
 kz.Entity.prototype.x = 0;
 kz.Entity.prototype.y = 0;
-kz.Entity.prototype.listen = function () { 
+kz.Entity.prototype.listen = function () {
 };
-kz.Entity.prototype.delete = function () { 
+kz.Entity.prototype.delete = function () {
   delete kz.entities[this.__entity_id__];
 };
 /*$ The Entity object */
@@ -230,7 +230,7 @@ kz.initializeCanvas = function (canvas_id) {
   kz.canvas = document.getElementById(canvas_id);
   kz.context = kz.canvas.getContext('2d');
   kz.context.clearAll = function () {
-    kz.context.clearRect(0, 0, kz.canvas.width, kz.canvas.height); 
+    kz.context.clearRect(0, 0, kz.canvas.width, kz.canvas.height);
   };
 };
 
@@ -296,7 +296,7 @@ kz.initialize = function (canvas_id) {
           kztype: 'keypress',
           which: kz.KEYS.Z
         });
-      } else if (Math.abs(start_y - end_y) < 40 
+      } else if (Math.abs(start_y - end_y) < 40
                  && start_x - end_x > 20) {
         kz.events.push({
           kztype: 'keypress',
@@ -309,7 +309,7 @@ kz.initialize = function (canvas_id) {
           which: kz.KEYS.RIGHT
         });
       }
-        
+
       delete kz.TOUCHES[id];
     }
     console.log('touchend:', event, JSON.stringify(kz.TOUCHES));
