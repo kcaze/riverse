@@ -12,7 +12,7 @@ var scene_main_menu = (function () {
       text_alpha: 1
     };
     state = {
-      pressed_space: false,
+      pressed_space: false
     };
   }
 

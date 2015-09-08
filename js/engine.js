@@ -40,6 +40,9 @@ kz.loadSounds = function (queue) {
   var promises = [];
 
   for (var key in queue) {
+    /*sounds[key] = {
+      play: function () {}
+    };*/
     promises.push(new Promise(function(resolve) {
       var name = key;
       queue[key].loader(queue[key].data, function(buffer) {
@@ -173,7 +176,7 @@ kz.Entity.prototype.x = 0;
 kz.Entity.prototype.y = 0;
 kz.Entity.prototype.listen = function () {
 };
-kz.Entity.prototype.delete = function () {
+kz.Entity.prototype.destroy = function () {
   delete kz.entities[this.__entity_id__];
 };
 /*$ The Entity object */

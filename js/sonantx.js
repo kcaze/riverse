@@ -363,7 +363,7 @@ sonantx.MusicGenerator.prototype.generateTrack = function (instr, mixBuf, callBa
               soundGen.genSound(n, chnBuf, currentpos);
             }
             idx++;
-            currentpos += rowLen;
+            currentpos += 3*rowLen;
             if (new Date() - beginning > MAX_TIME) {
                 setTimeout(recordSounds, 0);
                 return;
