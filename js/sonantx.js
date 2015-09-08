@@ -35,7 +35,7 @@ sonantx = {};
 
 var WAVE_SPS = 44100;                    // Samples per second
 var WAVE_CHAN = 2;                       // Channels
-var MAX_TIME = 33; // maximum time, in millis, that the generator can use consecutively
+var MAX_TIME = 100; // maximum time, in millis, that the generator can use consecutively
 
 var audioCtx = null;
 
@@ -346,39 +346,30 @@ sonantx.MusicGenerator.prototype.generateTrack = function (instr, mixBuf, callBa
         var waveSamples = self.waveSize,
             waveBytes = self.waveSize * WAVE_CHAN * 2,
             rowLen = self.song.rowLen,
-            endPattern = self.song.endPattern,
             soundGen = new sonantx.SoundGenerator(instr, rowLen);
 
+        var endPattern = instr.notes.length;
         var currentpos = 0;
-        var p = 0;
-        var row = 0;
-        var recordSounds = function() {
-            var beginning = new Date();
-            while (true) {
-                if (row === 32) {
-                    row = 0;
-                    p += 1;
-                    continue;
-                }
-                if (p === endPattern - 1) {
-                    setTimeout(delay, 0);
-                    return;
-                }
-                var cp = instr.p[p];
-                if (cp) {
-                    var n = instr.c[cp - 1].n[row];
-                    if (n) {
-                        soundGen.genSound(n, chnBuf, currentpos);
-                    }
-                }
-                currentpos += rowLen;
-                row += 1;
-                if (new Date() - beginning > MAX_TIME) {
-                    setTimeout(recordSounds, 0);
-                    return;
-                }
+        var idx = 0;
+        var recordSounds = function () {
+          var beginning = new Date();
+          while (true) {
+            if (idx === endPattern) {
+              setTimeout(delay, 0);
+              return;
             }
-        };
+            var n = instr.notes[idx];
+            if (n) {
+              soundGen.genSound(n, chnBuf, currentpos);
+            }
+            idx++;
+            currentpos += rowLen;
+            if (new Date() - beginning > MAX_TIME) {
+                setTimeout(recordSounds, 0);
+                return;
+            }
+          }
+        }
 
         var delay = function() {
             applyDelay(chnBuf, waveSamples, instr, rowLen, finalize);
@@ -433,4 +424,3 @@ sonantx.MusicGenerator.prototype.createAudioBuffer = function(callBack) {
 };
 
 })();
-

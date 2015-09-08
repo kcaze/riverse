@@ -35,7 +35,7 @@ var scene_game = (function () {
       object: graphics,
       property: 'pause_alpha',
       value: 0.75,
-      duration: 50,
+      duration: 50
     });
   }
 
@@ -44,7 +44,7 @@ var scene_game = (function () {
       object: graphics,
       property: 'pause_alpha',
       value: 0,
-      duration: 50,
+      duration: 50
     }).then(kz.resume);
   }
 
@@ -192,7 +192,7 @@ var scene_game = (function () {
     state.score++;
 
     // animation
-    //kz.resources.sounds.sfx1.play();
+    kz.resources.sounds.sfx_clear.play();
     // animate fade away of row pieces
     // ensure that all row piece animations have finished
     var row_promise  = [];
@@ -347,11 +347,7 @@ var scene_game = (function () {
   /*$ Messy section of game logic */
 
   function initialize() {
-    /*kz.resources.sounds.bgm.loop(true);
-    kz.resources.sounds.bgm.play();
-    kz.resources.sounds.sfx_shoot.volume(0.4);
-    kz.resources.sounds.sfx_drop.volume(0.5);
-    kz.resources.sounds.sfx1.volume(0.6);*/
+    kz.resources.sounds.bgm_game.play(true);
   // initialize graphics
     graphics = {
       background_pattern: kz.context.createPattern(
@@ -608,7 +604,7 @@ var scene_game = (function () {
       // draw text
     graphics.info_context.textAlign = 'center';
     graphics.info_context.textBaseline = 'center';
-    graphics.info_context.font = '32px silom';
+    graphics.info_context.font = '32px font';
     graphics.info_context.strokeStyle = '#ce0000';
     graphics.info_context.fillStyle = '#ffa100';
     graphics.info_context.lineWidth = 4;
@@ -618,7 +614,7 @@ var scene_game = (function () {
     graphics.info_context.fillText('SCORE', 100, 130);
 
     graphics.info_context.textAlign = 'center';
-    graphics.info_context.font = '24px silom';
+    graphics.info_context.font = '24px font';
     graphics.info_context.stroke = 'black';
     var score_string = '' + state.score;
         // pad with zeroes
@@ -723,7 +719,7 @@ var scene_game = (function () {
     kz.context.globalAlpha = graphics.gameover_text_alpha;
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '48px silom';
+    kz.context.font = '48px font';
     kz.context.strokeStyle = '#ce0000';
     kz.context.fillStyle = '#ffa100';
     kz.context.lineWidth = 6;

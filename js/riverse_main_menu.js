@@ -1,6 +1,7 @@
 var scene_main_menu = (function () {
   var scene_main_menu = new kz.Scene();
   var graphics;
+  var state;
 
   scene_main_menu.initialize = function () {
     //kz.resources.sounds.main_menu_bgm.loop(true);
@@ -9,14 +10,17 @@ var scene_main_menu = (function () {
       press_space_visible: true,
       blink: true,
       text_alpha: 1
-    }
+    };
+    state = {
+      pressed_space: false,
+    };
   }
 
   scene_main_menu.draw = function () {
     kz.context.clearAll();
 
     kz.context.save();
-    kz.context.fillStyle = '#290000';
+    kz.context.fillStyle = '#30403b';
     kz.context.fillRect(
       0,
       0,
@@ -25,50 +29,13 @@ var scene_main_menu = (function () {
     );
     kz.context.restore();
 
-    kz.context.save();
-    kz.context.globalAlpha = graphics.text_alpha;
-    kz.context.textAlign = 'center';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '48px silom';
-    kz.context.strokeStyle = '#ce0000';
-    kz.context.fillStyle = '#ffa100';
-    kz.context.lineWidth = 6;
-    kz.context.strokeText(
-      'MONSTERS',
-      kz.canvas.width / 2,
-      110
-    );
-    kz.context.fillText(
-      'MONSTERS',
-      kz.canvas.width / 2,
-      110
-    );
-    kz.context.strokeText(
-      'REVERSED',
-      kz.canvas.width / 2,
-      170
-    );
-    kz.context.fillText(
-      'REVERSED',
-      kz.canvas.width / 2,
-      170
-    );
-    kz.context.restore();
-
     if (graphics.press_space_visible) {
       kz.context.save();
       kz.context.globalAlpha = graphics.text_alpha;
       kz.context.textAlign = 'center';
       kz.context.textBaseline = 'center';
-      kz.context.font = '24px silom';
+      kz.context.font = '24px font';
       kz.context.fillStyle = 'white';
-      kz.context.strokeStyle = '#ce0000';
-      kz.context.lineWidth = 2;
-      kz.context.strokeText(
-        'PRESS   Z',
-        kz.canvas.width / 2,
-        250
-      );
       kz.context.fillText(
         'PRESS   Z',
         kz.canvas.width / 2,
@@ -81,11 +48,11 @@ var scene_main_menu = (function () {
     kz.context.globalAlpha = graphics.text_alpha;
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '10px silom';
-    kz.context.fillStyle = '#00ff00';
+    kz.context.font = '10px font';
+    kz.context.fillStyle = '#50605b';
     kz.context.lineWidth = 2;
     kz.context.fillText(
-      'BY KCAZE (HERMAN CHAU)',
+      'HERMAN CHAU (KCAZE)',
       kz.canvas.width / 2,
       380
     );
@@ -95,18 +62,20 @@ var scene_main_menu = (function () {
   scene_main_menu.preUpdate = function (now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress' &&
-          kz.events[ii].which == kz.KEYS.Z) {
+          kz.events[ii].which == kz.KEYS.Z &&
+          !state.pressed_space) {
+        state.pressed_space = true;
         graphics.blink = false;
         graphics.press_space_visible = false;
         kz.tween({
           object: graphics,
           property: 'text_alpha',
           value: 0,
-          duration: 1000
+          duration: 500
         }).then(function () {
           setTimeout(function () {
             kz.run(scene_game);
-          }, 1000);
+          }, 500);
         });
       }
     }

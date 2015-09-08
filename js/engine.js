@@ -42,25 +42,21 @@ kz.loadSounds = function (queue) {
   for (var key in queue) {
     promises.push(new Promise(function(resolve) {
       var name = key;
-      var request = new XMLHttpRequest();
-      request.open('GET', queue[name], true);
-      request.responseType = 'arraybuffer';
-
-      request.onload = function() {
-        kz.audio_context.decodeAudioData(request.response, function(buffer) {
-          sounds[name] = {
-            play: function () {
-              var source = kz.audio_context.createBufferSource();
-              source.buffer = this.buffer;
-              source.connect(kz.audio_context.destination);
-              source.start(0);
-            },
-            buffer: buffer
-          };
-          resolve();
-        });
-      };
-      request.send();
+      queue[key].loader(queue[key].data, function(buffer) {
+        console.log("Loaded ", name);
+        sounds[name] = {
+          play: function (loop) {
+            loop = typeof loop == undefined ? false : loop;
+            var source = kz.audio_context.createBufferSource();
+            source.loop = loop;
+            source.buffer = this.buffer;
+            source.connect(kz.audio_context.destination);
+            source.start(0);
+          },
+          buffer: buffer
+        };
+        resolve();
+      });
     }));
   }
 
@@ -213,6 +209,9 @@ kz.Scene.prototype.postUpdate = function () {
 };
 
 kz.Scene.prototype.draw = function () {
+};
+
+kz.Scene.prototype.exit = function () {
 };
 
 // duck-typing check
