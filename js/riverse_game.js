@@ -1,32 +1,5 @@
 var previous_time;
 
-// From http://js-bits.blogspot.com/2010/07/canvas-rounded-corner-rectangles.html
-function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
-  if (typeof stroke == "undefined" ) {
-    stroke = true;
-  }
-  if (typeof radius === "undefined") {
-    radius = 5;
-  }
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + width - radius, y);
-  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-  ctx.lineTo(x + width, y + height - radius);
-  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-  ctx.lineTo(x + radius, y + height);
-  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
-  if (stroke) {
-    ctx.stroke();
-  }
-  if (fill) {
-    ctx.fill();
-  }
-}
-
 var scene_game = (function () {
   var state;
   var graphics;
@@ -83,8 +56,6 @@ var scene_game = (function () {
 
   function randomPieceType(piece_type_array) {
     var length = piece_type_array.length;
-    // TODO: This has a very small positive probability of returning
-    // piece_type_array[length]. Maybe worth fixing.
     return piece_type_array[Math.floor(Math.random()*length)];
   }
 
@@ -94,9 +65,9 @@ var scene_game = (function () {
       x: x,
       y: y,
       type: piece_type,
-      images: [pieceTypeImage(piece_type)],
-      frameIndex: 0,
       alpha: 1,
+      blend_alpha: 0,
+      blend_type: 0,
       actions_promise: blankPromise()
     });
   }
@@ -107,23 +78,6 @@ var scene_game = (function () {
         return kz.resources.images.piece_red;
       case PieceTypes.Blue:
         return kz.resources.images.piece_blue;
-    }
-  }
-
-  function pieceTypeFlipImages(piece_type) {
-    switch (piece_type) {
-      case PieceTypes.Red:
-        return [
-          kz.resources.images.piece_red,
-          kz.resources.images.piece_red1,
-          kz.resources.images.piece_red2
-        ];
-      case PieceTypes.Blue:
-        return [
-          kz.resources.images.piece_blue,
-          kz.resources.images.piece_blue1,
-          kz.resources.images.piece_blue2
-        ];
     }
   }
 
@@ -302,24 +256,20 @@ var scene_game = (function () {
         var piece = state.board[yy][xx].piece;
         // ugh, creating a closure to capture the piece variable
         (function (piece) {
-          piece.images = pieceTypeFlipImages(piece.type).concat(
-              pieceTypeFlipImages(piece_type).reverse());
           piece.actions_promise = piece.actions_promise.then(function () {
             return new Promise(function(resolve) {
-              // with the current way pause is set up, this doesn't pause :(
-              var intervalID;
-              function updatePieceImage() {
-                if (piece.frameIndex < piece.images.length-1) {
-                  piece.frameIndex++;
-                } else {
-                  piece.type = piece_type;
-                  piece.frameIndex = 0;
-                  piece.images = [pieceTypeImage(piece.type)];
-                  clearInterval(intervalID);
-                  resolve();
-                }
-              }
-              intervalID = setInterval(updatePieceImage, 30);
+              piece.blend_type = piece_type;
+              return kz.tween({
+                object: piece,
+                property: 'blend_alpha',
+                value: 1,
+                duration: 100
+              }).then(function() {
+                piece.type = piece.blend_type;
+                piece.blend_type = 0;
+                piece.blend_alpha = 0;
+                resolve();
+              });
             });
           });
         })(piece);
@@ -465,7 +415,7 @@ var scene_game = (function () {
         }
       },
       x: Math.floor(config.board_width/2),
-      sprite_x: Math.floor(config.board_width/2)*config.grid_size,
+      sprite_x: 4+Math.floor(config.board_width/2)*config.grid_size,
       sprite_y: config.board_height*config.grid_size+23,
       actions_promise: blankPromise(),
       draw: function (context) {
@@ -487,11 +437,11 @@ var scene_game = (function () {
         graphics.board_context.strokeStyle = '#8ed4a5';
         graphics.board_context.beginPath();
         graphics.board_context.moveTo(
-          this.sprite_x+config.grid_size/2,
+          this.sprite_x+config.grid_size/2-5,
           this.sprite_y-8
         );
         graphics.board_context.lineTo(
-          this.sprite_x+config.grid_size/2,
+          this.sprite_x+config.grid_size/2-5,
           (h+1) * config.grid_size + 20
         );
         graphics.board_context.stroke();
@@ -634,10 +584,18 @@ var scene_game = (function () {
       if (!piece.type) continue;
       graphics.board_context.globalAlpha = piece.alpha;
       graphics.board_context.drawImage(
-        piece.images[piece.frameIndex],
+        pieceTypeImage(piece.type),
         piece.x,
         piece.y+20
       );
+      if (piece.blend_type) {
+        graphics.board_context.globalAlpha = piece.blend_alpha;
+        graphics.board_context.drawImage(
+          pieceTypeImage(piece.blend_type),
+          piece.x,
+          piece.y+20
+        );
+      }
     };
       // draw player
     graphics.board_context.globalAlpha = 1;

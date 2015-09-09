@@ -23,16 +23,14 @@ function loadSonant(data, resolve) {
 var resources = {
   images: {
     'background': 'images/background.gif',
-    'piece_blue': 'images/piece_blue0.gif',
-    'piece_blue1': 'images/piece_blue1.gif',
-    'piece_blue2': 'images/piece_blue2.gif',
-    'piece_red': 'images/piece_red0.gif',
-    'piece_red1': 'images/piece_red1.gif',
-    'piece_red2': 'images/piece_red2.gif',
+    'characters': 'images/characters.gif',
+    'piece_blue': 'images/piece_black.gif',
+    'piece_red': 'images/piece_white.gif',
+    'piece_zodiac': 'images/piece_zodiac.gif',
     'shooter_0': 'images/shooter0.gif',
     'shooter_1': 'images/shooter1.gif',
     'shooter_2': 'images/shooter2.gif',
-    'shooter_3': 'images/shooter1.gif'
+    'shooter_3': 'images/shooter1.gif',
   },
   sounds: {
     'sfx_shoot': {

@@ -1,4 +1,9 @@
 var scene_loading = new kz.Scene();
+
+scene_loading.preUpdate = function (now) {
+  kz.events = [];
+};
+
 scene_loading.draw = function (now) {
   kz.context.clearAll();
   kz.context.save();
