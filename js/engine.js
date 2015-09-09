@@ -10,20 +10,40 @@ kz.loadResources = function (resources) {
   promises.push(kz.loadSounds(resources.sounds));
 
   return Promise.all(promises)
-                .then(function () {
-                  return kz.resources;
-                });
+    .then(function () {
+      return kz.resources;
+    });
 };
 
 kz.loadImages = function (queue) {
   var images = {};
   var promises = [];
 
-  for (var name in queue) {
+  for (var key in queue) {
     promises.push(new Promise(function(resolve) {
-      images[name] = new Image();
-      images[name].addEventListener('load', resolve);
-      images[name].src = queue[name];
+      var name = key;
+      var image = new Image();
+      image.addEventListener('load', function() {
+        var canvas = document.createElement('canvas');
+        var context = canvas.getContext('2d');
+        var crop;
+        if (!queue[name].crop) {
+          crop = {
+            x: 0,
+            y: 0,
+            w: image.width,
+            h: image.height
+          };
+        } else {
+          crop = queue[name].crop;
+        }
+        canvas.width = crop.w;
+        canvas.height = crop.h;
+        context.drawImage(image, crop.x, crop.y, crop.w, crop.h, 0, 0, crop.w, crop.h);
+        images[name] = canvas;
+        resolve();
+      });
+      image.src = queue[key].data;
     }));
   }
 
@@ -77,7 +97,9 @@ kz.KEYS = {
   ESCAPE: 27,
   SPACE: 32,
   LEFT: 37,
+  UP: 38,
   RIGHT: 39,
+  DOWN: 40,
   Z: 90
 };
 
@@ -319,14 +341,19 @@ kz.initialize = function (canvas_id) {
   });
 };
 
+var tickID;
+
 kz.tick = function (now) {
   kz.scene.preUpdate(kz.performance.now());
   kz.scene.draw(kz.performance.now());
   kz.scene.postUpdate(kz.performance.now());
-  window.requestAnimationFrame(kz.tick);
+  tickID = window.requestAnimationFrame(kz.tick);
 };
 
 kz.run = function (scene) {
+  if (tickID) {
+    window.cancelAnimationFrame(tickID);
+  }
   if (kz.scene) {
     kz.scene.exit();
   }
@@ -335,7 +362,7 @@ kz.run = function (scene) {
   kz.scene = scene;
   kz.scene.initialize();
   kz.alive = true;
-  window.requestAnimationFrame(kz.tick);
+  tickID = window.requestAnimationFrame(kz.tick);
 };
 
 kz.performance = Object.create(performance);

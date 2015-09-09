@@ -1,15 +1,29 @@
 var previous_time;
 
 var scene_game = (function () {
-  var state;
-  var graphics;
   var config = {
     board_width: 8,
     board_height: 17,
     grid_size: 20,
-    next_length:  4,
+    next_length: 8,
     next_row_interval: 10000
   };
+  var board_canvas = document.createElement('canvas');
+  var info_canvas = document.createElement('canvas');
+  var pause_canvas = document.createElement('canvas');
+  var gameover_canvas = document.createElement('canvas');
+  board_canvas.width = config.board_width*config.grid_size;
+  board_canvas.height = 390;
+  info_canvas.width = 96;
+  info_canvas.height = 390;
+  gameover_canvas.width = 280;
+  gameover_canvas.height = 390;
+  pause_canvas.width = 280;
+  pause_canvas.height = 390;
+  var board_context = board_canvas.getContext('2d');
+  var info_context = info_canvas.getContext('2d');
+  var gameover_context = gameover_canvas.getContext('2d');
+  var pause_context = pause_canvas.getContext('2d');
   var PieceTypes = {
     Empty: 0,
     Red: 1,
@@ -17,16 +31,21 @@ var scene_game = (function () {
   };
   var normal_piece_types = [PieceTypes.Red, PieceTypes.Blue];
 
+  var state;
+  var pause_choice;
+  var graphics;
+
   function pause() {
     kz.pause();
+    pause_choice = 0;
     // copy over game picture at pause time
-    graphics.pause_context.clearRect(
+    pause_context.clearRect(
       0,
       0,
-      graphics.pause_canvas.width,
-      graphics.pause_canvas.height
+      pause_canvas.width,
+      pause_canvas.height
     );
-    graphics.pause_context.drawImage(
+    pause_context.drawImage(
       kz.canvas,
       0,
       0
@@ -34,7 +53,7 @@ var scene_game = (function () {
     kz.tween({
       object: graphics,
       property: 'pause_alpha',
-      value: 0.75,
+      value: 0.8,
       duration: 50
     });
   }
@@ -103,13 +122,13 @@ var scene_game = (function () {
     );*/
 
     // copy over game picture at losing time
-    graphics.gameover_context.clearRect(
+    gameover_context.clearRect(
       0,
       0,
-      graphics.gameover_canvas.width,
-      graphics.gameover_canvas.height
+      gameover_canvas.width,
+      gameover_canvas.height
     );
-    graphics.gameover_context.drawImage(
+    gameover_context.drawImage(
       kz.canvas,
       0,
       0
@@ -330,35 +349,16 @@ var scene_game = (function () {
       background_pattern: kz.context.createPattern(
         kz.resources.images.background,
         'repeat'),
-      board_canvas: document.createElement('canvas'),
-      info_canvas: document.createElement('canvas'),
-      pause_canvas: document.createElement('canvas'),
       pause_alpha: 0,
-      gameover_canvas: document.createElement('canvas'),
       gameover_background_alpha: 0,
       gameover_text_alpha: 0
     }
 
-    graphics.board_canvas.width = config.board_width*config.grid_size;
-    //graphics.board_canvas.height = (config.board_height+1)*config.grid_size;
-    graphics.board_canvas.height = kz.canvas.height;
-    graphics.board_context = graphics.board_canvas.getContext('2d');
-
-    graphics.info_canvas.width = 95;
-    graphics.info_canvas.height = 400;
-    graphics.info_context = graphics.info_canvas.getContext('2d');
-
-    graphics.gameover_canvas.width = 400;
-    graphics.gameover_canvas.height = 400;
-    graphics.gameover_context = graphics.gameover_canvas.getContext('2d');
-
-    graphics.pause_canvas.width = 400;
-    graphics.pause_canvas.height = 400;
-    graphics.pause_context = graphics.pause_canvas.getContext('2d');
 
   // intialize state
     state = {
       alive: true,
+      begin: kz.performance.now(),
       board: [],
       can_restart: false,
       score: 0,
@@ -390,6 +390,7 @@ var scene_game = (function () {
         }
       }
     }
+    pause_choice = 0;
     // initialize player
     state.player = new kz.Entity({
       frames: [
@@ -430,22 +431,22 @@ var scene_game = (function () {
             break;
           }
         }
-        graphics.board_context.save();
-        graphics.board_context.globalAlpha = 1;
-        graphics.board_context.lineWidth = 1;
-        graphics.board_context.setLineDash([2, 8]);
-        graphics.board_context.strokeStyle = '#8ed4a5';
-        graphics.board_context.beginPath();
-        graphics.board_context.moveTo(
+        board_context.save();
+        board_context.globalAlpha = 1;
+        board_context.lineWidth = 1;
+        board_context.setLineDash([2, 8]);
+        board_context.strokeStyle = '#8ed4a5';
+        board_context.beginPath();
+        board_context.moveTo(
           this.sprite_x+config.grid_size/2-5,
           this.sprite_y-8
         );
-        graphics.board_context.lineTo(
+        board_context.lineTo(
           this.sprite_x+config.grid_size/2-5,
           (h+1) * config.grid_size + 20
         );
-        graphics.board_context.stroke();
-        graphics.board_context.restore();
+        board_context.stroke();
+        board_context.restore();
       },
       listen: function (event) {
         if (event.kztype == 'keypress') {
@@ -536,44 +537,44 @@ var scene_game = (function () {
   function drawAlive(now) {
     // clear contexts
     kz.context.clearAll();
-    graphics.board_context.clearRect(
+    board_context.clearRect(
       0,
       0,
-      graphics.board_canvas.width,
-      graphics.board_canvas.height
+      board_canvas.width,
+      board_canvas.height
     );
-    graphics.info_context.clearRect(
+    info_context.clearRect(
       0,
       0,
-      graphics.info_canvas.width,
-      graphics.info_canvas.height
+      info_canvas.width,
+      info_canvas.height
     );
 
     // board context drawing
       // background translucent box
-    graphics.board_context.fillStyle = 'rgba(0,0,0,0.5)';
-    graphics.board_context.fillRect(
+    board_context.fillStyle = 'rgba(0,0,0,0.5)';
+    board_context.fillRect(
       0,
       0,
-      graphics.board_canvas.width,
-      graphics.board_canvas.height
+      board_canvas.width,
+      board_canvas.height
     );
       // draw board line
-    graphics.board_context.save();
-    graphics.board_context.globalAlpha = 1;
-    graphics.board_context.lineWidth = 1;
-    graphics.board_context.strokeStyle = '#50605b';
-    graphics.board_context.beginPath();
-    graphics.board_context.moveTo(
+    board_context.save();
+    board_context.globalAlpha = 1;
+    board_context.lineWidth = 1;
+    board_context.strokeStyle = '#50605b';
+    board_context.beginPath();
+    board_context.moveTo(
       0,
       config.board_height * config.grid_size + 20
     );
-    graphics.board_context.lineTo(
+    board_context.lineTo(
       config.board_width * config.grid_size,
       config.board_height * config.grid_size + 20
     );
-    graphics.board_context.stroke();
-    graphics.board_context.restore();
+    board_context.stroke();
+    board_context.restore();
       // draw pieces
     // TODO: This is extremely hacky and necessary so that we can draw
     // the pieces fading away after a row clear. Should rewrite to make
@@ -582,15 +583,15 @@ var scene_game = (function () {
       var piece = kz.entities[id];
       // only piece entities have a type field
       if (!piece.type) continue;
-      graphics.board_context.globalAlpha = piece.alpha;
-      graphics.board_context.drawImage(
+      board_context.globalAlpha = piece.alpha;
+      board_context.drawImage(
         pieceTypeImage(piece.type),
         piece.x,
         piece.y+20
       );
       if (piece.blend_type) {
-        graphics.board_context.globalAlpha = piece.blend_alpha;
-        graphics.board_context.drawImage(
+        board_context.globalAlpha = piece.blend_alpha;
+        board_context.drawImage(
           pieceTypeImage(piece.blend_type),
           piece.x,
           piece.y+20
@@ -598,89 +599,111 @@ var scene_game = (function () {
       }
     };
       // draw player
-    graphics.board_context.globalAlpha = 1;
-    state.player.draw(graphics.board_context);
+    board_context.globalAlpha = 1;
+    state.player.draw(board_context);
 
       // draw timer
-    graphics.board_context.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    graphics.board_context.fillRect(
+    board_context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    board_context.fillRect(
       0,
       8,
-      graphics.board_canvas.width,
+      board_canvas.width,
       5
     );
-    graphics.board_context.fillStyle = 'rgba(142, 212, 165, 1)';
-    graphics.board_context.fillRect(
+    board_context.fillStyle = 'rgba(142, 212, 165, 1)';
+    board_context.fillRect(
       0,
       8,
-      graphics.board_canvas.width * (state.next_row_time - now) / state.next_row_interval,
+      board_canvas.width * (state.next_row_time - now) / state.next_row_interval,
       5
     );
 
     // info context drawing
       // draw translucent boxes
-    graphics.info_context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    info_context.fillStyle = 'rgba(0, 0, 0, 0.5)';
         // character box
-    graphics.info_context.fillRect(
+    info_context.fillRect(
       0,
-      20,
-      graphics.info_canvas.width,
-      graphics.info_canvas.width
+      10,
+      info_canvas.width,
+      info_canvas.width
     );
         // next pieces box
-    graphics.info_context.fillRect(
+    info_context.fillRect(
       0,
-      185,
-      graphics.info_canvas.width,
-      50
+      117,
+      info_canvas.width,
+      80
     );
         // score box
-    graphics.info_context.fillRect(
+    info_context.fillRect(
       0,
-      260,
-      graphics.info_canvas.width,
-      45
+      208,
+      info_canvas.width,
+      50
     );
         // level box
-    graphics.info_context.fillRect(
+    info_context.fillRect(
       0,
-      335,
-      graphics.info_canvas.width,
-      45
+      269,
+      info_canvas.width,
+      50
+    );
+        // time box
+    info_context.fillRect(
+      0,
+      330,
+      info_canvas.width,
+      50
     );
 
       // draw text
-    graphics.info_context.textAlign = 'center';
-    graphics.info_context.textBaseline = 'center';
-    graphics.info_context.font = '24px font';
-    graphics.info_context.fillStyle = 'white';
-    graphics.info_context.fillText('NEXT', 50, 205);
-    graphics.info_context.fillText('SCORE', 50, 280);
-    graphics.info_context.fillText('LEVEL', 50, 355);
+    info_context.textAlign = 'center';
+    info_context.textBaseline = 'top';
+    info_context.font = '24px font';
+    info_context.fillStyle = 'white';
+    info_context.fillText('NEXT', 48, 120);
+    info_context.fillText('SCORE', 48, 211);
+    info_context.fillText('LEVEL', 48, 272);
+    info_context.fillText('TIME', 48, 333);
+    info_context.font = '20px font';
+    info_context.textBaseline = 'bottom';
+    info_context.fillText(character.name, 48, 101);
 
-    graphics.info_context.font = '20px font';
-    graphics.info_context.fillText('' + state.level, 50, 375);
+    info_context.font = '20px font';
+    info_context.fillText('' + state.level, 48, 316);
     var score_string = '' + state.score;
         // pad with zeroes
     score_string = '0'.repeat(5 - score_string.length) + score_string;
-    graphics.info_context.fillText(score_string, 50, 300);
+    info_context.fillText(score_string, 48, 255);
+    var time = Math.floor((kz.performance.now() - state.begin)/1000);
+    var sec_string = '' + time%60;
+    var min_string = '' + Math.floor(time/60);
+    time_string = '0'.repeat(2-min_string.length) + min_string + ':'  + '0'.repeat(2-sec_string.length)+sec_string;
+    info_context.fillText(time_string, 48, 377);
 
       // draw sprites
     for (var ii = 0; ii < config.next_length; ii++) {
-      graphics.info_context.drawImage(
+      info_context.drawImage(
         pieceTypeImage(state.player.next[ii]),
-        10+ii*config.grid_size,
-        212
+        9+(ii%4)*config.grid_size,
+        148 + Math.floor(ii/4)*23
       );
     }
+
+    info_context.drawImage(
+      character.image,
+      23,
+      20
+    );
 
     // main context drawing
     kz.context.fillStyle = graphics.background_pattern;
     kz.context.fillRect(0, 0, kz.canvas.width, kz.canvas.height);
-    kz.context.drawImage(graphics.board_canvas, 10, 0);
+    kz.context.drawImage(board_canvas, 10, 0);
     kz.context.drawImage(
-      graphics.info_canvas,
-      10 + graphics.board_canvas.width + 10,
+      info_canvas,
+      10 + board_canvas.width + 7,
       0
     );
   }
@@ -708,7 +731,7 @@ var scene_game = (function () {
     kz.context.save();
     kz.context.globalAlpha = 1;
     kz.context.drawImage(
-      graphics.pause_canvas,
+      pause_canvas,
       0,
       0
     );
@@ -721,6 +744,17 @@ var scene_game = (function () {
       kz.canvas.height
     );
     kz.context.restore();
+    kz.context.save();
+    kz.context.textAlign = 'center';
+    kz.context.textBaseline = 'center';
+    kz.context.font = '24px font';
+    kz.context.fillStyle = pause_choice == 0 ? '#fff' : '#666';
+    kz.context.fillText('RESUME', kz.canvas.width/2, kz.canvas.height/2-48);
+    kz.context.fillStyle = pause_choice == 1 ? '#fff' : '#666';
+    kz.context.fillText('RESTART', kz.canvas.width/2, kz.canvas.height/2);
+    kz.context.fillStyle = pause_choice == 2 ? '#fff' : '#666';
+    kz.context.fillText('QUIT', kz.canvas.width/2, kz.canvas.height/2+48);
+    kz.context.restore();
   }
 
   function drawDead(now) {
@@ -728,7 +762,7 @@ var scene_game = (function () {
     kz.context.save();
     kz.context.globalAlpha = 1;
     kz.context.drawImage(
-      graphics.gameover_canvas,
+      gameover_canvas,
       0,
       0
     );
@@ -778,9 +812,22 @@ var scene_game = (function () {
 
   function preUpdatePause(now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
-      if (kz.events[ii].kztype == 'keypress' &&
-          kz.events[ii].which == kz.KEYS.ESCAPE) {
-        resume();
+      if (kz.events[ii].kztype == 'keypress') {
+        if (kz.events[ii].which == kz.KEYS.ESCAPE) {
+          resume();
+        } else if (kz.events[ii].which == kz.KEYS.DOWN) {
+          pause_choice = Math.min(2, pause_choice+1);
+        } else if (kz.events[ii].which == kz.KEYS.UP) {
+          pause_choice = Math.max(0, pause_choice-1);
+        } else if (kz.events[ii].which == kz.KEYS.Z) {
+          resume();
+          if (pause_choice == 0) {
+          } else if (pause_choice == 1) {
+            kz.run(scene_game);
+          } else {
+            kz.run(scene_main_menu);
+          }
+        }
       }
     }
     kz.events = [];

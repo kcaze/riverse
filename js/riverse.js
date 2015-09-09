@@ -22,15 +22,86 @@ function loadSonant(data, resolve) {
 
 var resources = {
   images: {
-    'background': 'images/background.gif',
-    'characters': 'images/characters.gif',
-    'piece_blue': 'images/piece_black.gif',
-    'piece_red': 'images/piece_white.gif',
-    'piece_zodiac': 'images/piece_zodiac.gif',
-    'shooter_0': 'images/shooter0.gif',
-    'shooter_1': 'images/shooter1.gif',
-    'shooter_2': 'images/shooter2.gif',
-    'shooter_3': 'images/shooter1.gif',
+    background: {
+      data: 'images/background.gif'
+    },
+    character_boar: {
+      data: 'images/characters.gif',
+      crop: {x:0, y:0, w:50, h:50},
+    },
+    character_cat: {
+      data: 'images/characters.gif',
+      crop: {x:49, y:0, w:50, h:50},
+    },
+    character_dog: {
+      data: 'images/characters.gif',
+      crop: {x:0, y:49, w:50, h:50},
+    },
+    character_dragon: {
+      data: 'images/characters.gif',
+      crop: {x:49, y:49, w:50, h:50},
+    },
+    character_hare: {
+      data: 'images/characters.gif',
+      crop: {x:0, y:98, w:50, h:50},
+    },
+    character_horse: {
+      data: 'images/characters.gif',
+      crop: {x:49, y:98, w:50, h:50},
+    },
+    character_monkey: {
+      data: 'images/characters.gif',
+      crop: {x:0, y:147, w:50, h:50},
+    },
+    character_ox: {
+      data: 'images/characters.gif',
+      crop: {x:49, y:147, w:50, h:50},
+    },
+    character_rat: {
+      data: 'images/characters.gif',
+      crop: {x:0, y:196, w:50, h:50},
+    },
+    character_rooster: {
+      data: 'images/characters.gif',
+      crop: {x:49, y:196, w:50, h:50},
+    },
+    character_sheep: {
+      data: 'images/characters.gif',
+      crop: {x:0, y:245, w:50, h:50},
+    },
+    character_snake: {
+      data: 'images/characters.gif',
+      crop: {x:49, y:245, w:50, h:50},
+    },
+    character_tiger: {
+      data: 'images/characters.gif',
+      crop: {x:0, y:294, w:50, h:50},
+    },
+    character_random: {
+      data: 'images/characters.gif',
+      crop: {x:49, y:294, w:50, h:50},
+    },
+    piece_blue: {
+      data: 'images/piece_black.gif'
+    },
+    piece_red: {
+      data: 'images/piece_white.gif'
+    },
+    piece_zodiac: {
+      data: 'images/piece_zodiac.gif'
+    },
+    shooter_0: {
+      data: 'images/shooter0.gif'
+    },
+    shooter_1: {
+      data: 'images/shooter1.gif'
+    },
+    shooter_2: {
+      data: 'images/shooter2.gif'
+    },
+    shooter_3: {
+      data: 'images/shooter1.gif'
+    }
   },
   sounds: {
     'sfx_shoot': {

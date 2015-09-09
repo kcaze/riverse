@@ -74,7 +74,7 @@ var scene_main_menu = (function () {
           duration: 500
         }).then(function () {
           setTimeout(function () {
-            kz.run(scene_game);
+            kz.run(scene_character_select);
           }, 500);
         });
       }
