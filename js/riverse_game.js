@@ -188,11 +188,7 @@ var scene_game = (function () {
     if (typeof row === 'undefined') return;
 
     // update score
-    state.score++;
-    if (!localStorage.getItem('highscore')
-        || parseInt(localStorage.getItem('highscore')) < state.score) {
-      localStorage.setItem('highscore', ''+state.score)
-    }
+    incrementScore(1);
 
     // capture row pieces before we update board so we can animate them
     var row_pieces = [];
@@ -214,7 +210,9 @@ var scene_game = (function () {
     character.zodiac({
       state: state,
       animateClearPieces: animateClearPieces,
+      animateColorChange: animateColorChange,
       config: config,
+      incrementScore: incrementScore,
       row: row
     });
   }
@@ -273,7 +271,7 @@ var scene_game = (function () {
     var dys = [0, 0, 1, -1, 1, -1, 1, -1];
     var piece_type = state.board[board_y][board_x].piece_type;
 
-    if (piece_type == PieceTypes.Empty) return
+    if (piece_type == PieceTypes.Empty || piece_type == PieceTypes.Zodiac) return
 
     for (var ii = 0; ii < 8; ii++) {
       var dx = dxs[ii];
@@ -302,27 +300,36 @@ var scene_game = (function () {
         var yy = board_y + jj * dy;
         state.board[yy][xx].piece_type = piece_type;
         var piece = state.board[yy][xx].piece;
-        // ugh, creating a closure to capture the piece variable
-        (function (piece) {
-          piece.actions_promise = piece.actions_promise.then(function () {
-            return new Promise(function(resolve) {
-              piece.blend_type = piece_type;
-              return kz.tween({
-                object: piece,
-                property: 'blend_alpha',
-                value: 1,
-                duration: 100
-              }).then(function() {
-                piece.type = piece.blend_type;
-                piece.blend_type = 0;
-                piece.blend_alpha = 0;
-                resolve();
-              });
-            });
-          });
-        })(piece);
+        animateColorChange(piece, piece_type);
       }
     }
+  }
+
+  function incrementScore(amount) {
+    state.score += amount;
+    if (!localStorage.getItem('highscore')
+        || parseInt(localStorage.getItem('highscore')) < state.score) {
+      localStorage.setItem('highscore', ''+state.score)
+    }
+  }
+
+  function animateColorChange(piece, to_type) {
+    piece.actions_promise = piece.actions_promise.then(function () {
+      return new Promise(function(resolve) {
+        piece.blend_type = to_type;
+        kz.tween({
+          object: piece,
+          property: 'blend_alpha',
+          value: 1,
+          duration: 100
+        }).then(function() {
+          piece.type = to_type;
+          piece.blend_type = 0;
+          piece.blend_alpha = 0;
+          resolve();
+        });
+      });
+    });
   }
 
   function addRow() {
@@ -393,7 +400,9 @@ var scene_game = (function () {
       score: 0,
       level: 1,
       next_row_interval: config.next_row_interval,
-      next_row_time: 0
+      next_row_time: 0,
+      next_row_time_diff: 0,
+      next_row_freeze: false
     };
     state.next_row_time = kz.performance.now() + state.next_row_interval;
     // initialize board
@@ -642,7 +651,11 @@ var scene_game = (function () {
       board_canvas.width,
       5
     );
-    board_context.fillStyle = 'rgba(142, 212, 165, 1)';
+    if (state.next_row_freeze) {
+      board_context.fillStyle = 'rgb(80, 96, 91)';
+    } else {
+      board_context.fillStyle = 'rgb(142, 212, 165)';
+    }
     board_context.fillRect(
       0,
       8,
@@ -751,6 +764,9 @@ var scene_game = (function () {
     }
     kz.processEvents();
     state.player.animate(now);
+    if (state.next_row_freeze) {
+      state.next_row_time = now + state.next_row_time_diff;
+    }
     if (state.next_row_time < now) {
       addRow();
       state.next_row_time = now + state.next_row_interval;
