@@ -27,7 +27,8 @@ var scene_game = (function () {
   var PieceTypes = {
     Empty: 0,
     Red: 1,
-    Blue: 2
+    Blue: 2,
+    Zodiac: 3
   };
   var normal_piece_types = [PieceTypes.Red, PieceTypes.Blue];
 
@@ -92,12 +93,11 @@ var scene_game = (function () {
   }
 
   function pieceTypeImage(piece_type) {
-    switch (piece_type) {
-      case PieceTypes.Red:
-        return kz.resources.images.piece_red;
-      case PieceTypes.Blue:
-        return kz.resources.images.piece_blue;
-    }
+    return [
+      kz.resources.images.piece_red,
+      kz.resources.images.piece_blue,
+      kz.resources.images.piece_zodiac
+    ][piece_type-1];
   }
 
   function piece_to_board(piece_coord) {
@@ -111,6 +111,11 @@ var scene_game = (function () {
   /*^ Messy section of game logic */
   function lose() {
     state.alive = false;
+    if (!localStorage.getItem('playcount')) {
+      localStorage.setItem('playcount', '1');
+    } else {
+      localStorage.setItem('playcount', parseInt(localStorage.getItem('playcount'))+1);
+    }
     console.log('Lost :(');
     /*kz.resources.sounds.bgm.fade(
       1,
@@ -153,23 +158,41 @@ var scene_game = (function () {
 
   function clearRow() {
     var row;
+    var activateAbility = false;
+
     for (var yy = 0; yy < config.board_height; yy++) {
       var piece_type = state.board[yy][0].piece_type;
-      if (piece_type == PieceTypes.Empty) continue;
+      var zodiacCounter = 0;
       var cleared = true;
       for (var xx = 0; xx < config.board_width; xx++) {
-        if (state.board[yy][xx].piece_type != piece_type) {
+        if (state.board[yy][xx].piece_type == PieceTypes.Zodiac) {
+          zodiacCounter++;
+        }
+        // wow, much hack. this works because zodiac = 3, so it ANDs with
+        // both 1 (black) and 2 (white) to be nonzero.
+        piece_type &= state.board[yy][xx].piece_type;
+        if (piece_type == 0) {
           cleared = false;
           break;
         }
       }
       if (cleared) {
+        if (zodiacCounter > 0) {
+          activateAbility = true;
+        }
         row = yy;
         break;
       }
     }
 
     if (typeof row === 'undefined') return;
+
+    // update score
+    state.score++;
+    if (!localStorage.getItem('highscore')
+        || parseInt(localStorage.getItem('highscore')) < state.score) {
+      localStorage.setItem('highscore', ''+state.score)
+    }
 
     // capture row pieces before we update board so we can animate them
     var row_pieces = [];
@@ -178,31 +201,35 @@ var scene_game = (function () {
     }
 
     // update of underlying board
-    for (yy = row; yy < config.board_height-1; yy++) {
-      for (xx = 0; xx < config.board_width; xx++) {
-        state.board[yy][xx] = state.board[yy+1][xx];
-      }
-    }
     for (xx = 0; xx < config.board_width; xx++) {
-      state.board[config.board_height-1][xx] = {
+      state.board[row][xx] = {
         piece_type: PieceTypes.Empty
       };
     }
 
-    state.score++;
-
     // animation
+    animateClearPieces(row_pieces);
+
+    if (!activateAbility) return;
+    character.zodiac({
+      state: state,
+      animateClearPieces: animateClearPieces,
+      config: config,
+      row: row
+    });
+  }
+
+  function animateClearPieces(pieces) {
     kz.resources.sounds.sfx_clear.play();
-    // animate fade away of row pieces
+    // animate fade away
     // ensure that all row piece animations have finished
-    var row_promise  = [];
-    row_pieces.forEach(function (piece) {
-      row_promise.push(piece.actions_promise);
+    var promise  = [];
+    pieces.forEach(function (piece) {
+      promise.push(piece.actions_promise);
     })
-    row_promise = Promise.all(row_promise);
-    var promises = [];
-    row_pieces.forEach(function (piece) {
-      var promise = row_promise.then(function () {
+    promise = Promise.all(promise);
+    pieces.forEach(function (piece) {
+      var piecePromise = promise.then(function () {
         return kz.tween({
           object: piece,
           property: 'alpha',
@@ -212,30 +239,31 @@ var scene_game = (function () {
           piece.destroy();
         });
       });
-      piece.actions_promise = promise;
-      promises.push(promise);
+      piece.actions_promise = piecePromise;
     });
+  }
 
-    // drop pieces
-    for (var yy = row; yy < config.board_height; yy++) {
+  function drop() {
+    for (var yy = config.board_height-1; yy > 0; yy--) {
       for (var xx = 0; xx < config.board_width; xx++) {
-        var piece = state.board[yy][xx].piece;
-        if (!piece) continue;
-        // ugh, again, wrapping in closure to capture piece
-        (function (piece) {
-          // ensure we start the animation AFTER the row fades away
-          var promise = Promise.all(
-            promises.concat([piece.actions_promise])
-          );
-          piece.actions_promise = promise.then(function () {
-            return kz.tween({
-              object: piece,
-              property: 'y',
-              value: piece.y - config.grid_size,
-              rate: 1
+        if (state.board[yy][xx].piece_type && !state.board[yy-1][xx].piece_type) {
+          state.board[yy-1][xx] = state.board[yy][xx];
+          state.board[yy][xx] = {
+            piece_type: PieceTypes.Empty
+          };
+          var piece = state.board[yy-1][xx].piece;
+          (function (piece) {
+            // ensure we start the animation AFTER the row fades away
+            piece.actions_promise = piece.actions_promise.then(function () {
+              return kz.tween({
+                object: piece,
+                property: 'y',
+                value: piece.y - config.grid_size,
+                duration: 100
+              });
             });
-          });
-        })(piece);
+          })(piece);
+        }
       }
     }
   }
@@ -258,7 +286,8 @@ var scene_game = (function () {
              && 0 <= y
              && x < config.board_width
              && y < config.board_height) {
-        if (state.board[y][x].piece_type == PieceTypes.Empty) break;
+        if (state.board[y][x].piece_type == PieceTypes.Empty
+          || state.board[y][x].piece_type == PieceTypes.Zodiac) break;
         if (state.board[y][x].piece_type == piece_type) {
           reverse = true;
           break;
@@ -343,7 +372,7 @@ var scene_game = (function () {
   /*$ Messy section of game logic */
 
   function initialize() {
-    kz.resources.sounds.bgm_game.play(true);
+    //kz.resources.sounds.bgm_game.play(true);
   // initialize graphics
     graphics = {
       background_pattern: kz.context.createPattern(
@@ -496,7 +525,10 @@ var scene_game = (function () {
         }
 
         var piece_type = this.next.shift();
-        this.next.push(randomPieceType(normal_piece_types));
+        var next_piece_type = Math.random()*16 > 1
+          ? randomPieceType(normal_piece_types)
+          : PieceTypes.Zodiac;
+        this.next.push(next_piece_type);
 
         var target_y = config.board_height-1;
         while (target_y > 0) {
@@ -724,6 +756,7 @@ var scene_game = (function () {
       state.next_row_time = now + state.next_row_interval;
     }
     clearRow();
+    drop();
   }
 
   function drawPause(now) {

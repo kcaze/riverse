@@ -16,13 +16,31 @@ var scene_character_select = (function () {
         name: 'BOAR',
         image: kz.resources.images.character_boar,
         unlock_message: '',
-        unlocked: false
+        unlocked: parseInt(localStorage.getItem('playcount')) >= 10
       },
       {
         description: 'CLEAR ROW ABOVE',
         name: 'CAT',
         image: kz.resources.images.character_cat,
-        unlocked: true
+        unlocked: true,
+        zodiac: function(data) {
+          var state = data.state;
+          var config = data.config;
+          var row = data.row;
+          row--;
+          var row_pieces = [];
+          for (var xx = 0; xx < config.board_width; xx++) {
+            if (state.board[row][xx].piece) {
+              row_pieces.push(state.board[row][xx].piece);
+            }
+          }
+          for (xx = 0; xx < config.board_width; xx++) {
+            state.board[row][xx] = {
+              piece_type: 0
+            };
+          }
+          data.animateClearPieces(row_pieces);
+        }
       },
       {
         description: 'CLEAR LEFT SIDE',
@@ -85,7 +103,7 @@ var scene_character_select = (function () {
         name: 'SHEEP',
         image: kz.resources.images.character_sheep,
         unlock_message: '',
-        unlocked: false
+        unlocked: parseInt(localStorage.getItem('highscore')) >= 10
       },
       {
         description: 'NEXT ALL BLACK',
