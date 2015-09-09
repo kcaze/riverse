@@ -12,11 +12,11 @@ var scene_character_select = (function () {
     }
     characters = [
       {
-        description: '',
+        description: 'ENDS TURN WHITE',
         name: 'BOAR',
         image: kz.resources.images.character_boar,
         unlock_message: '',
-        unlocked: true
+        unlocked: false
       },
       {
         description: 'CLEAR ROW ABOVE',
@@ -25,77 +25,77 @@ var scene_character_select = (function () {
         unlocked: true
       },
       {
-        description: '',
+        description: 'CLEAR LEFT SIDE',
         name: 'DOG',
         image: kz.resources.images.character_dog,
         unlock_message: '',
-        unlocked: true
+        unlocked: false
       },
       {
-        description: '',
+        description: 'CLEAR 4 ON ENDS',
         name: 'DRAGON',
         image: kz.resources.images.character_dragon,
         unlock_message: '',
-        unlocked: true
+        unlocked: false
       },
       {
-        description: '',
+        description: 'CLEAR 12 RANDOM',
         name: 'HARE',
         image: kz.resources.images.character_hare,
         unlock_message: '',
         unlocked: false
       },
       {
-        description: '',
+        description: 'SCORE +2',
         name: 'HORSE',
         image: kz.resources.images.character_horse,
         unlock_message: '',
         unlocked: false
       },
       {
-        description: '',
+        description: 'DELAY ROW DROP',
         name: 'MONKEY',
         image: kz.resources.images.character_monkey,
         unlock_message: '',
-        unlocked: true
+        unlocked: false
       },
       {
-        description: '',
+        description: 'ENDS TURN BLACK',
         name: 'OX',
         image: kz.resources.images.character_ox,
         unlock_message: '',
         unlocked: false
       },
       {
-        description: '',
+        description: 'NEXT ALL WHITE',
         name: 'RAT',
         image: kz.resources.images.character_rat,
         unlock_message: '',
         unlocked: false
       },
       {
-        description: '',
+        description: 'CLEAR RIGHT SIDE',
         name: 'ROOSTER',
         image: kz.resources.images.character_rooster,
         unlock_message: '',
-        unlocked: true
+        unlocked: false
       },
       {
-        description: '',
+        description: 'CLEAR TOP ROW',
         name: 'SHEEP',
         image: kz.resources.images.character_sheep,
         unlock_message: '',
         unlocked: false
       },
       {
-        description: '',
+        description: 'NEXT ALL BLACK',
         name: 'SNAKE',
         image: kz.resources.images.character_snake,
         unlock_message: '',
         unlocked: false
       },
       {
-        description: '',
+        description: 'SCORE +LEVEL/3',
         name: 'TIGER',
         image: kz.resources.images.character_tiger,
         unlock_message: '',
