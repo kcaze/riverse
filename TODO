@@ -1,0 +1,23 @@
+Features (decreasing order of priority):
+-Add unlock conditions for each character, (display on menu perhaps?)
+-Redesign game over screen / sequence
+-Add settings menu
+  -Change keybindings
+  -Toggle music
+-Add records menu
+  -Show all records logged in local storage.
+-Add unlock message when a character is unlocked.
+
+Bug fixes:
+-Quitting game should stop music properly. BGM should probably be a global static variable that plays on scene starts and stops on scene exit.
+-Newly added rows cannot be all black or all white
+-Should allow for possibility of zodiacs in initial 8 start
+-Test across multiple browsers and verify that there are no console errors.
+-Pressing ESC should take you back to main menu from character selection screen.
+
+Assets (descending order of priority):
+-Sound effect for menu item selection
+-Sound effect for row drop
+-Title logo (questionable. could take lots of time to create and take up lots of space)
+-Main menu music
+-Character selection music
