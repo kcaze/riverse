@@ -20,8 +20,8 @@ var scene_character_select = (function () {
         description: 'ENDS TURN WHITE',
         name: 'BOAR',
         image: kz.resources.images.character_boar,
-        unlock_message: '',
-        unlocked: parseInt(localStorage.getItem('playcount')) >= 10,
+        unlock_message: '', // play 13 times or more
+        unlocked: parseInt(localStorage.getItem('playcount')) >= 13,
         zodiac: function (data) {
           var state = data.state;
           var config = data.config;
@@ -66,7 +66,7 @@ var scene_character_select = (function () {
         name: 'DOG',
         image: kz.resources.images.character_dog,
         unlock_message: '',
-        unlocked: true,
+        unlocked: true, // spend 13 minutes playing in total
         zodiac: function (data) {
           var board = data.state.board;
           var pieces = [];
@@ -84,7 +84,7 @@ var scene_character_select = (function () {
         name: 'DRAGON',
         image: kz.resources.images.character_dragon,
         unlock_message: '',
-        unlocked: true,
+        unlocked: true, // achieve a score of 169
         zodiac: function(data) {
           var leftCounter = 4;
           var rightCounter = 4;
@@ -115,7 +115,7 @@ var scene_character_select = (function () {
         name: 'HARE',
         image: kz.resources.images.character_hare,
         unlock_message: '',
-        unlocked: true,
+        unlocked: true, // get to level 13
         zodiac: function(data) {
           var board = data.state.board;
           var count = 0;
@@ -145,7 +145,7 @@ var scene_character_select = (function () {
         name: 'HORSE',
         image: kz.resources.images.character_horse,
         unlock_message: '',
-        unlocked: true,
+        unlocked: true, // activate zodiac abilities 13 times in a single game
         zodiac: function(data) {
           data.incrementScore(2);
         }
@@ -155,7 +155,7 @@ var scene_character_select = (function () {
         name: 'MONKEY',
         image: kz.resources.images.character_monkey,
         unlock_message: '',
-        unlocked: true,
+        unlocked: true, // activate zodiac abilities 169 times in total
         zodiac: function (data) {
           var state = data.state;
           state.next_row_time_diff = state.next_row_time - kz.performance.now();
@@ -169,7 +169,7 @@ var scene_character_select = (function () {
         description: 'ENDS TURN BLACK',
         name: 'OX',
         image: kz.resources.images.character_ox,
-        unlock_message: '',
+        unlock_message: '', // shoot 1313 orbs in total
         unlocked: true,
         zodiac: function (data) {
           var state = data.state;
@@ -190,7 +190,7 @@ var scene_character_select = (function () {
         description: 'NEXT ALL WHITE',
         name: 'RAT',
         image: kz.resources.images.character_rat,
-        unlock_message: '',
+        unlock_message: '', // shoot 13 white orbs in a row
         unlocked: true,
         zodiac: function (data) {
           for (var ii = 0; ii < 8; ii++) {
@@ -221,19 +221,30 @@ var scene_character_select = (function () {
         description: 'CLEAR TOP ROW',
         name: 'SHEEP',
         image: kz.resources.images.character_sheep,
-        unlock_message: '',
-        unlocked: parseInt(localStorage.getItem('highscore')) >= 10,
+        unlock_message: '', // achieve a high score of 13 or more
+        unlocked: parseInt(localStorage.getItem('highscore')) >= 13,
         //TODO
         zodiac: function (data) {
-
+          var state = data.state;
+          var config = data.config;
+          var row_pieces = [];
+          for (var xx = 0; xx < config.board_width; xx++) {
+            if (state.board[0][xx].piece) {
+              row_pieces.push(state.board[0][xx].piece);
+            }
+            state.board[0][xx] = {
+              piece_type: 0
+            };
+          }
+          data.animateClearPieces(row_pieces);
         }
       },
       {
         description: 'NEXT ALL BLACK',
-        name: 'SNAKE',
+        name: 'SNAKE', // shoot 13 black orbs in a row
         image: kz.resources.images.character_snake,
         unlock_message: '',
-        unlocked: true,
+        unlocked: true, // survive for 13 minutes in a single game
         zodiac: function (data) {
           for (var ii = 0; ii < 8; ii++) {
             data.state.player.next[ii] = 2;
@@ -242,7 +253,7 @@ var scene_character_select = (function () {
       },
       {
         description: 'SCORE +LEVEL/3',
-        name: 'TIGER',
+        name: 'TIGER', // clear 1313 rows in total
         image: kz.resources.images.character_tiger,
         unlock_message: '',
         unlocked: true,

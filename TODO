@@ -1,17 +1,11 @@
 Features (decreasing order of priority):
 -Level increment + timer adjustment
--Add unlock conditions for each character, (display on menu perhaps?)
--Add settings menu
-  -Change keybindings
-  -Toggle music
--Add records menu
-  -Show all records logged in local storage.
--Add unlock message when a character is unlocked.
+-Add unlock conditions for each character, display on character select screen
+-Add records menu option
 
 Bug fixes:
 -Test across multiple browsers and verify that there are no console errors.
 
 Assets (descending order of priority):
--Title logo (questionable. could take lots of time to create and take up lots of space)
 -Main menu music
 -Character selection music
