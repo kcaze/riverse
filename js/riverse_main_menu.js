@@ -9,8 +9,15 @@ var scene_main_menu = (function () {
     graphics = {
       press_space_visible: true,
       blink: true,
-      text_alpha: 1
+      text_alpha: 1,
+      fadeAlpha: 1,
     };
+    kz.tween({
+      object: graphics,
+      property: 'fadeAlpha',
+      value: 0,
+      duration: 100
+    });
     state = {
       pressed_space: false
     };
@@ -28,6 +35,16 @@ var scene_main_menu = (function () {
       kz.canvas.height
     );
     kz.context.restore();
+
+    kz.context.textAlign = 'center';
+    kz.context.textBaseline = 'center';
+    kz.context.font = '48px font';
+    kz.context.fillStyle = 'rgb(142, 212, 165)';
+    kz.context.fillText(
+      'ZODIAC 13',
+      kz.canvas.width / 2,
+      125
+    );
 
     if (graphics.press_space_visible) {
       kz.context.save();
@@ -57,6 +74,8 @@ var scene_main_menu = (function () {
       380
     );
     kz.context.restore();
+    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
   }
 
   scene_main_menu.preUpdate = function (now) {
@@ -64,18 +83,17 @@ var scene_main_menu = (function () {
       if (kz.events[ii].kztype == 'keypress' &&
           kz.events[ii].which == kz.KEYS.Z &&
           !state.pressed_space) {
+        kz.resources.sounds.sfx_select.play();
         state.pressed_space = true;
         graphics.blink = false;
         graphics.press_space_visible = false;
         kz.tween({
           object: graphics,
-          property: 'text_alpha',
-          value: 0,
-          duration: 500
+          property: 'fadeAlpha',
+          value: 1,
+          duration: 100
         }).then(function () {
-          setTimeout(function () {
-            kz.run(scene_character_select);
-          }, 500);
+          kz.run(scene_character_select);
         });
       }
     }

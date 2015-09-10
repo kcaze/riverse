@@ -75,6 +75,7 @@ kz.loadSounds = function (queue) {
             source.buffer = this.buffer;
             source.connect(kz.audio_context.destination);
             source.start(0);
+            return source;
           },
           buffer: buffer
         };

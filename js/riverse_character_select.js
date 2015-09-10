@@ -1,7 +1,6 @@
 var character;
 var scene_character_select = (function () {
   var scene = new kz.Scene();
-  var graphics;
   var state;
 
   var characters;
@@ -9,7 +8,13 @@ var scene_character_select = (function () {
   scene.initialize = function () {
     state = {
       selected: 0,
+      fadeAlpha: 1
     }
+    kz.tween({
+      object: state,
+      property: 'fadeAlpha',
+      value: 0,
+      duration: 100});
     characters = [
       {
         description: 'ENDS TURN WHITE',
@@ -313,6 +318,8 @@ var scene_character_select = (function () {
         360
       );
     }
+    kz.context.fillStyle = 'rgba(0,0,0,'+state.fadeAlpha+')';
+    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
   }
 
   scene.preUpdate = function (now) {
@@ -334,9 +341,28 @@ var scene_character_select = (function () {
             }
           }
           if (characters[state.selected].unlocked) {
+            kz.resources.sounds.sfx_select.play();
             character = characters[state.selected];
-            kz.run(scene_game);
+            kz.tween({
+              object: state,
+              property: 'fadeAlpha',
+              value: 1,
+              duration: 100
+            }).then(function () {
+              kz.run(scene_game);
+            });
+          } else {
+            kz.resources.sounds.sfx_denied.play();
           }
+        } else if (kz.events[ii].which == kz.KEYS.ESCAPE) {
+          kz.tween({
+            object: state,
+            property: 'fadeAlpha',
+            value: 1,
+            duration: 100
+          }).then(function () {
+            kz.run(scene_main_menu);
+          });
         }
       }
     }

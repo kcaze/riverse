@@ -112,6 +112,18 @@ var resources = {
       data: jsfxr([1,,0.06,0.4848,0.4938,0.8917,,,,,,,,,,,,,1,,,,,0.49]),
       loader: loadJSFXR
     },
+    'sfx_select': {
+      data: jsfxr([0,,0.0538,0.4336,0.3186,0.4583,,,,,,0.5712,0.5566,,,,,,1,,,,,0.5]),
+      loader: loadJSFXR
+    },
+    'sfx_denied': {
+      data: jsfxr([0,,0.24,0.51,0.3829,0.15,,,,,,,,,,,,,1,,,,,0.5]),
+      loader: loadJSFXR
+    },
+    'sfx_drop': {
+      data: jsfxr([1,,0.0468,,0.2103,0.4979,,-0.4519,,,,,,,,,,,1,,,,,0.83]),
+      loader: loadJSFXR
+    },
     'bgm_game': {
       loader: loadSonant,
       data:

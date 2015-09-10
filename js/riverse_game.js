@@ -35,6 +35,7 @@ var scene_game = (function () {
   var state;
   var pause_choice;
   var graphics;
+  var bgm;
 
   function pause() {
     kz.pause();
@@ -110,6 +111,7 @@ var scene_game = (function () {
 
   /*^ Messy section of game logic */
   function lose() {
+    bgm.stop();
     state.alive = false;
     if (!localStorage.getItem('playcount')) {
       localStorage.setItem('playcount', '1');
@@ -333,6 +335,7 @@ var scene_game = (function () {
   }
 
   function addRow() {
+    kz.resources.sounds.sfx_drop.play();
     var new_row = [];
     for (var ii = 0; ii < config.board_width; ii++) {
       var piece_type = randomPieceType(normal_piece_types);
@@ -344,6 +347,15 @@ var scene_game = (function () {
           piece_type
         )
       });
+    }
+    // if all colors the same, change the color of last one
+    var piece_type = new_row[config.board_width-1].piece_type;
+    for (var ii = 0; ii < config.board_width; ii++) {
+      piece_type ^= new_row[ii].piece_type;
+    }
+    if (piece_type) {
+      new_row[config.board_width-1].piece_type ^= 3;
+      new_row[config.board_width-1].piece.type ^= 3;
     }
 
     // update board
@@ -379,7 +391,8 @@ var scene_game = (function () {
   /*$ Messy section of game logic */
 
   function initialize() {
-    //kz.resources.sounds.bgm_game.play(true);
+    bgm = kz.resources.sounds.bgm_game.play(true);
+    bgm.stop();
   // initialize graphics
     graphics = {
       background_pattern: kz.context.createPattern(
@@ -387,8 +400,14 @@ var scene_game = (function () {
         'repeat'),
       pause_alpha: 0,
       gameover_background_alpha: 0,
-      gameover_text_alpha: 0
+      gameover_text_alpha: 0,
+      fadeAlpha: 1
     }
+    kz.tween({
+      object: graphics,
+      property: 'fadeAlpha',
+      value: 0,
+      duration: 100});
 
 
   // intialize state
@@ -421,6 +440,17 @@ var scene_game = (function () {
             piece_type: piece_type,
             piece: piece
           });
+          // check if all colors if the same. if so, change the color of the last
+          if (xx == config.board_width - 1) {
+            var piece_type = state.board[yy][0].piece_type;
+            for (var xxx = 0; xxx < config.board_width; xxx++) {
+              piece_type &= state.board[yy][xxx].piece_type
+            }
+            if (piece_type) {
+              state.board[yy][config.board_width - 1].piece_type ^= 3;
+              state.board[yy][config.board_width - 1].piece.type ^= 3;
+            }
+          }
         } else {
           state.board[yy].push({
             piece_type: PieceTypes.Empty
@@ -571,6 +601,9 @@ var scene_game = (function () {
     });
     for (var ii = 0; ii < 8; ii++) {
       state.player.next.push(randomPieceType(normal_piece_types));
+      if (Math.random()*16 < 1) {
+        state.player.next[ii] = PieceTypes.Zodiac;
+      }
     }
   }
 
@@ -751,6 +784,8 @@ var scene_game = (function () {
       10 + board_canvas.width + 7,
       0
     );
+    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
   }
 
   function preUpdateAlive(now) {
@@ -804,6 +839,8 @@ var scene_game = (function () {
     kz.context.fillStyle = pause_choice == 2 ? '#fff' : '#666';
     kz.context.fillText('QUIT', kz.canvas.width/2, kz.canvas.height/2+48);
     kz.context.restore();
+    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
   }
 
   function drawDead(now) {
@@ -816,29 +853,25 @@ var scene_game = (function () {
       0
     );
     kz.context.globalAlpha = graphics.gameover_background_alpha;
-    kz.context.fillStyle = '#290000';
+    kz.context.fillStyle = 'rgb(142, 212, 165)';
     kz.context.fillRect(
-      0,
-      0,
-      kz.canvas.width,
-      kz.canvas.height
+      10,
+      (kz.canvas.height / 2) - 28,
+      160,
+      42
     );
     kz.context.globalAlpha = graphics.gameover_text_alpha;
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '48px font';
-    kz.context.strokeStyle = '#ce0000';
-    kz.context.fillStyle = '#ffa100';
-    kz.context.lineWidth = 6;
-    kz.context.strokeText(
-      'GAME OVER',
-      kz.canvas.width / 2,
-      kz.canvas.height / 2);
+    kz.context.font = '24px font';
+    kz.context.fillStyle = '#fff';
     kz.context.fillText(
       'GAME OVER',
-      kz.canvas.width / 2,
+      kz.canvas.width / 2 - 46,
       kz.canvas.height / 2);
     kz.context.restore();
+    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
   }
 
   function preUpdateDead(now) {
@@ -848,12 +881,11 @@ var scene_game = (function () {
           state.can_restart) {
         kz.tween({
           object: graphics,
-          property: 'gameover_text_alpha',
-          value: 0,
-          duration: 1000
-        }).then(function () {
-          kz.run(scene_main_menu);
-        });
+          property: 'fadeAlpha',
+          value: 1,
+          duration: 100}).then(function () {
+            kz.run(scene_main_menu);
+          })
       }
     }
     kz.events = [];
@@ -872,9 +904,21 @@ var scene_game = (function () {
           resume();
           if (pause_choice == 0) {
           } else if (pause_choice == 1) {
-            kz.run(scene_game);
+            kz.tween({
+              object: graphics,
+              property: 'fadeAlpha',
+              value: 1,
+              duration: 100}).then(function () {
+                kz.run(scene_game);
+              });
           } else {
-            kz.run(scene_main_menu);
+            kz.tween({
+              object: graphics,
+              property: 'fadeAlpha',
+              value: 1,
+              duration: 100}).then(function () {
+                kz.run(scene_main_menu);
+              });
           }
         }
       }
@@ -899,7 +943,7 @@ var scene_game = (function () {
     }
   };
   scene_game.exit = function () {
-    //kz.resources.sounds.bgm.stop();
+    bgm.stop();
   }
   return scene_game
 })();
