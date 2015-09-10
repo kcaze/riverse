@@ -1377,5 +1377,62 @@ window.onload = function() {
   kz.loadResources(resources).then(function () {
     console.log("Loaded resources!");
     kz.run(scene_main_menu);
+    setInterval(function () {
+      incrementRecord('total_time', 1);
+    }, 1000);
   });
 };
+/**
+ * Records to store:
+ * 1. Number of games played (play_count)
+ * 2. Total time spent playing in seconds (total_time)
+ * 3. Highscore in one game (max_score)
+ * 4. Highest level gotten to (max_level)
+ * 5. Total number of zodiac abilities activated (total_zodiac)
+ * 6. Maximum number of zodiac abilities activated in one game (max_zodiac)
+ * 7. Number of orbs shot (total_orbs)
+ * 8. Maximum number of white orbs ever shot in a row (max_white_orbs)
+ * 9. Maximum number of black orbs ever shot in a row (max_black_orbs)
+ * 10. Maximum number of zodiac orbs ever shot in a row (max_zodiac_orbs)
+ * 11. Maximum number of rows cleared in one game (max_rows)
+ * 12. Total number of rows cleared ever (total_rows)
+ * 13. Maximum time survived in one single game in seconds (max_time)
+ */
+(function() {
+  var records = [
+    'play_count', // done 
+    'total_time', // done
+    'max_score', // done
+    'max_level', // done
+    'total_zodiac', // done
+    'max_zodiac', // done
+    'total_orbs', // done
+    'max_white_orbs', // done
+    'max_black_orbs', // done
+    'max_zodiac_orbs', // done
+    'max_rows', // done
+    'total_rows', // done
+    'max_time']; // done
+  records.forEach(function (record) {
+    if (!localStorage.getItem(record)) {
+      localStorage.setItem(record, '0');
+    }
+  });
+})();
+
+function incrementRecord(name, value) {
+  localStorage.setItem(
+    name, 
+    parseInt(localStorage.getItem(name)) + value);
+}
+
+function maxRecord(name, value) {
+  localStorage.setItem(
+    name, 
+    max(parseInt(localStorage.getItem(name)), value));
+}
+
+function getRecord(name) {
+  return parseInt(localStorage.getItem(name));
+}
+

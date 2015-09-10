@@ -113,20 +113,8 @@ var scene_game = (function () {
   function lose() {
     bgm.stop();
     state.alive = false;
-    if (!localStorage.getItem('playcount')) {
-      localStorage.setItem('playcount', '1');
-    } else {
-      localStorage.setItem('playcount', parseInt(localStorage.getItem('playcount'))+1);
-    }
+    incrementRecord('playcount', 1);
     console.log('Lost :(');
-    /*kz.resources.sounds.bgm.fade(
-      1,
-      0,
-      100,
-      function () {
-        kz.resources.sounds.bgm.stop();
-      }
-    );*/
 
     // copy over game picture at losing time
     gameover_context.clearRect(
@@ -192,16 +180,11 @@ var scene_game = (function () {
     // update score
     incrementScore(1);
     state.rows_cleared += 1;
-    if (!localStorage.getItem('highrows')
-        || parseInt(localStorage.getItem('highrows')) < state.rows_cleared) {
-      localStorage.setItem('highrows', ''+state.rows_cleared)
-    }
-    if (state.rows_cleared % 1 == 0) {
+    incrementRecord('total_rows', 1);
+    maxRecord('max_rows', state.rows_cleared);
+    if (state.rows_cleared % 10 == 0) {
       state.level += 1;
-      if (!localStorage.getItem('highlevel')
-          || parseInt(localStorage.getItem('highlevel')) < state.level) {
-        localStorage.setItem('highlevel', ''+state.level)
-      }
+      maxRecord('max_level', state.level);
       state.next_row_interval = Math.max(3000, state.next_row_interval - 750);
       console.log(state.next_row_interval);
     }
@@ -222,7 +205,11 @@ var scene_game = (function () {
     // animation
     animateClearPieces(row_pieces);
 
+    // activate zodiac
     if (!activateAbility) return;
+    state.zodiacs++;
+    incrementRecord('total_zodiac', 1); 
+    maxRecord('total_zodiac', state.zodiacs); 
     character.zodiac({
       state: state,
       animateClearPieces: animateClearPieces,
@@ -323,10 +310,7 @@ var scene_game = (function () {
 
   function incrementScore(amount) {
     state.score += amount;
-    if (!localStorage.getItem('highscore')
-        || parseInt(localStorage.getItem('highscore')) < state.score) {
-      localStorage.setItem('highscore', ''+state.score)
-    }
+    maxRecord('max_score', state.score);
   }
 
   function animateColorChange(piece, to_type) {
@@ -436,7 +420,13 @@ var scene_game = (function () {
       next_row_interval: config.next_row_interval,
       next_row_time: 0,
       next_row_time_diff: 0,
-      next_row_freeze: false
+      next_row_freeze: false,
+      zodiacs: 0,
+      consecutive: {
+        1: 0,
+        2: 0,
+        3: 0
+      }
     };
     state.next_row_time = kz.performance.now() + state.next_row_interval;
     // initialize board
@@ -578,11 +568,30 @@ var scene_game = (function () {
           return;
         }
 
+        incrementRecord('total_orbs', 1);
+
         var piece_type = this.next.shift();
         var next_piece_type = Math.random()*16 > 1
           ? randomPieceType(normal_piece_types)
           : PieceTypes.Zodiac;
         this.next.push(next_piece_type);
+
+        // update consecutive counts
+        if (state.consecutive[piece_type]) {
+          state.consecutive[piece_type]++;
+          console.log("Consecutives: ", state.consecutive);
+        } else {
+          state.consecutive[PieceTypes.Red] = 0;
+          state.consecutive[PieceTypes.Blue] = 0;
+          state.consecutive[PieceTypes.Zodiac] = 0;
+          state.consecutive[piece_type] = 1;
+        }
+        var pieceTypeRecordMap = {
+          1: 'max_white_orbs',
+          2: 'max_black_orbs',
+          3: 'max_zodiac_orbs'
+        };
+        maxRecord(pieceTypeRecordMap[piece_type], state.consecutive[piece_type]);
 
         var target_y = config.board_height-1;
         while (target_y > 0) {
@@ -804,6 +813,7 @@ var scene_game = (function () {
   }
 
   function preUpdateAlive(now) {
+    maxRecord('max_time', Math.floor(now - state.begin));
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress' &&
           kz.events[ii].which == kz.KEYS.ESCAPE) {

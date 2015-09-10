@@ -1,3 +1,4 @@
+
 var character;
 var scene_character_select = (function () {
   var scene = new kz.Scene();
@@ -20,8 +21,8 @@ var scene_character_select = (function () {
         description: 'ENDS TURN WHITE',
         name: 'BOAR',
         image: kz.resources.images.character_boar,
-        unlock_message: '', // play 13 times or more
-        unlocked: parseInt(localStorage.getItem('playcount')) >= 13,
+        unlock_message: '13 WHITE ORBS IN A ROW',
+        unlocked: getRecord('max_white_orbs') >= 13,
         zodiac: function (data) {
           var state = data.state;
           var config = data.config;
@@ -65,8 +66,8 @@ var scene_character_select = (function () {
         description: 'CLEAR LEFT SIDE',
         name: 'DOG',
         image: kz.resources.images.character_dog,
-        unlock_message: '',
-        unlocked: true, // spend 13 minutes playing in total
+        unlock_message: '169 ORBS SHOT',
+        unlocked: getRecord('total_orbs') >= 169,
         zodiac: function (data) {
           var board = data.state.board;
           var pieces = [];
@@ -83,8 +84,8 @@ var scene_character_select = (function () {
         description: 'CLEAR 4 ON ENDS',
         name: 'DRAGON',
         image: kz.resources.images.character_dragon,
-        unlock_message: '',
-        unlocked: true, // achieve a score of 169
+        unlock_message: 'SCORE 169',
+        unlocked: getRecord('max_score') >= 169,
         zodiac: function(data) {
           var leftCounter = 4;
           var rightCounter = 4;
@@ -114,8 +115,8 @@ var scene_character_select = (function () {
         description: 'CLEAR 12 RANDOM',
         name: 'HARE',
         image: kz.resources.images.character_hare,
-        unlock_message: '',
-        unlocked: true, // get to level 13
+        unlock_message: 'REACH LEVEL 13',
+        unlocked: getRecord('max_level') >= 13,
         zodiac: function(data) {
           var board = data.state.board;
           var count = 0;
@@ -144,8 +145,8 @@ var scene_character_select = (function () {
         description: 'SCORE +2',
         name: 'HORSE',
         image: kz.resources.images.character_horse,
-        unlock_message: '',
-        unlocked: true, // activate zodiac abilities 13 times in a single game
+        unlock_message: 'ZODIAC 13 TIMES',
+        unlocked: getRecord('total_zodiac') >= 13,
         zodiac: function(data) {
           data.incrementScore(2);
         }
@@ -154,8 +155,8 @@ var scene_character_select = (function () {
         description: 'DELAY ROW DROP',
         name: 'MONKEY',
         image: kz.resources.images.character_monkey,
-        unlock_message: '',
-        unlocked: true, // activate zodiac abilities 169 times in total
+        unlock_message: 'ZODIAC 169 TIMES',
+        unlocked: getRecord('total_zodiac') >= 169,
         zodiac: function (data) {
           var state = data.state;
           state.next_row_time_diff = state.next_row_time - kz.performance.now();
@@ -169,8 +170,8 @@ var scene_character_select = (function () {
         description: 'ENDS TURN BLACK',
         name: 'OX',
         image: kz.resources.images.character_ox,
-        unlock_message: '', // shoot 1313 orbs in total
-        unlocked: true,
+        unlock_message: '13 BLACK ORBS IN A ROW', 
+        unlocked: getRecord('max_black_orbs') >= 13,
         zodiac: function (data) {
           var state = data.state;
           var config = data.config;
@@ -190,8 +191,8 @@ var scene_character_select = (function () {
         description: 'NEXT ALL WHITE',
         name: 'RAT',
         image: kz.resources.images.character_rat,
-        unlock_message: '', // shoot 13 white orbs in a row
-        unlocked: true,
+        unlock_message: '1313 ORBS SHOT',
+        unlocked: getRecord('total_orbs') >= 1313,
         zodiac: function (data) {
           for (var ii = 0; ii < 8; ii++) {
             data.state.player.next[ii] = 1;
@@ -202,8 +203,8 @@ var scene_character_select = (function () {
         description: 'CLEAR RIGHT SIDE',
         name: 'ROOSTER',
         image: kz.resources.images.character_rooster,
-        unlock_message: '',
-        unlocked: true,
+        unlock_message: 'SURVIVE 13 MINUTES',
+        unlocked: getRecord('max_time') >= 13*60,
         zodiac: function (data) {
           var board = data.state.board;
           var pieces = [];
@@ -221,9 +222,8 @@ var scene_character_select = (function () {
         description: 'CLEAR TOP ROW',
         name: 'SHEEP',
         image: kz.resources.images.character_sheep,
-        unlock_message: '', // achieve a high score of 13 or more
-        unlocked: parseInt(localStorage.getItem('highscore')) >= 13,
-        //TODO
+        unlock_message: 'SCORE 13',
+        unlocked: getRecord('max_score') >= 13,
         zodiac: function (data) {
           var state = data.state;
           var config = data.config;
@@ -241,10 +241,10 @@ var scene_character_select = (function () {
       },
       {
         description: 'NEXT ALL BLACK',
-        name: 'SNAKE', // shoot 13 black orbs in a row
+        name: 'SNAKE',
         image: kz.resources.images.character_snake,
-        unlock_message: '',
-        unlocked: true, // survive for 13 minutes in a single game
+        unlock_message: 'PLAY 13 GAMES',
+        unlocked: getRecord('play_count') >= 13,
         zodiac: function (data) {
           for (var ii = 0; ii < 8; ii++) {
             data.state.player.next[ii] = 2;
@@ -253,10 +253,10 @@ var scene_character_select = (function () {
       },
       {
         description: 'SCORE +LEVEL/3',
-        name: 'TIGER', // clear 1313 rows in total
+        name: 'TIGER', 
         image: kz.resources.images.character_tiger,
-        unlock_message: '',
-        unlocked: true,
+        unlock_message: '169 ROWS CLEARED',
+        unlocked: getRecord('total_rows') >= 169,
         zodiac: function (data) {
           data.incrementScore(Math.floor(data.state.level/3));
         }
@@ -323,8 +323,10 @@ var scene_character_select = (function () {
         360
       );
     } else {
+      kz.context.font = '12px font';
+      kz.context.fillStyle = '#50605b';
       kz.context.fillText(
-        'LOCKED',
+        characters[state.selected].unlock_message,
         kz.canvas.width - 10,
         360
       );
