@@ -6,7 +6,7 @@ var scene_game = (function () {
     board_height: 17,
     grid_size: 20,
     next_length: 8,
-    next_row_interval: 10000
+    next_row_interval: 20000
   };
   var board_canvas = document.createElement('canvas');
   var info_canvas = document.createElement('canvas');
@@ -191,6 +191,20 @@ var scene_game = (function () {
 
     // update score
     incrementScore(1);
+    state.rows_cleared += 1;
+    if (!localStorage.getItem('highrows')
+        || parseInt(localStorage.getItem('highrows')) < state.rows_cleared) {
+      localStorage.setItem('highrows', ''+state.rows_cleared)
+    }
+    if (state.rows_cleared % 1 == 0) {
+      state.level += 1;
+      if (!localStorage.getItem('highlevel')
+          || parseInt(localStorage.getItem('highlevel')) < state.level) {
+        localStorage.setItem('highlevel', ''+state.level)
+      }
+      state.next_row_interval = Math.max(3000, state.next_row_interval - 750);
+      console.log(state.next_row_interval);
+    }
 
     // capture row pieces before we update board so we can animate them
     var row_pieces = [];
@@ -418,6 +432,7 @@ var scene_game = (function () {
       can_restart: false,
       score: 0,
       level: 1,
+      rows_cleared: 0,
       next_row_interval: config.next_row_interval,
       next_row_time: 0,
       next_row_time_diff: 0,
