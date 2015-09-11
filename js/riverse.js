@@ -1423,17 +1423,16 @@ var records = [
 
 function incrementRecord(name, value) {
   localStorage.setItem(
-    name, 
+    name,
     parseInt(localStorage.getItem(name), 10) + value);
 }
 
 function maxRecord(name, value) {
   localStorage.setItem(
-    name, 
+    name,
     Math.max(parseInt(localStorage.getItem(name), 10), value));
 }
 
 function getRecord(name) {
   return parseInt(localStorage.getItem(name),10);
 }
-

@@ -1,6 +1,3 @@
-Features (decreasing order of priority):
--Add records menu option
-
 Bug fixes:
 -Test across multiple browsers and verify that there are no console errors.
 

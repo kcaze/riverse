@@ -328,19 +328,32 @@ kz.initialize = function (canvas_id) {
           kztype: 'keypress',
           which: kz.KEYS.Z
         });
-      } else if (Math.abs(start_y - end_y) < 40
-                 && start_x - end_x > 20) {
+      } else if (Math.abs(start_y - end_y) < 60
+                 && start_x - end_x > 60) {
         kz.events.push({
           kztype: 'keypress',
           which: kz.KEYS.LEFT
         });
-      } else if (Math.abs(start_y - end_y) < 40
-                 && end_x - start_x > 20) {
+      } else if (Math.abs(start_y - end_y) < 60
+                 && end_x - start_x > 60) {
         kz.events.push({
           kztype: 'keypress',
           which: kz.KEYS.RIGHT
         });
+      } else if (Math.abs(start_x - end_x) < 60
+                 && end_y - start_y > 60) {
+        kz.events.push({
+          kztype: 'keypress',
+          which: kz.KEYS.DOWN
+        });
+      } else if (Math.abs(start_x - end_x) < 60
+                 && start_y - end_y > 60) {
+        kz.events.push({
+          kztype: 'keypress',
+          which: kz.KEYS.UP
+        });
       }
+
 
       delete kz.TOUCHES[id];
     }
@@ -372,15 +385,17 @@ kz.run = function (scene) {
   tickID = window.requestAnimationFrame(kz.tick);
 };
 
-kz.performance = Object.create(performance);
-kz.performance.pauseTime = 0;
-kz.performance.now = function () {
-  if (kz.paused) {
-      return kz.pauseNow;
-  } else {
-    return performance.now() - kz.performance.pauseTime;
+kz._performance = performance ? performance : Date;
+kz.performance = {
+  pauseTime: 0,
+  now: function () {
+    if (kz.paused) {
+        return kz.pauseNow;
+    } else {
+      return kz._performance.now() - kz.performance.pauseTime;
+    }
   }
-}
+};
 kz.paused = false;
 kz.pauseTime = 0;
 kz.pause = function () {
