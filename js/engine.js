@@ -1,8 +1,3 @@
-/**
- * A bunch of ios hacks
- */
- var performance = window.performance ? window.performance : window.Date;
- var AudioContext = window.AudioContext ? window.AudioContext : window.webkitAudioContext;
 
 var kz = {};
 
@@ -295,13 +290,6 @@ kz.initialize = function (canvas_id) {
 
   // touch events
   document.addEventListener('touchstart', function(event) {
-    /* EXTREMELY DUMB HACK TO GET AUDIO WORKING ON IOS */
-  	var buffer = myContext.createBuffer(1, 1, 22050);
-  	var source = myContext.createBufferSource();
-  	source.buffer = buffer;
-  	source.connect(myContext.destination);
-  	source.noteOn(0);
-
     event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
