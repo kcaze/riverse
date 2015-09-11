@@ -55,8 +55,8 @@ kz.loadImages = function (queue) {
                 });
 };
 
+kz.audio_context = new AudioContext();
 kz.loadSounds = function (queue) {
-  kz.audio_context = new AudioContext();
   var sounds = {};
   var promises = [];
 
@@ -329,25 +329,25 @@ kz.initialize = function (canvas_id) {
           kztype: 'keypress',
           which: kz.KEYS.Z
         });
-      } else if (Math.abs(start_y - end_y) < 60
+      } else if (Math.abs(start_y - end_y) < 20
                  && start_x - end_x > 60) {
         kz.events.push({
           kztype: 'keypress',
           which: kz.KEYS.LEFT
         });
-      } else if (Math.abs(start_y - end_y) < 60
+      } else if (Math.abs(start_y - end_y) < 20
                  && end_x - start_x > 60) {
         kz.events.push({
           kztype: 'keypress',
           which: kz.KEYS.RIGHT
         });
-      } else if (Math.abs(start_x - end_x) < 60
+      } else if (Math.abs(start_x - end_x) < 20
                  && end_y - start_y > 60) {
         kz.events.push({
           kztype: 'keypress',
           which: kz.KEYS.DOWN
         });
-      } else if (Math.abs(start_x - end_x) < 60
+      } else if (Math.abs(start_x - end_x) < 20
                  && start_y - end_y > 60) {
         kz.events.push({
           kztype: 'keypress',

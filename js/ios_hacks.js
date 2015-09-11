@@ -22,11 +22,10 @@ if (!String.prototype.repeat) {
 }
 document.addEventListener('touchstart', function(event) {
   console.log("Ran ios audio hack");
-  var dummy_context = new AudioContext();
   /* EXTREMELY DUMB HACK TO GET AUDIO WORKING ON IOS */
-	var buffer = dummy_context.createBuffer(1, 1, 22050);
-	var source = dummy_context.createBufferSource();
+	var buffer = kz.audio_context.createBuffer(1, 1, 22050);
+	var source = kz.audio_context.createBufferSource();
 	source.buffer = buffer;
-	source.connect(dummy_context.destination);
+	source.connect(kz.audio_context.destination);
 	source.noteOn(0);
 }, false);
