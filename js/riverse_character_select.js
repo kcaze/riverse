@@ -170,7 +170,7 @@ var scene_character_select = (function () {
         description: 'ENDS TURN BLACK',
         name: 'OX',
         image: kz.resources.images['character_ox'],
-        unlock_message: '13 BLACK ORBS IN A ROW', 
+        unlock_message: '13 BLACK ORBS IN A ROW',
         unlocked: getRecord('max_black_orbs') >= 13,
         zodiac: function (data) {
           var state = data.state;
@@ -253,7 +253,7 @@ var scene_character_select = (function () {
       },
       {
         description: 'SCORE +LEVEL/3',
-        name: 'TIGER', 
+        name: 'TIGER',
         image: kz.resources.images['character_tiger'],
         unlock_message: '169 ROWS CLEARED',
         unlocked: getRecord('total_rows') >= 169,
@@ -349,9 +349,9 @@ var scene_character_select = (function () {
           state.selected = Math.max(0, state.selected-2);
         } else if (kz.events[ii].which == kz.KEYS.Z) {
           if (state.selected == 13) {
-            state.selected = Math.floor(Math.random() * 14);
+            state.selected = Math.floor(Math.random() * 13);
             while (!characters[state.selected].unlocked) {
-              state.selected = Math.floor(Math.random() * 14);
+              state.selected = Math.floor(Math.random() * 13);
             }
           }
           if (characters[state.selected].unlocked) {
