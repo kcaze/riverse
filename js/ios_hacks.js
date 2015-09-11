@@ -3,6 +3,23 @@
  */
 var performance = window.performance ? window.performance : window.Date;
 var AudioContext = window.AudioContext ? window.AudioContext : window.webkitAudioContext;
+if (!String.prototype.repeat) {
+  String.prototype.repeat = function(count) {
+    var str = '' + this;
+    var rpt = '';
+    for (;;) {
+      if ((count & 1) == 1) {
+        rpt += str;
+      }
+      count >>>= 1;
+      if (count == 0) {
+        break;
+      }
+      str += str;
+    }
+    return rpt;
+  }
+}
 document.addEventListener('touchstart', function(event) {
   console.log("Ran ios audio hack");
   var dummy_context = new AudioContext();
@@ -10,6 +27,6 @@ document.addEventListener('touchstart', function(event) {
 	var buffer = dummy_context.createBuffer(1, 1, 22050);
 	var source = dummy_context.createBufferSource();
 	source.buffer = buffer;
-	source.connect(audio_context.destination);
+	source.connect(dummy_context.destination);
 	source.noteOn(0);
 }, false);
