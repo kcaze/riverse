@@ -295,8 +295,8 @@ kz.initialize = function (canvas_id) {
       var touch = event.touches[ii];
       if (kz.TOUCHES[touch.identifier]) continue;
       kz.TOUCHES[touch.identifier] = {
-        initial: touch,
-        current: touch
+        initial: {x: touch.screenX, y: touch.screenY},
+        current: {x: touch.screenX, y: touch.screenY}
       };
     }
     console.log('touchstart:', event, JSON.stringify(kz.TOUCHES));
@@ -307,7 +307,7 @@ kz.initialize = function (canvas_id) {
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
       if (!kz.TOUCHES[touch.identifier]) continue;
-      kz.TOUCHES[touch.identifier].current = touch;
+      kz.TOUCHES[touch.identifier].current = {x: touch.screenX, y:touch.screenY};
     }
     console.log('touchmove:', event, JSON.stringify(kz.TOUCHES));
   });
@@ -320,10 +320,10 @@ kz.initialize = function (canvas_id) {
         if (event.touches[ii].identifier == id) found = true;
       }
       if (found) continue;
-      var start_x = kz.TOUCHES[id].initial.screenX;
-      var start_y = kz.TOUCHES[id].initial.screenY;
-      var end_x = kz.TOUCHES[id].current.screenX;
-      var end_y = kz.TOUCHES[id].current.screenY;
+      var start_x = kz.TOUCHES[id].initial.x;
+      var start_y = kz.TOUCHES[id].initial.y;
+      var end_x = kz.TOUCHES[id].current.x;
+      var end_y = kz.TOUCHES[id].current.y;
       if (Math.abs(start_x - end_x) + Math.abs(start_y - end_y) < 20) {
         kz.events.push({
           kztype: 'keypress',
