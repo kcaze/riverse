@@ -112,7 +112,7 @@ var scene_game = (function () {
 
   /*^ Messy section of game logic */
   function lose() {
-    bgm.stop();
+    bgm.stop(0);
     state.alive = false;
     console.log('Lost :(');
 
@@ -208,8 +208,8 @@ var scene_game = (function () {
     // activate zodiac
     if (!activateAbility) return;
     state.zodiacs++;
-    incrementRecord('total_zodiac', 1); 
-    maxRecord('max_zodiac', state.zodiacs); 
+    incrementRecord('total_zodiac', 1);
+    maxRecord('max_zodiac', state.zodiacs);
     character.zodiac({
       state: state,
       animateClearPieces: animateClearPieces,
@@ -390,7 +390,7 @@ var scene_game = (function () {
   function initialize() {
     incrementRecord('play_count', 1);
     bgm = kz.resources.sounds['bgm_game'].play(true);
-    bgm.stop();
+    bgm.stop(0);
   // initialize graphics
     graphics = {
       background_pattern: kz.context.createPattern(
@@ -965,7 +965,7 @@ var scene_game = (function () {
     }
   };
   scene_game.exit = function () {
-    bgm.stop();
+    bgm.stop(0);
   }
   return scene_game
 })();

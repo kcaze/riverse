@@ -290,7 +290,7 @@ kz.initialize = function (canvas_id) {
 
   // touch events
   document.addEventListener('touchstart', function(event) {
-    event.preventDefault();
+    //event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
       if (kz.TOUCHES[touch.identifier]) continue;
