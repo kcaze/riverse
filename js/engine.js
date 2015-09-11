@@ -1,3 +1,9 @@
+/**
+ * A bunch of ios hacks
+ */
+ var performance = window.performance ? window.performance : window.Date;
+ var Audiocontext = window.AudioContext ? window.AudioContext : window.webkitAudioContext;
+
 var kz = {};
 
 /*^ Functions for loading resources */
@@ -289,6 +295,13 @@ kz.initialize = function (canvas_id) {
 
   // touch events
   document.addEventListener('touchstart', function(event) {
+    /* EXTREMELY DUMB HACK TO GET AUDIO WORKING ON IOS */
+  	var buffer = myContext.createBuffer(1, 1, 22050);
+  	var source = myContext.createBufferSource();
+  	source.buffer = buffer;
+  	source.connect(myContext.destination);
+  	source.noteOn(0);
+
     event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
@@ -385,14 +398,13 @@ kz.run = function (scene) {
   tickID = window.requestAnimationFrame(kz.tick);
 };
 
-kz._performance = window.performance ? window.performance : Date;
 kz.performance = {
   pauseTime: 0,
   now: function () {
     if (kz.paused) {
         return kz.pauseNow;
     } else {
-      return kz._performance.now() - kz.performance.pauseTime;
+      return performance.now() - kz.performance.pauseTime;
     }
   }
 };
