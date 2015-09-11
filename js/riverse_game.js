@@ -1,3 +1,4 @@
+// three '/' represents comments for minification purposes
 var previous_time;
 
 var scene_game = (function () {
@@ -69,6 +70,7 @@ var scene_game = (function () {
     }).then(kz.resume);
   }
 
+  // TODO: I think this is unnecessary and can be killed
   function blankPromise() {
     return new Promise(function (resolve) {
       resolve();
@@ -80,7 +82,6 @@ var scene_game = (function () {
     return piece_type_array[Math.floor(Math.random()*length)];
   }
 
-  // TODO: This should be converted to a constructor
   function makePiece(x, y, piece_type) {
     return new kz.Entity({
       x: x,
@@ -95,9 +96,9 @@ var scene_game = (function () {
 
   function pieceTypeImage(piece_type) {
     return [
-      kz.resources.images.piece_red,
-      kz.resources.images.piece_blue,
-      kz.resources.images.piece_zodiac
+      kz.resources.images['piece_red'],
+      kz.resources.images['piece_blue'],
+      kz.resources.images['piece_zodiac']
     ][piece_type-1];
   }
 
@@ -221,7 +222,7 @@ var scene_game = (function () {
   }
 
   function animateClearPieces(pieces) {
-    kz.resources.sounds.sfx_clear.play();
+    kz.resources.sounds['sfx_clear'].play();
     // animate fade away
     // ensure that all row piece animations have finished
     var promise  = [];
@@ -333,7 +334,7 @@ var scene_game = (function () {
   }
 
   function addRow() {
-    kz.resources.sounds.sfx_drop.play();
+    kz.resources.sounds['sfx_drop'].play();
     var new_row = [];
     for (var ii = 0; ii < config.board_width; ii++) {
       var piece_type = randomPieceType(normal_piece_types);
@@ -370,7 +371,6 @@ var scene_game = (function () {
     }
 
     // animate pieces
-    //kz.resources.sounds.sfx_drop.play();
     state.board.forEach(function (row) {
       row.forEach(function (square) {
         var piece = square.piece;
@@ -389,12 +389,12 @@ var scene_game = (function () {
   /*$ Messy section of game logic */
 
   function initialize() {
-    bgm = kz.resources.sounds.bgm_game.play(true);
+    bgm = kz.resources.sounds['bgm_game'].play(true);
     bgm.stop();
   // initialize graphics
     graphics = {
       background_pattern: kz.context.createPattern(
-        kz.resources.images.background,
+        kz.resources.images['background'],
         'repeat'),
       pause_alpha: 0,
       gameover_background_alpha: 0,
@@ -467,10 +467,10 @@ var scene_game = (function () {
     // initialize player
     state.player = new kz.Entity({
       frames: [
-        kz.resources.images.shooter_0,
-        kz.resources.images.shooter_1,
-        kz.resources.images.shooter_2,
-        kz.resources.images.shooter_3
+        kz.resources.images['shooter_0'],
+        kz.resources.images['shooter_1'],
+        kz.resources.images['shooter_2'],
+        kz.resources.images['shooter_3']
       ],
       frame_lengths: [
         500,
@@ -613,7 +613,7 @@ var scene_game = (function () {
         reverse(this.x, target_y);
 
         piece.actions_promise = piece.actions_promise.then(function () {
-          kz.resources.sounds.sfx_shoot.play();
+          kz.resources.sounds['sfx_shoot'].play();
           return kz.tween({
             object: piece,
             property: 'y',
@@ -631,7 +631,6 @@ var scene_game = (function () {
     }
   }
 
-  //TODO: should rewrite things to use context.save and context.restore
   function drawAlive(now) {
     // clear contexts
     kz.context.clearAll();
@@ -674,9 +673,6 @@ var scene_game = (function () {
     board_context.stroke();
     board_context.restore();
       // draw pieces
-    // TODO: This is extremely hacky and necessary so that we can draw
-    // the pieces fading away after a row clear. Should rewrite to make
-    // this better
     for (var id in kz.entities) {
       var piece = kz.entities[id];
       // only piece entities have a type field
@@ -929,6 +925,7 @@ var scene_game = (function () {
           resume();
           if (pause_choice == 0) {
           } else if (pause_choice == 1) {
+            // TODO: this is dangerous. need to add an exiting variable in state.
             kz.tween({
               object: graphics,
               property: 'fadeAlpha',

@@ -1,3 +1,5 @@
+// NOTE: This is an altered version of Sonant-X by Herman Chau for 
+// use in js13kgames.
 //
 // Sonant-X
 //
@@ -138,6 +140,9 @@ function applyDelay(chnBuf, waveSamples, instr, rowLen, callBack) {
     setTimeout(iterate, 0);
 }
 
+/**
+ * @constructor
+ */
 sonantx.AudioGenerator = function(mixBuf) {
     this.mixBuf = mixBuf;
     this.waveSize = mixBuf.length / WAVE_CHAN / 2;
@@ -215,6 +220,9 @@ sonantx.AudioGenerator.prototype.getAudioBuffer = function(callBack) {
     setTimeout(iterate, 0);
 };
 
+/**
+ * @constructor
+ */
 sonantx.SoundGenerator = function(instr, rowLen) {
     this.instr = instr;
     this.rowLen = rowLen || 5605;
@@ -334,6 +342,9 @@ sonantx.SoundGenerator.prototype.createAudioBuffer = function(n, callBack) {
     });
 };
 
+/**
+ * @constructor
+ */
 sonantx.MusicGenerator = function(song) {
     this.song = song;
     // Wave data configuration

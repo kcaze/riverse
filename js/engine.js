@@ -176,12 +176,15 @@ kz.processEvents = function () {
 
 /*^ The Entity object */
 kz.__entity_id__ = 0;
+/**
+ * @constructor
+ */
 kz.Entity = function (properties) {
   for (name in properties) {
     if (!properties.hasOwnProperty(name)) continue;
     this[name] = properties[name];
   }
-  if (typeof this.x !== 'number') {
+  /*if (typeof this.x !== 'number') {
     throw 'Entity.x must be a number';
   }
   if (typeof this.y !== 'number') {
@@ -189,7 +192,7 @@ kz.Entity = function (properties) {
   }
   if (typeof this.listen !== 'function') {
     throw 'Entity.listen must be a function';
-  }
+  }*/
   this.__entity_id__ = kz.__entity_id__;
   kz.entities[this.__entity_id__] = this;
   kz.__entity_id__++;
@@ -205,25 +208,28 @@ kz.Entity.prototype.destroy = function () {
 /*$ The Entity object */
 
 /*^ The Scene object */
-kz.Scene = function (functions) {
-  functions = (typeof functions !== 'undefined') ? functions : {};
+/**
+ * @constructor
+ */
+kz.Scene = function () {};
+/*kz.Scene = function (functions) {
   if (typeof functions.initialize === 'function') {
     this.initialize = functions.initialize;
-    throw 'Scene.initialize must be function';
+    //throw 'Scene.initialize must be function';
   }
   if (typeof functions.preUpdate === 'function') {
     this.preUpdate = functions.preUpdate;
-    throw 'Scene.preUpdate must be function';
+    //throw 'Scene.preUpdate must be function';
   }
   if (typeof functions.postUpdate === 'function') {
     this.postUpdate = functions.postUpdate;
-    throw 'Scene.postUpdate must be function';
+    //throw 'Scene.postUpdate must be function';
   }
   if (typeof functions.draw === 'function') {
     this.draw = functions.draw;
-    throw 'Scene.draw must be function';
+    //throw 'Scene.draw must be function';
   }
-};
+};*/
 
 kz.Scene.prototype.initialize = function () {
 };
@@ -241,14 +247,14 @@ kz.Scene.prototype.exit = function () {
 };
 
 // duck-typing check
-kz.isSceneLike = function(object) {
+/*kz.isSceneLike = function(object) {
   return (object !== undefined &&
     object !== null &&
     typeof object.initialize === 'function' &&
     typeof object.preUpdate === 'function' &&
     typeof object.postUpdate === 'function' &&
     typeof object.draw === 'function');
-};
+};*/
 /*$ The Scene object */
 
 /*^ Essential functions such as initialize, tick, and run */
@@ -358,7 +364,7 @@ kz.run = function (scene) {
   if (kz.scene) {
     kz.scene.exit();
   }
-  if (!kz.isSceneLike(scene)) throw 'No scene attached!';
+  //if (!kz.isSceneLike(scene)) throw 'No scene attached!';
   kz.entities = {};
   kz.scene = scene;
   kz.scene.initialize();
