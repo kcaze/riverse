@@ -2,7 +2,7 @@
  * A bunch of ios hacks
  */
  var performance = window.performance ? window.performance : window.Date;
- var Audiocontext = window.AudioContext ? window.AudioContext : window.webkitAudioContext;
+ var AudioContext = window.AudioContext ? window.AudioContext : window.webkitAudioContext;
 
 var kz = {};
 
