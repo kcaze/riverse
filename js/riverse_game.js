@@ -393,7 +393,6 @@ var scene_game = (function () {
     bgm.mystop = function () {
       if (!bgm.stopped) {bgm.stop(0); bgm.stopped = 1;}
     };
-    bgm.mystop();
   // initialize graphics
     graphics = {
       background_pattern: kz.context.createPattern(
