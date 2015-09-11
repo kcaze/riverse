@@ -16,86 +16,28 @@ function loadSonant(data, resolve) {
 
 var resources = {
   images: {
-    background: {
-      data: 'images/background.gif'
-    },
-    character_boar: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:0, w:50, h:50}
-    },
-    character_cat: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:0, w:50, h:50}
-    },
-    character_dog: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:49, w:50, h:50}
-    },
-    character_dragon: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:49, w:50, h:50}
-    },
-    character_hare: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:98, w:50, h:50}
-    },
-    character_horse: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:98, w:50, h:50}
-    },
-    character_monkey: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:147, w:50, h:50}
-    },
-    character_ox: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:147, w:50, h:50}
-    },
-    character_rat: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:196, w:50, h:50}
-    },
-    character_rooster: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:196, w:50, h:50}
-    },
-    character_sheep: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:245, w:50, h:50}
-    },
-    character_snake: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:245, w:50, h:50}
-    },
-    character_tiger: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:294, w:50, h:50}
-    },
-    character_random: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:294, w:50, h:50}
-    },
-    piece_blue: {
-      data: 'images/piece_black.gif'
-    },
-    piece_red: {
-      data: 'images/piece_white.gif'
-    },
-    piece_zodiac: {
-      data: 'images/piece_zodiac.gif'
-    },
-    shooter_0: {
-      data: 'images/shooter0.gif'
-    },
-    shooter_1: {
-      data: 'images/shooter1.gif'
-    },
-    shooter_2: {
-      data: 'images/shooter2.gif'
-    },
-    shooter_3: {
-      data: 'images/shooter1.gif'
-    }
+    background: {x:0,y:0,w:0,h:0},
+    character_boar: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_cat: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_dog: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_dragon: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_hare: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_horse: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_monkey: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_ox: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_rat: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_rooster: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_sheep: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_snake: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_tiger: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    character_random: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    piece_blue: {x:0,y:0,w:0,h:0},
+    piece_red: {x:0,y:0,w:0,h:0},
+    piece_zodiac: {x:0,y:0,w:0,h:0},
+    shooter_0: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    shooter_1: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    shooter_2: {x:0,y:0,w:0,h:0,W:0,H:0,f:1},
+    shooter_3: {x:0,y:0,w:0,h:0,W:0,H:0,f:1}
   },
   sounds: {
     'sfx_shoot': {

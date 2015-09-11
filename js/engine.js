@@ -22,29 +22,22 @@ kz.loadImages = function (queue) {
 
   for (var key in queue) {
     promises.push(new Promise(function(resolve) {
-      var name = key;
+      var c = queue[key];
       var image = new Image();
       image.addEventListener('load', function() {
         var canvas = document.createElement('canvas');
         var context = canvas.getContext('2d');
-        var crop;
-        if (!queue[name].crop) {
-          crop = {
-            x: 0,
-            y: 0,
-            w: image.width,
-            h: image.height
-          };
+        canvas.width = c.w
+        canvas.height = c.h;
+        if (c.f) {
+          context.drawImage(image, c.x, c.y, c.w, c.h, 0, 0, c.w, c.h);
         } else {
-          crop = queue[name].crop;
+          context.drawImage(image, c.x, c.y, c.W, c.H, (c.w-c.W)/2, (c.h-c.H)/2, c.W, c.H);
         }
-        canvas.width = crop.w;
-        canvas.height = crop.h;
-        context.drawImage(image, crop.x, crop.y, crop.w, crop.h, 0, 0, crop.w, crop.h);
         images[name] = canvas;
         resolve();
       });
-      image.src = queue[key].data;
+      image.src = 's.png';
     }));
   }
 
