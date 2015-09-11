@@ -114,7 +114,7 @@ var scene_game = (function () {
   function lose() {
     bgm.stop();
     state.alive = false;
-    incrementRecord('playcount', 1);
+    incrementRecord('play_count', 1);
     console.log('Lost :(');
 
     // copy over game picture at losing time
@@ -210,7 +210,7 @@ var scene_game = (function () {
     if (!activateAbility) return;
     state.zodiacs++;
     incrementRecord('total_zodiac', 1); 
-    maxRecord('total_zodiac', state.zodiacs); 
+    maxRecord('max_zodiac', state.zodiacs); 
     character.zodiac({
       state: state,
       animateClearPieces: animateClearPieces,
@@ -809,7 +809,7 @@ var scene_game = (function () {
   }
 
   function preUpdateAlive(now) {
-    maxRecord('max_time', Math.floor(now - state.begin));
+    maxRecord('max_time', Math.floor((now - state.begin)/1000));
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress' &&
           kz.events[ii].which == kz.KEYS.ESCAPE) {
