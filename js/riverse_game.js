@@ -112,7 +112,7 @@ var scene_game = (function () {
 
   /*^ Messy section of game logic */
   function lose() {
-    bgm.stop(0);
+    bgm.mystop();
     state.alive = false;
     console.log('Lost :(');
 
@@ -390,7 +390,10 @@ var scene_game = (function () {
   function initialize() {
     incrementRecord('play_count', 1);
     bgm = kz.resources.sounds['bgm_game'].play(true);
-    bgm.stop(0);
+    bgm.mystop = function () {
+      if (!bgm.stopped) {bgm.stop(0); bgm.stopped = 1;}
+    };
+    bgm.mystop();
   // initialize graphics
     graphics = {
       background_pattern: kz.context.createPattern(
@@ -965,7 +968,7 @@ var scene_game = (function () {
     }
   };
   scene_game.exit = function () {
-    bgm.stop(0);
+    bgm.mystop();
   }
   return scene_game
 })();
