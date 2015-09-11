@@ -761,17 +761,17 @@ var scene_game = (function () {
       // draw text
     info_context.textAlign = 'center';
     info_context.textBaseline = 'top';
-    info_context.font = '24px font';
+    info_context.font = '24px f';
     info_context.fillStyle = 'white';
     info_context.fillText('NEXT', 48, 120);
     info_context.fillText('SCORE', 48, 211);
     info_context.fillText('LEVEL', 48, 272);
     info_context.fillText('TIME', 48, 333);
-    info_context.font = '20px font';
+    info_context.font = '20px f';
     info_context.textBaseline = 'bottom';
     info_context.fillText(character.name, 48, 101);
 
-    info_context.font = '20px font';
+    info_context.font = '20px f';
     info_context.fillText('' + state.level, 48, 316);
     var score_string = '' + state.score;
         // pad with zeroes
@@ -855,7 +855,7 @@ var scene_game = (function () {
     kz.context.save();
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '24px font';
+    kz.context.font = '24px f';
     kz.context.fillStyle = pause_choice == 0 ? '#fff' : '#666';
     kz.context.fillText('RESUME', kz.canvas.width/2, kz.canvas.height/2-48);
     kz.context.fillStyle = pause_choice == 1 ? '#fff' : '#666';
@@ -887,7 +887,7 @@ var scene_game = (function () {
     kz.context.globalAlpha = graphics.gameover_text_alpha;
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '24px font';
+    kz.context.font = '24px f';
     kz.context.fillStyle = '#fff';
     kz.context.fillText(
       'GAME OVER',

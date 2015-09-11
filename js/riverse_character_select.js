@@ -305,7 +305,7 @@ var scene_character_select = (function () {
     }
     kz.context.textAlign = 'right';
     kz.context.textBaseline = 'center';
-    kz.context.font = '24px font';
+    kz.context.font = '24px f';
     kz.context.fillStyle = 'white';
     kz.context.fillText(
       characters[state.selected].name,
@@ -314,7 +314,7 @@ var scene_character_select = (function () {
     );
     kz.context.textAlign = 'right';
     kz.context.textBaseline = 'center';
-    kz.context.font = '16px font';
+    kz.context.font = '16px f';
     kz.context.fillStyle = 'white';
     if (characters[state.selected].unlocked) {
       kz.context.fillText(
@@ -323,7 +323,7 @@ var scene_character_select = (function () {
         360
       );
     } else {
-      kz.context.font = '12px font';
+      kz.context.font = '12px f';
       kz.context.fillStyle = '#50605b';
       kz.context.fillText(
         characters[state.selected].unlock_message,

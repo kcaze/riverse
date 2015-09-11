@@ -21,7 +21,7 @@ scene_loading.draw = function (now) {
   kz.context.save();
   kz.context.textAlign = 'center';
   kz.context.textBaseline = 'center';
-  kz.context.font = '18px font';
+  kz.context.font = '18px f';
   kz.context.fillStyle = 'rgb(142, 212, 165)';
   kz.context.lineWidth = 2;
   kz.context.fillText(

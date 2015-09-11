@@ -33,14 +33,14 @@ var scene_records = (function () {
 
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '32px font';
+    kz.context.font = '32px f';
     kz.context.fillStyle = '#fff';
     kz.context.fillText(
       'RECORDS',
       kz.canvas.width / 2,
       48
     );
-    kz.context.font = '12px font';
+    kz.context.font = '12px f';
     for (var ii = 0; ii < records.length; ii++) {
       kz.context.fillStyle = '#fff';
       kz.context.textAlign = 'left';

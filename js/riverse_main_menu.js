@@ -38,7 +38,7 @@ var scene_main_menu = (function () {
 
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '48px font';
+    kz.context.font = '48px f';
     ///kz.context.fillStyle = 'rgb(142, 212, 165)';
     kz.context.fillStyle = '#8ed4a5';
     kz.context.fillText(
@@ -52,7 +52,7 @@ var scene_main_menu = (function () {
       kz.context.globalAlpha = graphics.text_alpha;
       ///kz.context.textAlign = 'center';
       ///kz.context.textBaseline = 'center';
-      kz.context.font = '24px font';
+      kz.context.font = '24px f';
       kz.context.fillStyle = 'white';
       kz.context.fillText(
         'PRESS   Z',
@@ -64,7 +64,7 @@ var scene_main_menu = (function () {
     if (graphics.state == 1) {
       kz.context.textAlign = 'center';
       kz.context.textBaseline = 'center';
-      kz.context.font = '24px font';
+      kz.context.font = '24px f';
       kz.context.fillStyle = graphics.choice == 0 ? '#fff' : '#666';
       kz.context.fillText('GAME START', kz.canvas.width/2, kz.canvas.height/2+40);
       kz.context.fillStyle = graphics.choice == 1 ? '#fff' : '#666';
@@ -76,7 +76,7 @@ var scene_main_menu = (function () {
     kz.context.globalAlpha = graphics.text_alpha;
     ///kz.context.textAlign = 'center';
     ///kz.context.textBaseline = 'center';
-    kz.context.font = '10px font';
+    kz.context.font = '10px f';
     kz.context.fillStyle = '#50605b';
     kz.context.lineWidth = 2;
     kz.context.fillText(
