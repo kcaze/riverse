@@ -23,18 +23,18 @@ kz.loadImages = function (queue) {
   for (var key in queue) {
     promises.push(new Promise(function(resolve) {
       var c = queue[key];
+      var canvas = document.createElement('canvas');
+      images[key] = canvas;
       var image = new Image();
       image.addEventListener('load', function() {
-        var canvas = document.createElement('canvas');
         var context = canvas.getContext('2d');
         canvas.width = c.w
         canvas.height = c.h;
         if (c.f) {
-          context.drawImage(image, c.x, c.y, c.w, c.h, 0, 0, c.w, c.h);
-        } else {
           context.drawImage(image, c.x, c.y, c.W, c.H, (c.w-c.W)/2, (c.h-c.H)/2, c.W, c.H);
+        } else {
+          context.drawImage(image, c.x, c.y, c.w, c.h, 0, 0, c.w, c.h);
         }
-        images[name] = canvas;
         resolve();
       });
       image.src = 's.png';

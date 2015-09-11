@@ -635,7 +635,6 @@ var scene_game = (function () {
 
   function drawAlive(now) {
     // clear contexts
-    kz.context.clearAll();
     board_context.clearRect(
       0,
       0,
@@ -798,6 +797,8 @@ var scene_game = (function () {
     );
 
     // main context drawing
+    kz.context.fillStyle = '#50605b';
+    kz.context.fillRect(0, 0, kz.canvas.width, kz.canvas.height);
     kz.context.fillStyle = graphics.background_pattern;
     kz.context.fillRect(0, 0, kz.canvas.width, kz.canvas.height);
     kz.context.drawImage(board_canvas, 10, 0);
