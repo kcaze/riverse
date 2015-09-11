@@ -6,14 +6,8 @@
 
 var audio_context = new AudioContext();
 function loadJSFXR(data, resolve) {
-  var request = new XMLHttpRequest();
-  request.open('GET', data, true);
-  request.responseType = 'arraybuffer';
-
-  request.onload = function() {
-    audio_context.decodeAudioData(request.response, resolve);
-  };
-  request.send();
+  var buff = base64ToArrayBuffer(data.substr(22));
+  audio_context.decodeAudioData(buff, resolve);
 }
 
 function loadSonant(data, resolve) {
