@@ -385,7 +385,7 @@ kz.run = function (scene) {
   tickID = window.requestAnimationFrame(kz.tick);
 };
 
-kz._performance = performance ? performance : Date;
+kz._performance = window.performance ? window.performance : Date;
 kz.performance = {
   pauseTime: 0,
   now: function () {
