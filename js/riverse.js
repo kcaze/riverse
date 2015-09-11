@@ -1399,24 +1399,24 @@ window.onload = function() {
  * 12. Total number of rows cleared ever (total_rows)
  * 13. Maximum time survived in one single game in seconds (max_time)
  */
+var records = [
+  {text: 'GAMES PLAYED', name:'play_count'},
+  {text: 'TOTAL TIME SPENT', name:'total_time'},
+  {text: 'LONGEST TIME SURVIVED', name: 'max_time'},
+  {text: 'HIGHEST SCORE OBTAINED', name:'max_score'},
+  {text: 'HIGHEST LEVEL REACHED', name:'max_level'},
+  {text: 'TOTAL ROWS CLEARED', name: 'total_rows'},
+  {text: 'MOST ROWS CLEARED IN ONE GAME', name: 'max_rows'},
+  {text: 'TOTAL ZODIAC CLEARS', name:'total_zodiac'},
+  {text: 'MOST ZODIACS CLEARS IN ONE GAME', name:'max_zodiac'},
+  {text: 'TOTAL ORBS SHOT', name:'total_orbs'},
+  {text: 'MAX CONSECUTIVE WHITE ORBS', name:'max_white_orbs'},
+  {text: 'MAX CONSECUTIVE BLACK ORBS', name:'max_black_orbs'},
+  {text: 'MAX CONSECUTIVE ZODIAC ORBS', name:'max_zodiac_orbs'}];
 (function() {
-  var records = [
-    'play_count', // done 
-    'total_time', // done
-    'max_score', // done
-    'max_level', // done
-    'total_zodiac', // done
-    'max_zodiac', // done
-    'total_orbs', // done
-    'max_white_orbs', // done
-    'max_black_orbs', // done
-    'max_zodiac_orbs', // done
-    'max_rows', // done
-    'total_rows', // done
-    'max_time']; // done
   records.forEach(function (record) {
-    if (!localStorage.getItem(record)) {
-      localStorage.setItem(record, '0');
+    if (!localStorage.getItem(record.name)) {
+      localStorage.setItem(record.name, '0');
     }
   });
 })();

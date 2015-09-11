@@ -5,11 +5,12 @@ var scene_main_menu = (function () {
 
   scene_main_menu.initialize = function () {
     graphics = {
-      press_space_visible: true,
-      blink: true,
+      press_space_visible: 1,
       text_alpha: 1,
       fadeAlpha: 1,
-      exiting: false
+      exiting: false,
+      choice: 0,
+      state: 0
     };
     kz.tween({
       object: graphics,
@@ -17,6 +18,9 @@ var scene_main_menu = (function () {
       value: 0,
       duration: 100
     });
+    graphics.blinkID = setInterval(function() {
+      graphics.press_space_visible ^= 1;
+    }, 400);
   }
 
   scene_main_menu.draw = function () {
@@ -43,7 +47,7 @@ var scene_main_menu = (function () {
       125
     );
 
-    if (graphics.press_space_visible) {
+    if (graphics.state == 0 && graphics.press_space_visible) {
       kz.context.save();
       kz.context.globalAlpha = graphics.text_alpha;
       ///kz.context.textAlign = 'center';
@@ -55,6 +59,16 @@ var scene_main_menu = (function () {
         kz.canvas.width / 2,
         250
       );
+      kz.context.restore();
+    }
+    if (graphics.state == 1) {
+      kz.context.textAlign = 'center';
+      kz.context.textBaseline = 'center';
+      kz.context.font = '24px font';
+      kz.context.fillStyle = graphics.choice == 0 ? '#fff' : '#666';
+      kz.context.fillText('GAME START', kz.canvas.width/2, kz.canvas.height/2+40);
+      kz.context.fillStyle = graphics.choice == 1 ? '#fff' : '#666';
+      kz.context.fillText('RECORDS', kz.canvas.width/2, kz.canvas.height/2+88);
       kz.context.restore();
     }
 
@@ -77,32 +91,39 @@ var scene_main_menu = (function () {
 
   scene_main_menu.preUpdate = function (now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
-      if (kz.events[ii].kztype == 'keypress' &&
-          kz.events[ii].which == kz.KEYS.Z &&
-          !graphics.exiting) {
-        kz.resources.sounds['sfx_select'].play();
-        graphics.exiting = true;
-        graphics.blink = false;
-        graphics.press_space_visible = false;
-        kz.tween({
-          object: graphics,
-          property: 'fadeAlpha',
-          value: 1,
-          duration: 100
-        }).then(function () {
-          kz.run(scene_character_select);
-        });
+      if (kz.events[ii].kztype == 'keypress') {
+        if (graphics.exiting) continue;
+        if (kz.events[ii].which == kz.KEYS.Z) {
+          if (!graphics.state) {
+            kz.resources.sounds['sfx_select'].play();
+            graphics.state = 1;
+          } else {
+            var s = graphics.choice ? scene_records : scene_character_select;
+            graphics.exiting = true;
+            kz.tween({
+              object: graphics,
+              property: 'fadeAlpha',
+              value: 1,
+              duration: 100
+            }).then(function () {
+              clearInterval(graphics.blinkID);
+              kz.run(s);
+            });
+          }
+        }
+      }
+      if (kz.events[ii].which == kz.KEYS.UP) {
+        if (graphics.state) {
+          graphics.choice = Math.max(0, graphics.choice-1);
+        }
+      }
+      if (kz.events[ii].which == kz.KEYS.DOWN) {
+        if (graphics.state) {
+          graphics.choice = Math.min(1, graphics.choice+1);
+        }
       }
     }
     kz.events = [];
-
-    if (graphics.blink) {
-      if (Math.floor(now/300)%4 < 2) {
-        graphics.press_space_visible = true;
-      } else {
-        graphics.press_space_visible = false;
-      }
-    }
   }
 
   return scene_main_menu;

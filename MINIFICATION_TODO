@@ -6,3 +6,5 @@
 6. Change tween to take in keys that are shorter (i.e. 'o' for 'object', 'p' for 'property')
 7. Combine state and graphics into one object.
 8. Constant propagation (esp. in riverse_game)
+9. Remove 'else' from 'else if' whenever possible
+10. Replace all true's and false's with 1's and 0's.

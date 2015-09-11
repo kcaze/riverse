@@ -33,13 +33,32 @@ var scene_records = (function () {
 
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '48px font';
-    kz.context.fillStyle = 'rgb(142, 212, 165)';
+    kz.context.font = '32px font';
+    kz.context.fillStyle = '#fff';
     kz.context.fillText(
       'RECORDS',
       kz.canvas.width / 2,
-      125
+      48
     );
+    kz.context.font = '12px font';
+    for (var ii = 0; ii < records.length; ii++) {
+      kz.context.fillStyle = '#fff';
+      kz.context.textAlign = 'left';
+      kz.context.fillText(records[ii].text + ': ', 12, 90 + ii*20);
+      kz.context.textAlign = 'right';
+      kz.context.fillStyle = '#8ed4a5';
+      var value;
+      if (records[ii].name == 'total_time' || records[ii].name == 'max_time') {
+        var time = getRecord(records[ii].name);
+        var sec_string = '' + time%60;
+        var min_string = '' + (Math.floor(time/60)%60);
+        var hour_string = records[ii].name == 'total_time' ? '' + Math.floor(time/3600) + ':' : '';
+        value = hour_string+'0'.repeat(2-min_string.length) + min_string + ':'  + '0'.repeat(2-sec_string.length)+sec_string;
+      } else { 
+        value = getRecord(records[ii].name);
+      }
+      kz.context.fillText(value, kz.canvas.width-12, 90+ii*20);
+    }
 
     kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
     kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
@@ -52,12 +71,12 @@ var scene_records = (function () {
         if (kz.events[ii].which == kz.KEYS.ESCAPE) {
           state.exiting = true;
           kz.tween({
-            object: state,
+            object: graphics,
             property: 'fadeAlpha',
             value: 1,
             duration: 100
           }).then(function () {
-            kz.run(scene);
+            kz.run(scene_main_menu);
           });
         }
       }
