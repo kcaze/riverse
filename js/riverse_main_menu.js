@@ -97,7 +97,7 @@ var scene_main_menu = (function () {
     kz.events = [];
 
     if (graphics.blink) {
-      if (Math.floor(now/500)%4 < 2) {
+      if (Math.floor(now/300)%4 < 2) {
         graphics.press_space_visible = true;
       } else {
         graphics.press_space_visible = false;

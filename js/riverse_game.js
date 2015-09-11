@@ -114,7 +114,6 @@ var scene_game = (function () {
   function lose() {
     bgm.stop();
     state.alive = false;
-    incrementRecord('play_count', 1);
     console.log('Lost :(');
 
     // copy over game picture at losing time
@@ -389,6 +388,7 @@ var scene_game = (function () {
   /*$ Messy section of game logic */
 
   function initialize() {
+    incrementRecord('play_count', 1);
     bgm = kz.resources.sounds['bgm_game'].play(true);
     bgm.stop();
   // initialize graphics
