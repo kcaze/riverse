@@ -287,6 +287,11 @@ var scene_character_select = (function () {
       for (var xx = 0; xx < 2; xx++) {
         var idx = yy*2 + xx;
         if (idx >= characters.length) break;
+        kz.context.strokeStyle = '#89928e';
+        kz.context.lineWidth = 0.5;
+        kz.context.fillStyle = '#50605b';
+        kz.context.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
+        kz.context.strokeRect(xx*49 + 10, yy*49 + 20, 50, 50) ;
         kz.context.drawImage(
           characters[idx].image,
           xx*49 + 10,
