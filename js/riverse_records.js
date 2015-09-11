@@ -54,7 +54,7 @@ var scene_records = (function () {
         var min_string = '' + (Math.floor(time/60)%60);
         var hour_string = records[ii].name == 'total_time' ? '' + Math.floor(time/3600) + ':' : '';
         value = hour_string+'0'.repeat(2-min_string.length) + min_string + ':'  + '0'.repeat(2-sec_string.length)+sec_string;
-      } else { 
+      } else {
         value = getRecord(records[ii].name);
       }
       kz.context.fillText(value, kz.canvas.width-12, 90+ii*20);
@@ -68,7 +68,7 @@ var scene_records = (function () {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (state.exiting) continue;
       if (kz.events[ii].kztype == 'keypress') {
-        if (kz.events[ii].which == kz.KEYS.ESCAPE) {
+        if (kz.events[ii].which == kz.KEYS.ESCAPE || kz.events[ii].which == kz.KEYS.Z) {
           state.exiting = true;
           kz.tween({
             object: graphics,
@@ -86,4 +86,3 @@ var scene_records = (function () {
 
   return scene;
 })();
-
