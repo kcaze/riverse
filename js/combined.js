@@ -1,3 +1,5 @@
+var $W = window;
+var $D = document;
 function base64ToArrayBuffer(base64) {
     var binary_string =  window.atob(base64);
     var len = binary_string.length;
@@ -10,8 +12,8 @@ function base64ToArrayBuffer(base64) {
 /**
  * So that this actually runs on ios
  */
-var performance = window.performance ? window.performance : window.Date;
-var AudioContext = window.AudioContext ? window.AudioContext : window.webkitAudioContext;
+var performance = $W.performance ? $W.performance : $W.Date;
+var AudioContext = $W.AudioContext ? $W.AudioContext : $W.webkitAudioContext;
 if (!String.prototype.repeat) {
   String.prototype.repeat = function(count) {
     var str = '' + this;
@@ -29,12 +31,12 @@ if (!String.prototype.repeat) {
     return rpt;
   }
 }
-document.addEventListener('touchstart', function(event) {
+$D.addEventListener('touchstart', function(event) {
   /* EXTREMELY DUMB HACK TO GET AUDIO WORKING ON IOS */
-	var buffer = kz.audio_context.createBuffer(1, 1, 22050);
-	var source = kz.audio_context.createBufferSource();
+	var buffer = kz.a.createBuffer(1, 1, 22050);
+	var source = kz.a.createBufferSource();
 	source.buffer = buffer;
-	source.connect(kz.audio_context.destination);
+	source.connect(kz.a.destination);
 	source.noteOn(0);
 }, false);
 //$a = sonantx
@@ -179,30 +181,30 @@ function genBuffer(waveSize, callBack) {
     }, 0);
 }
 
-function applyDelay(chnBuf, waveSamples, instr, rowLen, callBack) {
-    var p1 = (instr.n * rowLen) >> 1;
-    var t1 = instr.s / 255;
+function applyDelay($c, $w, $i, rowLen, callBack) {
+    var p1 = ($i.n * rowLen) >> 1;
+    var t1 = $i.s / 255;
 
     var n1 = 0;
     var iterate = function() {
         var beginning = new Date();
         var count = 0;
-        while(n1 < waveSamples - p1)
+        while(n1 < $w - p1)
         {
             var b1 = 4 * n1;
             var l = 4 * (n1 + p1);
 
             // Left channel = left + right[-p1] * t1
-            var x1 = chnBuf[l] + (chnBuf[l+1] << 8) +
-                (chnBuf[b1+2] + (chnBuf[b1+3] << 8) - 32768) * t1;
-            chnBuf[l] = x1 & 255;
-            chnBuf[l+1] = (x1 >> 8) & 255;
+            var x1 = $c[l] + ($c[l+1] << 8) +
+                ($c[b1+2] + ($c[b1+3] << 8) - 32768) * t1;
+            $c[l] = x1 & 255;
+            $c[l+1] = (x1 >> 8) & 255;
 
             // Right channel = right + left[-p1] * t1
-            x1 = chnBuf[l+2] + (chnBuf[l+3] << 8) +
-                (chnBuf[b1] + (chnBuf[b1+1] << 8) - 32768) * t1;
-            chnBuf[l+2] = x1 & 255;
-            chnBuf[l+3] = (x1 >> 8) & 255;
+            x1 = $c[l+2] + ($c[l+3] << 8) +
+                ($c[b1] + ($c[b1+1] << 8) - 32768) * t1;
+            $c[l+2] = x1 & 255;
+            $c[l+3] = (x1 >> 8) & 255;
             ++n1;
             count += 1;
             if (count % 1000 === 0 && (new Date() - beginning) > MAX_TIME) {
@@ -298,72 +300,72 @@ $x.A.prototype.getAudioBuffer = function(callBack) {
 /**
  * @constructor
  */
-$x.S = function(instr, rowLen) {
-    this.instr = instr;
+$x.S = function($i, rowLen) {
+    this.$i = $i;
     this.rowLen = rowLen || 5605;
 
-    this.osc_lfo = oscillators[instr.p];
-    this.osc1 = oscillators[instr.t];
-    this.osc2 = oscillators[instr.a];
-    this.attack = instr.ab;
-    this.sustain = instr.x;
-    this.release = instr.w;
-    this.panFreq = Math.pow(2, instr.l - 8) / this.rowLen;
-    this.lfoFreq = Math.pow(2, instr.z - 8) / this.rowLen;
+    this.osc_lfo = oscillators[$i.p];
+    this.osc1 = oscillators[$i.t];
+    this.osc2 = oscillators[$i.a];
+    this.$a = $i.ab;
+    this.sustain = $i.x;
+    this.release = $i.w;
+    this.panFreq = Math.pow(2, $i.l - 8) / this.rowLen;
+    this.lfoFreq = Math.pow(2, $i.z - 8) / this.rowLen;
 };
-$x.S.prototype.genSound = function(n, chnBuf, currentpos) {
+$x.S.prototype.genSound = function(n, $c, currentpos) {
     var marker = new Date();
     var c1 = 0;
     var c2 = 0;
 
     // Precalculate frequencues
-    var o1t = getnotefreq(n + (this.instr.ac - 8) * 12 + this.instr.aa) * (1 + 0.0008 * this.instr.h);
-    var o2t = getnotefreq(n + (this.instr.i - 8) * 12 + this.instr.m) * (1 + 0.0008 * this.instr.v);
+    var o1t = getnotefreq(n + (this.$i.ac - 8) * 12 + this.$i.aa) * (1 + 0.0008 * this.$i.h);
+    var o2t = getnotefreq(n + (this.$i.i - 8) * 12 + this.$i.m) * (1 + 0.0008 * this.$i.v);
 
     // State variable init
-    var q = this.instr.k / 255;
+    var q = this.$i.k / 255;
     var low = 0;
     var band = 0;
-    for (var j = this.attack + this.sustain + this.release - 1; j >= 0; --j)
+    for (var j = this.$a + this.sustain + this.release - 1; j >= 0; --j)
     {
         var k = j + currentpos;
 
         // LFO
-        var lfor = this.osc_lfo(k * this.lfoFreq) * this.instr.e / 512 + 0.5;
+        var lfor = this.osc_lfo(k * this.lfoFreq) * this.$i.e / 512 + 0.5;
 
         // Envelope
         var e = 1;
-        if(j < this.attack)
-            e = j / this.attack;
-        else if(j >= this.attack + this.sustain)
-            e -= (j - this.attack - this.sustain) / this.release;
+        if(j < this.$a)
+            e = j / this.$a;
+        else if(j >= this.$a + this.sustain)
+            e -= (j - this.$a - this.sustain) / this.release;
 
         // Oscillator 1
         var t = o1t;
-        if(this.instr.f) t += lfor;
-        if(this.instr.y) t *= e * e;
+        if(this.$i.f) t += lfor;
+        if(this.$i.y) t *= e * e;
         c1 += t;
-        var rsample = this.osc1(c1) * this.instr.r;
+        var rsample = this.osc1(c1) * this.$i.r;
 
         // Oscillator 2
         t = o2t;
-        if(this.instr.b) t *= e * e;
+        if(this.$i.b) t *= e * e;
         c2 += t;
-        rsample += this.osc2(c2) * this.instr.d;
+        rsample += this.osc2(c2) * this.$i.d;
 
         // Noise oscillator
-        if(this.instr.g) rsample += (2*Math.random()-1) * this.instr.g * e;
+        if(this.$i.g) rsample += (2*Math.random()-1) * this.$i.g * e;
 
         rsample *= e / 255;
 
         // State variable filter
-        var f = this.instr.o;
-        if(this.instr.u) f *= lfor;
+        var f = this.$i.o;
+        if(this.$i.u) f *= lfor;
         f = 1.5 * Math.sin(f * 3.141592 / WAVE_SPS);
         low += f * band;
         var high = q * (rsample - band) - low;
         band += f * high;
-        switch(this.instr.j)
+        switch(this.$i.j)
         {
             case 1: // Hipass
                 rsample = high;
@@ -381,27 +383,27 @@ $x.S.prototype.genSound = function(n, chnBuf, currentpos) {
         }
 
         // Panning & master volume
-        t = osc_sin(k * this.panFreq) * this.instr.c / 512 + 0.5;
-        rsample *= 39 * this.instr._;
+        t = osc_sin(k * this.panFreq) * this.$i.c / 512 + 0.5;
+        rsample *= 39 * this.$i._;
 
         // Add to 16-bit channel buffer
         k = k * 4;
-        if (k + 3 < chnBuf.length) {
-            var x = chnBuf[k] + (chnBuf[k+1] << 8) + rsample * (1 - t);
-            chnBuf[k] = x & 255;
-            chnBuf[k+1] = (x >> 8) & 255;
-            x = chnBuf[k+2] + (chnBuf[k+3] << 8) + rsample * t;
-            chnBuf[k+2] = x & 255;
-            chnBuf[k+3] = (x >> 8) & 255;
+        if (k + 3 < $c.length) {
+            var x = $c[k] + ($c[k+1] << 8) + rsample * (1 - t);
+            $c[k] = x & 255;
+            $c[k+1] = (x >> 8) & 255;
+            x = $c[k+2] + ($c[k+3] << 8) + rsample * t;
+            $c[k+2] = x & 255;
+            $c[k+3] = (x >> 8) & 255;
         }
     }
 };
 $x.S.prototype.getAudioGenerator = function(n, callBack) {
-    var bufferSize = (this.attack + this.sustain + this.release - 1) + (32 * this.rowLen);
+    var bufferSize = (this.$a + this.sustain + this.release - 1) + (32 * this.rowLen);
     var self = this;
     genBuffer(bufferSize, function(buffer) {
         self.genSound(n, buffer, 0);
-        applyDelay(buffer, bufferSize, self.instr, self.rowLen, function() {
+        applyDelay(buffer, bufferSize, self.$i, self.rowLen, function() {
             callBack(new $x.A(buffer));
         });
     });
@@ -425,16 +427,16 @@ $x.M = function(song) {
     // Wave data configuration
     this.waveSize = WAVE_SPS * song.songLen; // Total song size (in samples)
 };
-$x.M.prototype.generateTrack = function (instr, mixBuf, callBack) {
+$x.M.prototype.generateTrack = function ($i, mixBuf, callBack) {
     var self = this;
-    genBuffer(this.waveSize, function(chnBuf) {
+    genBuffer(this.waveSize, function($c) {
         // Preload/precalc some properties/expressions (for improved performance)
-        var waveSamples = self.waveSize,
+        var $w = self.waveSize,
             waveBytes = self.waveSize * WAVE_CHAN * 2,
             rowLen = self.song.rowLen,
-            soundGen = new $x.S(instr, rowLen);
+            soundGen = new $x.S($i, rowLen);
 
-        var endPattern = instr.notes.length;
+        var endPattern = $i.notes.length;
         var currentpos = 0;
         var idx = 0;
         var recordSounds = function () {
@@ -444,9 +446,9 @@ $x.M.prototype.generateTrack = function (instr, mixBuf, callBack) {
               setTimeout(delay, 0);
               return;
             }
-            var n = instr.notes[idx];
+            var n = $i.notes[idx];
             if (n) {
-              soundGen.genSound(n, chnBuf, currentpos);
+              soundGen.genSound(n, $c, currentpos);
             }
             idx++;
             currentpos += 3*rowLen;
@@ -458,7 +460,7 @@ $x.M.prototype.generateTrack = function (instr, mixBuf, callBack) {
         }
 
         var delay = function() {
-            applyDelay(chnBuf, waveSamples, instr, rowLen, finalize);
+            applyDelay($c, $w, $i, rowLen, finalize);
         };
 
         var b2 = 0;
@@ -468,7 +470,7 @@ $x.M.prototype.generateTrack = function (instr, mixBuf, callBack) {
             // Add to mix buffer
             while(b2 < waveBytes)
             {
-                var x2 = mixBuf[b2] + (mixBuf[b2+1] << 8) + chnBuf[b2] + (chnBuf[b2+1] << 8) - 32768;
+                var x2 = mixBuf[b2] + (mixBuf[b2+1] << 8) + $c[b2] + ($c[b2+1] << 8) - 32768;
                 mixBuf[b2] = x2 & 255;
                 mixBuf[b2+1] = (x2 >> 8) & 255;
                 b2 += 2;
@@ -959,7 +961,7 @@ function SfxrSynth() {
 // Adapted from http://codebase.es/riffwave/
 var synth = new SfxrSynth();
 // Export for the Closure Compiler
-window['jsfxr'] = function(settings) {
+$W['jsfxr'] = function(settings) {
   // Initialize SfxrParams
   synth._params.setSettings(settings);
   // Synthesize Wave
@@ -989,7 +991,7 @@ window['jsfxr'] = function(settings) {
   {
     var a = data[i] << 16 | data[i + 1] << 8 | data[i + 2];
     output += base64Characters[a >> 18] + base64Characters[a >> 12 & 63] + base64Characters[a >> 6 & 63] + base64Characters[a & 63];
-  }
+  }
   return output;
 }
 // L -- loadResources
@@ -1000,6 +1002,8 @@ window['jsfxr'] = function(settings) {
 // r -- resources
 // x -- context
 // v -- canvas
+// t -- tween
+// a -- audio_context
 
 var kz = {};
 
@@ -1025,7 +1029,7 @@ kz.I = function (queue) {
   for (var key in queue) {
     promises.push(new Promise(function(resolve) {
       var c = queue[key];
-      var canvas = document.createElement('canvas');
+      var canvas = $D.createElement('canvas');
       images[key] = canvas;
       var image = new Image();
       image.addEventListener('load', function() {
@@ -1050,7 +1054,7 @@ kz.I = function (queue) {
                 });
 };
 
-kz.audio_context = new AudioContext();
+kz.a = new AudioContext();
 kz.S = function (queue) {
   var sounds = {};
   var promises = [];
@@ -1065,10 +1069,10 @@ kz.S = function (queue) {
         sounds[name] = {
           play: function (loop) {
             loop = typeof loop == undefined ? false : loop;
-            var source = kz.audio_context.createBufferSource();
+            var source = kz.a.createBufferSource();
             source.loop = loop;
             source.buffer = this.buffer;
-            source.connect(kz.audio_context.destination);
+            source.connect(kz.a.destination);
             source.start(0);
             return source;
           },
@@ -1125,7 +1129,7 @@ kz.T = {};
  *   }
  *   Only one of 'rate' or 'duration' should be set.
  */
-kz.tween = function (tween) {
+kz.t = function (tween) {
   var start_time = performance.now();
   var old_value = tween.object[tween.property];
   var new_value = tween.value;
@@ -1142,10 +1146,10 @@ kz.tween = function (tween) {
         resolve();
       } else {
         tween.object[tween.property] = t * new_value + (1 - t) * old_value;
-        window.requestAnimationFrame(update);
+        $W.requestAnimationFrame(update);
       }
     }
-    window.requestAnimationFrame(update);
+    $W.requestAnimationFrame(update);
   });
 };
 /*$ Tween */
@@ -1252,7 +1256,7 @@ kz.Scene.prototype.exit = function () {
 
 /*^ Essential functions such as initialize, tick, and run */
 kz.initializeCanvas = function (canvas_id) {
-  kz.v = document.getElementById(canvas_id);
+  kz.v = $D.getElementById(canvas_id);
   kz.x = kz.v.getContext('2d');
   kz.x.clearAll = function () {
     kz.x.clearRect(0, 0, kz.v.width, kz.v.height);
@@ -1262,7 +1266,7 @@ kz.initializeCanvas = function (canvas_id) {
 kz.initialize = function (canvas_id) {
   kz.initializeCanvas(canvas_id);
 
-  document.addEventListener('keydown', function(event) {
+  $D.addEventListener('keydown', function(event) {
     event.preventDefault();
     if (kz.keys_status[event.which] == 0) {
       kz.keys_status[event.which] = 1;
@@ -1273,7 +1277,7 @@ kz.initialize = function (canvas_id) {
     kz.events.push(event);
   });
 
-  document.addEventListener('keyup', function(event) {
+  $D.addEventListener('keyup', function(event) {
     event.preventDefault();
     event.kztype = 'keyup';
     kz.keys_status[event.which] = 0;
@@ -1281,7 +1285,7 @@ kz.initialize = function (canvas_id) {
   });
 
   // touch events
-  document.addEventListener('touchstart', function(event) {
+  $D.addEventListener('touchstart', function(event) {
     //event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
@@ -1293,7 +1297,7 @@ kz.initialize = function (canvas_id) {
     }
   });
 
-  document.addEventListener('touchmove', function(event) {
+  $D.addEventListener('touchmove', function(event) {
     event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
@@ -1302,7 +1306,7 @@ kz.initialize = function (canvas_id) {
     }
   });
 
-  document.addEventListener('touchend', function(event) {
+  $D.addEventListener('touchend', function(event) {
     event.preventDefault();
     for (var id in kz.T) {
       var found = false;
@@ -1361,12 +1365,12 @@ kz.tick = function (now) {
   kz.scene.preUpdate(kz.performance.now());
   kz.scene.draw(kz.performance.now());
   kz.scene.postUpdate(kz.performance.now());
-  tickID = window.requestAnimationFrame(kz.tick);
+  tickID = $W.requestAnimationFrame(kz.tick);
 };
 
 kz.run = function (scene) {
   if (tickID) {
-    window.cancelAnimationFrame(tickID);
+    $W.cancelAnimationFrame(tickID);
   }
   if (kz.scene) {
     kz.scene.exit();
@@ -1376,7 +1380,7 @@ kz.run = function (scene) {
   kz.scene = scene;
   kz.scene.initialize();
   kz.alive = true;
-  tickID = window.requestAnimationFrame(kz.tick);
+  tickID = $W.requestAnimationFrame(kz.tick);
 };
 
 kz.performance = {
@@ -1448,7 +1452,7 @@ var scene_main_menu = (function () {
       choice: 0,
       state: 0
     };
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'fadeAlpha',
       value: 0,
@@ -1531,7 +1535,7 @@ var scene_main_menu = (function () {
           } else {
             var s = graphics.choice ? scene_records : scene_character_select;
             graphics.exiting = true;
-            kz.tween({
+            kz.t({
               object: graphics,
               property: 'fadeAlpha',
               value: 1,
@@ -1568,7 +1572,7 @@ var scene_records = (function () {
     graphics = {
       fadeAlpha: 1
     };
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'fadeAlpha',
       value: 0,
@@ -1631,7 +1635,7 @@ var scene_records = (function () {
       if (kz.events[ii].kztype == 'keypress') {
         if (kz.events[ii].which == kz.K.X || kz.events[ii].which == kz.K.Z) {
           state.exiting = true;
-          kz.tween({
+          kz.t({
             object: graphics,
             property: 'fadeAlpha',
             value: 1,
@@ -1660,7 +1664,7 @@ var scene_character_select = (function () {
       exiting: false,
       fadeAlpha: 1
     }
-    kz.tween({
+    kz.t({
       object: state,
       property: 'fadeAlpha',
       value: 0,
@@ -1669,7 +1673,7 @@ var scene_character_select = (function () {
       {
         description: 'ENDS TURN WHITE',
         name: 'BOAR',
-        image: kz.r.images['character_boar'],
+        image: kz.r.images['b'],
         unlock_message: '13 WHITE ORBS IN A ROW',
         unlocked: getRecord('max_white_orbs') >= 13,
         zodiac: function (data) {
@@ -1690,7 +1694,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR ROW ABOVE',
         name: 'CAT',
-        image: kz.r.images['character_cat'],
+        image: kz.r.images['c'],
         unlocked: true,
         zodiac: function (data) {
           var state = data.state;
@@ -1714,7 +1718,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR LEFT SIDE',
         name: 'DOG',
-        image: kz.r.images['character_dog'],
+        image: kz.r.images['d'],
         unlock_message: '169 ORBS SHOT',
         unlocked: getRecord('total_orbs') >= 169,
         zodiac: function (data) {
@@ -1732,7 +1736,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR 4 ON ENDS',
         name: 'DRAGON',
-        image: kz.r.images['character_dragon'],
+        image: kz.r.images['e'],
         unlock_message: 'SCORE 169',
         unlocked: getRecord('max_score') >= 169,
         zodiac: function(data) {
@@ -1763,7 +1767,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR 12 RANDOM',
         name: 'HARE',
-        image: kz.r.images['character_hare'],
+        image: kz.r.images['f'],
         unlock_message: 'REACH LEVEL 13',
         unlocked: getRecord('max_level') >= 13,
         zodiac: function(data) {
@@ -1793,7 +1797,7 @@ var scene_character_select = (function () {
       {
         description: 'SCORE +2',
         name: 'HORSE',
-        image: kz.r.images['character_horse'],
+        image: kz.r.images['g'],
         unlock_message: 'ZODIAC 13 TIMES',
         unlocked: getRecord('total_zodiac') >= 13,
         zodiac: function(data) {
@@ -1803,7 +1807,7 @@ var scene_character_select = (function () {
       {
         description: 'DELAY ROW DROP',
         name: 'MONKEY',
-        image: kz.r.images['character_monkey'],
+        image: kz.r.images['h'],
         unlock_message: 'ZODIAC 169 TIMES',
         unlocked: getRecord('total_zodiac') >= 169,
         zodiac: function (data) {
@@ -1818,7 +1822,7 @@ var scene_character_select = (function () {
       {
         description: 'ENDS TURN BLACK',
         name: 'OX',
-        image: kz.r.images['character_ox'],
+        image: kz.r.images['i'],
         unlock_message: '13 BLACK ORBS IN A ROW',
         unlocked: getRecord('max_black_orbs') >= 13,
         zodiac: function (data) {
@@ -1839,7 +1843,7 @@ var scene_character_select = (function () {
       {
         description: 'NEXT ALL WHITE',
         name: 'RAT',
-        image: kz.r.images['character_rat'],
+        image: kz.r.images['k'],
         unlock_message: '1313 ORBS SHOT',
         unlocked: getRecord('total_orbs') >= 1313,
         zodiac: function (data) {
@@ -1851,7 +1855,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR RIGHT SIDE',
         name: 'ROOSTER',
-        image: kz.r.images['character_rooster'],
+        image: kz.r.images['l'],
         unlock_message: 'SURVIVE 13 MINUTES',
         unlocked: getRecord('max_time') >= 13*60,
         zodiac: function (data) {
@@ -1870,7 +1874,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR TOP ROW',
         name: 'SHEEP',
-        image: kz.r.images['character_sheep'],
+        image: kz.r.images['m'],
         unlock_message: 'SCORE 13',
         unlocked: getRecord('max_score') >= 13,
         zodiac: function (data) {
@@ -1891,7 +1895,7 @@ var scene_character_select = (function () {
       {
         description: 'NEXT ALL BLACK',
         name: 'SNAKE',
-        image: kz.r.images['character_snake'],
+        image: kz.r.images['n'],
         unlock_message: 'PLAY 13 GAMES',
         unlocked: getRecord('play_count') >= 13,
         zodiac: function (data) {
@@ -1903,7 +1907,7 @@ var scene_character_select = (function () {
       {
         description: 'SCORE +LEVEL/3',
         name: 'TIGER',
-        image: kz.r.images['character_tiger'],
+        image: kz.r.images['o'],
         unlock_message: '169 ROWS CLEARED',
         unlocked: getRecord('total_rows') >= 169,
         zodiac: function (data) {
@@ -1913,7 +1917,7 @@ var scene_character_select = (function () {
       {
         description: '',
         name: 'RANDOM',
-        image: kz.r.images['character_random'],
+        image: kz.r.images['p'],
         unlocked: true
       }
     ];
@@ -1995,7 +1999,7 @@ var scene_character_select = (function () {
       if (kz.events[ii].kztype == 'keypress') {
         if (kz.events[ii].which == kz.K.R) {
           state.selected = Math.min(13, state.selected+1);
-        } else if (kz.events[ii].which == kz.K.D) {
+        } else if (kz.events[ii].which == kz.K.D) {
           state.selected = Math.min(13, state.selected+2);
         } else if (kz.events[ii].which == kz.K.L) {
           state.selected = Math.max(0, state.selected-1);
@@ -2012,7 +2016,7 @@ var scene_character_select = (function () {
             kz.r.sounds['sfx_select'].play();
             character = characters[state.selected];
             state.exiting = true;
-            kz.tween({
+            kz.t({
               object: state,
               property: 'fadeAlpha',
               value: 1,
@@ -2025,7 +2029,7 @@ var scene_character_select = (function () {
           }
         } else if (kz.events[ii].which == kz.K.X) {
           state.exiting = true;
-          kz.tween({
+          kz.t({
             object: state,
             property: 'fadeAlpha',
             value: 1,
@@ -2052,10 +2056,10 @@ var scene_game = (function () {
     next_length: 8,
     next_row_interval: 20000
   };
-  var board_canvas = document.createElement('canvas');
-  var info_canvas = document.createElement('canvas');
-  var pause_canvas = document.createElement('canvas');
-  var gameover_canvas = document.createElement('canvas');
+  var board_canvas = $D.createElement('canvas');
+  var info_canvas = $D.createElement('canvas');
+  var pause_canvas = $D.createElement('canvas');
+  var gameover_canvas = $D.createElement('canvas');
   board_canvas.width = $c.w*$c.g;
   board_canvas.height = 390;
   info_canvas.width = 96;
@@ -2068,14 +2072,7 @@ var scene_game = (function () {
   var info_context = info_canvas.getContext('2d');
   var gameover_context = gameover_canvas.getContext('2d');
   var pause_context = pause_canvas.getContext('2d');
-  var PieceTypes = {
-    Empty: 0,
-    Red: 1,
-    Blue: 2,
-    Zodiac: 3
-  };
-  var normal_piece_types = [PieceTypes.Red, PieceTypes.Blue];
-
+  var normal_piece_types = [1, 2];
   var state;
   var pause_choice;
   var graphics;
@@ -2096,7 +2093,7 @@ var scene_game = (function () {
       0,
       0
     );
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'pause_alpha',
       value: 0.8,
@@ -2105,7 +2102,7 @@ var scene_game = (function () {
   }
 
   function resume() {
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'pause_alpha',
       value: 0,
@@ -2139,9 +2136,9 @@ var scene_game = (function () {
 
   function pieceTypeImage(piece_type) {
     return [
-      kz.r.images['piece_red'],
-      kz.r.images['piece_blue'],
-      kz.r.images['piece_zodiac']
+      kz.r.images['s'],
+      kz.r.images['r'],
+      kz.r.images['t']
     ][piece_type-1];
   }
 
@@ -2171,13 +2168,13 @@ var scene_game = (function () {
       0
     );
     // fade to black
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'gameover_background_alpha',
       value: 1,
       duration: 1000
     }).then(function () {
-      return kz.tween({
+      return kz.t({
         object: graphics,
         property: 'gameover_text_alpha',
         value: 1,
@@ -2197,7 +2194,7 @@ var scene_game = (function () {
       var zodiacCounter = 0;
       var cleared = true;
       for (var xx = 0; xx < $c.w; xx++) {
-        if (state.board[yy][xx].piece_type == PieceTypes.Zodiac) {
+        if (state.board[yy][xx].piece_type == 3) {
           zodiacCounter++;
         }
         // wow, much hack. this works because zodiac = 3, so it ANDs with
@@ -2218,7 +2215,7 @@ var scene_game = (function () {
     }
 
     if (typeof row === 'undefined') return;
-
+
     // update score
     incrementScore(1);
     state.rows_cleared += 1;
@@ -2239,7 +2236,7 @@ var scene_game = (function () {
     // update of underlying board
     for (xx = 0; xx < $c.w; xx++) {
       state.board[row][xx] = {
-        piece_type: PieceTypes.Empty
+        piece_type:0
       };
     }
 
@@ -2272,7 +2269,7 @@ var scene_game = (function () {
     promise = Promise.all(promise);
     pieces.forEach(function (piece) {
       var piecePromise = promise.then(function () {
-        return kz.tween({
+        return kz.t({
           object: piece,
           property: 'alpha',
           value: 0,
@@ -2291,13 +2288,13 @@ var scene_game = (function () {
         if (state.board[yy][xx].piece_type && !state.board[yy-1][xx].piece_type) {
           state.board[yy-1][xx] = state.board[yy][xx];
           state.board[yy][xx] = {
-            piece_type: PieceTypes.Empty
+            piece_type:0
           };
           var piece = state.board[yy-1][xx].piece;
           (function (piece) {
             // ensure we start the animation AFTER the row fades away
             piece.actions_promise = piece.actions_promise.then(function () {
-              return kz.tween({
+              return kz.t({
                 object: piece,
                 property: 'y',
                 value: piece.y - $c.g,
@@ -2315,7 +2312,7 @@ var scene_game = (function () {
     var dys = [0, 0, 1, -1, 1, -1, 1, -1];
     var piece_type = state.board[board_y][board_x].piece_type;
 
-    if (piece_type == PieceTypes.Empty || piece_type == PieceTypes.Zodiac) return
+    if (piece_type == 0|| piece_type == 3) return
 
     for (var ii = 0; ii < 8; ii++) {
       var dx = dxs[ii];
@@ -2328,8 +2325,8 @@ var scene_game = (function () {
              && 0 <= y
              && x < $c.w
              && y < $c.h) {
-        if (state.board[y][x].piece_type == PieceTypes.Empty
-          || state.board[y][x].piece_type == PieceTypes.Zodiac) break;
+        if (state.board[y][x].piece_type ==0
+          || state.board[y][x].piece_type == 3) break;
         if (state.board[y][x].piece_type == piece_type) {
           reverse = true;
           break;
@@ -2358,7 +2355,7 @@ var scene_game = (function () {
     piece.actions_promise = piece.actions_promise.then(function () {
       return new Promise(function(resolve) {
         piece.blend_type = to_type;
-        kz.tween({
+        kz.t({
           object: piece,
           property: 'blend_alpha',
           value: 1,
@@ -2400,7 +2397,7 @@ var scene_game = (function () {
     // update board
     for (var xx = 0; xx < $c.w; xx++) {
       if (state.board[$c.h-1][xx].piece_type
-          != PieceTypes.Empty) {
+          != 0) {
         lose();
         return;
       }
@@ -2416,7 +2413,7 @@ var scene_game = (function () {
         var piece = square.piece;
         if (!piece) return;
         piece.actions_promise = piece.actions_promise.then(function () {
-          return kz.tween({
+          return kz.t({
             object: piece,
             property: 'y',
             value: piece.y + $c.g,
@@ -2437,14 +2434,14 @@ var scene_game = (function () {
   // initialize graphics
     graphics = {
       background_pattern: kz.x.createPattern(
-        kz.r.images['background'],
+        kz.r.images['a'],
         'repeat'),
       pause_alpha: 0,
       gameover_background_alpha: 0,
       gameover_text_alpha: 0,
       fadeAlpha: 1
     }
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'fadeAlpha',
       value: 0,
@@ -2502,7 +2499,7 @@ var scene_game = (function () {
           }
         } else {
           state.board[yy].push({
-            piece_type: PieceTypes.Empty
+            piece_type:0
           });
         }
       }
@@ -2511,10 +2508,10 @@ var scene_game = (function () {
     // initialize player
     state.player = new kz.Entity({
       frames: [
-        kz.r.images['shooter_0'],
-        kz.r.images['shooter_1'],
-        kz.r.images['shooter_2'],
-        kz.r.images['shooter_3']
+        kz.r.images['u'],
+        kz.r.images['v'],
+        kz.r.images['w'],
+        kz.r.images['u']
       ],
       frame_lengths: [
         500,
@@ -2544,7 +2541,7 @@ var scene_game = (function () {
         // draw aiming line
         var h;
         for (h = $c.h-1; h >= 0; h--) {
-          if (state.board[h][this.x].piece_type != PieceTypes.Empty) {
+          if (state.board[h][this.x].piece_type != 0) {
             break;
           }
         }
@@ -2579,7 +2576,7 @@ var scene_game = (function () {
         if (this.x+dx >= 0 && this.x+dx < $c.w) {
           this.x += dx;
           this.actions_promise = this.actions_promise.then(function () {
-            return kz.tween({
+            return kz.t({
               object: this,
               property: 'sprite_x',
               value: this.sprite_x + dx*$c.g,
@@ -2593,7 +2590,7 @@ var scene_game = (function () {
       next: [],
       shoot : function() {
         if (state.board[$c.h-1][this.x].piece_type
-            != PieceTypes.Empty) {
+            != 0) {
           lose();
           return;
         }
@@ -2603,16 +2600,16 @@ var scene_game = (function () {
         var piece_type = this.next.shift();
         var next_piece_type = Math.random()*16 > 1
           ? randomPieceType(normal_piece_types)
-          : PieceTypes.Zodiac;
+          : 3;
         this.next.push(next_piece_type);
 
         // update consecutive counts
         if (state.consecutive[piece_type]) {
           state.consecutive[piece_type]++;
         } else {
-          state.consecutive[PieceTypes.Red] = 0;
-          state.consecutive[PieceTypes.Blue] = 0;
-          state.consecutive[PieceTypes.Zodiac] = 0;
+          state.consecutive[1] = 0;
+          state.consecutive[2] = 0;
+          state.consecutive[3] = 0;
           state.consecutive[piece_type] = 1;
         }
         var pieceTypeRecordMap = {
@@ -2625,7 +2622,7 @@ var scene_game = (function () {
         var target_y = $c.h-1;
         while (target_y > 0) {
           if (state.board[target_y-1][this.x].piece_type
-              != PieceTypes.Empty) {
+              != 0) {
             break;
           }
           target_y--;
@@ -2643,7 +2640,7 @@ var scene_game = (function () {
 
         piece.actions_promise = piece.actions_promise.then(function () {
           kz.r.sounds['sfx_shoot'].play();
-          return kz.tween({
+          return kz.t({
             object: piece,
             property: 'y',
             value: board_to_piece(target_y),
@@ -2655,7 +2652,7 @@ var scene_game = (function () {
     for (var ii = 0; ii < 8; ii++) {
       state.player.next.push(randomPieceType(normal_piece_types));
       if (Math.random()*16 < 1) {
-        state.player.next[ii] = PieceTypes.Zodiac;
+        state.player.next[ii] = 3;
       }
     }
   }
@@ -2723,7 +2720,7 @@ var scene_game = (function () {
       // draw player
     board_context.globalAlpha = 1;
     state.player.draw(board_context);
-
+
       // draw timer
     board_context.fillStyle = 'rgba(0, 0, 0, 0.5)';
     board_context.fillRect(
@@ -2932,7 +2929,7 @@ var scene_game = (function () {
           kz.events[ii].which == kz.K.Z &&
           state.can_restart) {
         state.exiting = true;
-        kz.tween({
+        kz.t({
           object: graphics,
           property: 'fadeAlpha',
           value: 1,
@@ -2959,7 +2956,7 @@ var scene_game = (function () {
           if (pause_choice == 0) {
           } else if (pause_choice == 1) {
             state.exiting = true;
-            kz.tween({
+            kz.t({
               object: graphics,
               property: 'fadeAlpha',
               value: 1,
@@ -2968,7 +2965,7 @@ var scene_game = (function () {
               });
           } else {
             state.exiting = true;
-            kz.tween({
+            kz.t({
               object: graphics,
               property: 'fadeAlpha',
               value: 1,
@@ -3009,7 +3006,7 @@ var scene_game = (function () {
 
 function loadJSFXR(data, resolve) {
   var buff = base64ToArrayBuffer(data.substr(22));
-  kz.audio_context.decodeAudioData(buff, resolve);
+  kz.a.decodeAudioData(buff, resolve);
 }
 
 function loadSonant(data, resolve) {
@@ -3019,28 +3016,27 @@ function loadSonant(data, resolve) {
 
 var resources = {
   images: {
-    background: {x:36,y:263,w:32,h:32},
-    character_boar: {x:0,y:0,w:50,h:50,W:37,H:39,f:1},
-    character_cat: {x:37,y:0,w:50,h:50,W:42,H:38,f:1},
-    character_dog: {x:0,y:39,w:50,h:50,W:40,H:42,f:1},
-    character_dragon: {x:40,y:38,w:50,h:50,W:45,H:40,f:1},
-    character_hare: {x:0,y:81,w:50,h:50,W:35,H:40,f:1},
-    character_horse: {x:35,y:81,w:50,h:50,W:41,H:43,f:1},
-    character_monkey: {x:0,y:121,w:50,h:50,W:30,H:44,f:1},
-    character_ox: {x:30,y:124,w:50,h:50,W:42,H:32,f:1},
-    character_rat: {x:0,y:165,w:50,h:50,W:41,H:39,f:1},
-    character_rooster: {x:41,y:156,w:50,h:50,W:35,H:36,f:1},
-    character_sheep: {x:0,y:205,w:50,h:50,W:43,H:43,f:1},
-    character_snake: {x:43,y:192,w:50,h:50,W:34,H:34,f:1},
-    character_tiger: {x:0,y:248,w:50,h:50,W:36,H:41,f:1},
-    character_random: {x:43,y:226,w:50,h:50,W:21,H:37,f:1},
-    piece_blue: {x:65,y:226,w:17,h:17},
-    piece_red: {x:64,y:243,w:17,h:17},
-    piece_zodiac: {x:72,y:124,w:17,h:17},
-    shooter_0: {x:68,y:260,w:9,h:22,W:9,H:22,f:1},
-    shooter_1: {x:76,y:81,w:9,h:22,W:5,H:22,f:1},
-    shooter_2: {x:76,y:156,w:9,h:22,W:1,H:22,f:1},
-    shooter_3: {x:68,y:260,w:9,h:22,W:9,H:22,f:1}
+    a: {x:36,y:263,w:32,h:32}, //background
+    b: {x:0,y:0,w:50,h:50,W:37,H:39,f:1}, //character_boar
+    c: {x:37,y:0,w:50,h:50,W:42,H:38,f:1}, //character_cat
+    d: {x:0,y:39,w:50,h:50,W:40,H:42,f:1}, //character_dog
+    e: {x:40,y:38,w:50,h:50,W:45,H:40,f:1}, //character_dragon
+    f: {x:0,y:81,w:50,h:50,W:35,H:40,f:1}, //character_hare
+    g: {x:35,y:81,w:50,h:50,W:41,H:43,f:1}, //character_horse
+    h: {x:0,y:121,w:50,h:50,W:30,H:44,f:1}, //character_monkey
+    i: {x:30,y:124,w:50,h:50,W:42,H:32,f:1}, //character_ox
+    k: {x:0,y:165,w:50,h:50,W:41,H:39,f:1}, //character_rat
+    l: {x:41,y:156,w:50,h:50,W:35,H:36,f:1}, //character_rooster
+    m: {x:0,y:205,w:50,h:50,W:43,H:43,f:1}, //character_sheep
+    n: {x:43,y:192,w:50,h:50,W:34,H:34,f:1}, //character_snake
+    o: {x:0,y:248,w:50,h:50,W:36,H:41,f:1}, //chraacter_tiger
+    p: {x:43,y:226,w:50,h:50,W:21,H:37,f:1}, //character_random
+    r: {x:65,y:226,w:17,h:17}, // piece_black
+    s: {x:64,y:243,w:17,h:17}, // piece_white
+    t: {x:72,y:124,w:17,h:17}, //piece_zodiac
+    u: {x:68,y:260,w:9,h:22,W:9,H:22,f:1}, //shooter_0
+    v: {x:76,y:81,w:9,h:22,W:5,H:22,f:1}, // shooter_1
+    w: {x:76,y:156,w:9,h:22,W:1,H:22,f:1} //shooter_2
   },
   sounds: {
     'sfx_shoot': {
@@ -3251,11 +3247,7 @@ var resources = {
                 0,
                 0,
                 147,
-                0,
-                0,
-                0,
-                147,
-                0,
+                0,
                 0,
                 0,
                 147,
@@ -3302,6 +3294,10 @@ var resources = {
                 0,
                 0,
                 0,
+                147,
+                0,
+                0,
+                0,
                 147,
                 0,
                 0,
@@ -4306,8 +4302,8 @@ var resources = {
   }
 };
 
-window.onload = function() {
-  var fontHack = document.getElementById('fontHack');
+$W.onload = function() {
+  var fontHack = $D.getElementById('fontHack');
   fontHack.parentNode.removeChild(fontHack);
 
   kz.initialize('canvas');

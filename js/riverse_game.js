@@ -83,15 +83,15 @@ var scene_game = (function () {
       alpha: 1,
       blend_alpha: 0,
       blend_type: 0,
-      actions_promise: blankPromise()
+      a: blankPromise() //actions_promise
     });
   }
 
   function pieceTypeImage(piece_type) {
     return [
-      kz.r.images['s'],
-      kz.r.images['r'],
-      kz.r.images['t']
+      kz.r.i.s,
+      kz.r.i.r,
+      kz.r.i.t
     ][piece_type-1];
   }
 
@@ -217,7 +217,7 @@ var scene_game = (function () {
     // ensure that all row piece animations have finished
     var promise  = [];
     pieces.forEach(function (piece) {
-      promise.push(piece.actions_promise);
+      promise.push(piece.a);
     })
     promise = Promise.all(promise);
     pieces.forEach(function (piece) {
@@ -231,7 +231,7 @@ var scene_game = (function () {
           piece.destroy();
         });
       });
-      piece.actions_promise = piecePromise;
+      piece.a = piecePromise;
     });
   }
 
@@ -246,7 +246,7 @@ var scene_game = (function () {
           var piece = state.board[yy-1][xx].piece;
           (function (piece) {
             // ensure we start the animation AFTER the row fades away
-            piece.actions_promise = piece.actions_promise.then(function () {
+            piece.a = piece.a.then(function () {
               return kz.t({
                 object: piece,
                 property: 'y',
@@ -305,7 +305,7 @@ var scene_game = (function () {
   }
 
   function animateColorChange(piece, to_type) {
-    piece.actions_promise = piece.actions_promise.then(function () {
+    piece.a = piece.a.then(function () {
       return new Promise(function(resolve) {
         piece.blend_type = to_type;
         kz.t({
@@ -365,7 +365,7 @@ var scene_game = (function () {
       row.forEach(function (square) {
         var piece = square.piece;
         if (!piece) return;
-        piece.actions_promise = piece.actions_promise.then(function () {
+        piece.a = piece.a.then(function () {
           return kz.t({
             object: piece,
             property: 'y',
@@ -387,7 +387,7 @@ var scene_game = (function () {
   // initialize graphics
     graphics = {
       background_pattern: kz.x.createPattern(
-        kz.r.images['a'],
+        kz.r.i.a,
         'repeat'),
       pause_alpha: 0,
       gameover_background_alpha: 0,
@@ -461,10 +461,10 @@ var scene_game = (function () {
     // initialize player
     state.player = new kz.Entity({
       frames: [
-        kz.r.images['u'],
-        kz.r.images['v'],
-        kz.r.images['w'],
-        kz.r.images['u']
+        kz.r.i.u,
+        kz.r.i.v,
+        kz.r.i.w,
+        kz.r.i.u
       ],
       frame_lengths: [
         500,
@@ -485,7 +485,7 @@ var scene_game = (function () {
       x: Math.floor($c.w/2),
       sprite_x: 4+Math.floor($c.w/2)*$c.g,
       sprite_y: $c.h*$c.g+23,
-      actions_promise: blankPromise(),
+      a: blankPromise(),
       draw: function (context) {
         context.drawImage(
           this.frames[this.current_frame],
@@ -528,7 +528,7 @@ var scene_game = (function () {
       move: function (dx) {
         if (this.x+dx >= 0 && this.x+dx < $c.w) {
           this.x += dx;
-          this.actions_promise = this.actions_promise.then(function () {
+          this.a = this.a.then(function () {
             return kz.t({
               object: this,
               property: 'sprite_x',
@@ -591,7 +591,7 @@ var scene_game = (function () {
         };
         reverse(this.x, target_y);
 
-        piece.actions_promise = piece.actions_promise.then(function () {
+        piece.a = piece.a.then(function () {
           kz.r.sounds['sfx_shoot'].play();
           return kz.t({
             object: piece,

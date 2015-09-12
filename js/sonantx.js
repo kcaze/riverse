@@ -140,30 +140,30 @@ function genBuffer(waveSize, callBack) {
     }, 0);
 }
 
-function applyDelay(chnBuf, waveSamples, instr, rowLen, callBack) {
-    var p1 = (instr.n * rowLen) >> 1;
-    var t1 = instr.s / 255;
+function applyDelay($c, $w, $i, rowLen, callBack) {
+    var p1 = ($i.n * rowLen) >> 1;
+    var t1 = $i.s / 255;
 
     var n1 = 0;
     var iterate = function() {
         var beginning = new Date();
         var count = 0;
-        while(n1 < waveSamples - p1)
+        while(n1 < $w - p1)
         {
             var b1 = 4 * n1;
             var l = 4 * (n1 + p1);
 
             // Left channel = left + right[-p1] * t1
-            var x1 = chnBuf[l] + (chnBuf[l+1] << 8) +
-                (chnBuf[b1+2] + (chnBuf[b1+3] << 8) - 32768) * t1;
-            chnBuf[l] = x1 & 255;
-            chnBuf[l+1] = (x1 >> 8) & 255;
+            var x1 = $c[l] + ($c[l+1] << 8) +
+                ($c[b1+2] + ($c[b1+3] << 8) - 32768) * t1;
+            $c[l] = x1 & 255;
+            $c[l+1] = (x1 >> 8) & 255;
 
             // Right channel = right + left[-p1] * t1
-            x1 = chnBuf[l+2] + (chnBuf[l+3] << 8) +
-                (chnBuf[b1] + (chnBuf[b1+1] << 8) - 32768) * t1;
-            chnBuf[l+2] = x1 & 255;
-            chnBuf[l+3] = (x1 >> 8) & 255;
+            x1 = $c[l+2] + ($c[l+3] << 8) +
+                ($c[b1] + ($c[b1+1] << 8) - 32768) * t1;
+            $c[l+2] = x1 & 255;
+            $c[l+3] = (x1 >> 8) & 255;
             ++n1;
             count += 1;
             if (count % 1000 === 0 && (new Date() - beginning) > MAX_TIME) {
@@ -259,72 +259,72 @@ $x.A.prototype.getAudioBuffer = function(callBack) {
 /**
  * @constructor
  */
-$x.S = function(instr, rowLen) {
-    this.instr = instr;
+$x.S = function($i, rowLen) {
+    this.$i = $i;
     this.rowLen = rowLen || 5605;
 
-    this.osc_lfo = oscillators[instr.p];
-    this.osc1 = oscillators[instr.t];
-    this.osc2 = oscillators[instr.a];
-    this.attack = instr.ab;
-    this.sustain = instr.x;
-    this.release = instr.w;
-    this.panFreq = Math.pow(2, instr.l - 8) / this.rowLen;
-    this.lfoFreq = Math.pow(2, instr.z - 8) / this.rowLen;
+    this.osc_lfo = oscillators[$i.p];
+    this.osc1 = oscillators[$i.t];
+    this.osc2 = oscillators[$i.a];
+    this.$a = $i.ab;
+    this.sustain = $i.x;
+    this.release = $i.w;
+    this.panFreq = Math.pow(2, $i.l - 8) / this.rowLen;
+    this.lfoFreq = Math.pow(2, $i.z - 8) / this.rowLen;
 };
-$x.S.prototype.genSound = function(n, chnBuf, currentpos) {
+$x.S.prototype.genSound = function(n, $c, currentpos) {
     var marker = new Date();
     var c1 = 0;
     var c2 = 0;
 
     // Precalculate frequencues
-    var o1t = getnotefreq(n + (this.instr.ac - 8) * 12 + this.instr.aa) * (1 + 0.0008 * this.instr.h);
-    var o2t = getnotefreq(n + (this.instr.i - 8) * 12 + this.instr.m) * (1 + 0.0008 * this.instr.v);
+    var o1t = getnotefreq(n + (this.$i.ac - 8) * 12 + this.$i.aa) * (1 + 0.0008 * this.$i.h);
+    var o2t = getnotefreq(n + (this.$i.i - 8) * 12 + this.$i.m) * (1 + 0.0008 * this.$i.v);
 
     // State variable init
-    var q = this.instr.k / 255;
+    var q = this.$i.k / 255;
     var low = 0;
     var band = 0;
-    for (var j = this.attack + this.sustain + this.release - 1; j >= 0; --j)
+    for (var j = this.$a + this.sustain + this.release - 1; j >= 0; --j)
     {
         var k = j + currentpos;
 
         // LFO
-        var lfor = this.osc_lfo(k * this.lfoFreq) * this.instr.e / 512 + 0.5;
+        var lfor = this.osc_lfo(k * this.lfoFreq) * this.$i.e / 512 + 0.5;
 
         // Envelope
         var e = 1;
-        if(j < this.attack)
-            e = j / this.attack;
-        else if(j >= this.attack + this.sustain)
-            e -= (j - this.attack - this.sustain) / this.release;
+        if(j < this.$a)
+            e = j / this.$a;
+        else if(j >= this.$a + this.sustain)
+            e -= (j - this.$a - this.sustain) / this.release;
 
         // Oscillator 1
         var t = o1t;
-        if(this.instr.f) t += lfor;
-        if(this.instr.y) t *= e * e;
+        if(this.$i.f) t += lfor;
+        if(this.$i.y) t *= e * e;
         c1 += t;
-        var rsample = this.osc1(c1) * this.instr.r;
+        var rsample = this.osc1(c1) * this.$i.r;
 
         // Oscillator 2
         t = o2t;
-        if(this.instr.b) t *= e * e;
+        if(this.$i.b) t *= e * e;
         c2 += t;
-        rsample += this.osc2(c2) * this.instr.d;
+        rsample += this.osc2(c2) * this.$i.d;
 
         // Noise oscillator
-        if(this.instr.g) rsample += (2*Math.random()-1) * this.instr.g * e;
+        if(this.$i.g) rsample += (2*Math.random()-1) * this.$i.g * e;
 
         rsample *= e / 255;
 
         // State variable filter
-        var f = this.instr.o;
-        if(this.instr.u) f *= lfor;
+        var f = this.$i.o;
+        if(this.$i.u) f *= lfor;
         f = 1.5 * Math.sin(f * 3.141592 / WAVE_SPS);
         low += f * band;
         var high = q * (rsample - band) - low;
         band += f * high;
-        switch(this.instr.j)
+        switch(this.$i.j)
         {
             case 1: // Hipass
                 rsample = high;
@@ -342,27 +342,27 @@ $x.S.prototype.genSound = function(n, chnBuf, currentpos) {
         }
 
         // Panning & master volume
-        t = osc_sin(k * this.panFreq) * this.instr.c / 512 + 0.5;
-        rsample *= 39 * this.instr._;
+        t = osc_sin(k * this.panFreq) * this.$i.c / 512 + 0.5;
+        rsample *= 39 * this.$i._;
 
         // Add to 16-bit channel buffer
         k = k * 4;
-        if (k + 3 < chnBuf.length) {
-            var x = chnBuf[k] + (chnBuf[k+1] << 8) + rsample * (1 - t);
-            chnBuf[k] = x & 255;
-            chnBuf[k+1] = (x >> 8) & 255;
-            x = chnBuf[k+2] + (chnBuf[k+3] << 8) + rsample * t;
-            chnBuf[k+2] = x & 255;
-            chnBuf[k+3] = (x >> 8) & 255;
+        if (k + 3 < $c.length) {
+            var x = $c[k] + ($c[k+1] << 8) + rsample * (1 - t);
+            $c[k] = x & 255;
+            $c[k+1] = (x >> 8) & 255;
+            x = $c[k+2] + ($c[k+3] << 8) + rsample * t;
+            $c[k+2] = x & 255;
+            $c[k+3] = (x >> 8) & 255;
         }
     }
 };
 $x.S.prototype.getAudioGenerator = function(n, callBack) {
-    var bufferSize = (this.attack + this.sustain + this.release - 1) + (32 * this.rowLen);
+    var bufferSize = (this.$a + this.sustain + this.release - 1) + (32 * this.rowLen);
     var self = this;
     genBuffer(bufferSize, function(buffer) {
         self.genSound(n, buffer, 0);
-        applyDelay(buffer, bufferSize, self.instr, self.rowLen, function() {
+        applyDelay(buffer, bufferSize, self.$i, self.rowLen, function() {
             callBack(new $x.A(buffer));
         });
     });
@@ -386,16 +386,16 @@ $x.M = function(song) {
     // Wave data configuration
     this.waveSize = WAVE_SPS * song.songLen; // Total song size (in samples)
 };
-$x.M.prototype.generateTrack = function (instr, mixBuf, callBack) {
+$x.M.prototype.generateTrack = function ($i, mixBuf, callBack) {
     var self = this;
-    genBuffer(this.waveSize, function(chnBuf) {
+    genBuffer(this.waveSize, function($c) {
         // Preload/precalc some properties/expressions (for improved performance)
-        var waveSamples = self.waveSize,
+        var $w = self.waveSize,
             waveBytes = self.waveSize * WAVE_CHAN * 2,
             rowLen = self.song.rowLen,
-            soundGen = new $x.S(instr, rowLen);
+            soundGen = new $x.S($i, rowLen);
 
-        var endPattern = instr.notes.length;
+        var endPattern = $i.notes.length;
         var currentpos = 0;
         var idx = 0;
         var recordSounds = function () {
@@ -405,9 +405,9 @@ $x.M.prototype.generateTrack = function (instr, mixBuf, callBack) {
               setTimeout(delay, 0);
               return;
             }
-            var n = instr.notes[idx];
+            var n = $i.notes[idx];
             if (n) {
-              soundGen.genSound(n, chnBuf, currentpos);
+              soundGen.genSound(n, $c, currentpos);
             }
             idx++;
             currentpos += 3*rowLen;
@@ -419,7 +419,7 @@ $x.M.prototype.generateTrack = function (instr, mixBuf, callBack) {
         }
 
         var delay = function() {
-            applyDelay(chnBuf, waveSamples, instr, rowLen, finalize);
+            applyDelay($c, $w, $i, rowLen, finalize);
         };
 
         var b2 = 0;
@@ -429,7 +429,7 @@ $x.M.prototype.generateTrack = function (instr, mixBuf, callBack) {
             // Add to mix buffer
             while(b2 < waveBytes)
             {
-                var x2 = mixBuf[b2] + (mixBuf[b2+1] << 8) + chnBuf[b2] + (chnBuf[b2+1] << 8) - 32768;
+                var x2 = mixBuf[b2] + (mixBuf[b2+1] << 8) + $c[b2] + ($c[b2+1] << 8) - 32768;
                 mixBuf[b2] = x2 & 255;
                 mixBuf[b2+1] = (x2 >> 8) & 255;
                 b2 += 2;

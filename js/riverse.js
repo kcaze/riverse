@@ -13,7 +13,7 @@ function loadSonant(data, resolve) {
 }
 
 var resources = {
-  images: {
+  i: {
     a: {x:36,y:263,w:32,h:32}, //background
     b: {x:0,y:0,w:50,h:50,W:37,H:39,f:1}, //character_boar
     c: {x:37,y:0,w:50,h:50,W:42,H:38,f:1}, //character_cat
@@ -34,7 +34,7 @@ var resources = {
     t: {x:72,y:124,w:17,h:17}, //piece_zodiac
     u: {x:68,y:260,w:9,h:22,W:9,H:22,f:1}, //shooter_0
     v: {x:76,y:81,w:9,h:22,W:5,H:22,f:1}, // shooter_1
-    w: {x:76,y:156,w:9,h:22,W:1,H:22,f:1}, //shooter_2
+    w: {x:76,y:156,w:9,h:22,W:1,H:22,f:1} //shooter_2
   },
   sounds: {
     'sfx_shoot': {

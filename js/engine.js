@@ -17,7 +17,7 @@ kz.L = function (resources) {
   var promises = [];
   kz.r = {};
 
-  promises.push(kz.I(resources.images));
+  promises.push(kz.I(resources.i));
   promises.push(kz.S(resources.sounds));
 
   return Promise.all(promises)
@@ -27,14 +27,14 @@ kz.L = function (resources) {
 };
 
 kz.I = function (queue) {
-  var images = {};
+  var i = {};
   var promises = [];
 
   for (var key in queue) {
     promises.push(new Promise(function(resolve) {
       var c = queue[key];
       var canvas = $D.createElement('canvas');
-      images[key] = canvas;
+      i[key] = canvas;
       var image = new Image();
       image.addEventListener('load', function() {
         var context = canvas.getContext('2d');
@@ -53,8 +53,8 @@ kz.I = function (queue) {
 
   return Promise.all(promises)
                 .then(function () {
-                  kz.r.images = images;
-                  return kz.r.images;
+                  kz.r.i = i;
+                  return kz.r.i;
                 });
 };
 

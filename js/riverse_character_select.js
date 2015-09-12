@@ -7,20 +7,20 @@ var scene_character_select = (function () {
 
   scene.initialize = function () {
     state = {
-      selected: 0,
+      s: 0, //selected
       exiting: false,
-      fadeAlpha: 1
+      f: 1 //fadeAlpha
     }
     kz.t({
       object: state,
-      property: 'fadeAlpha',
+      property: 'f',
       value: 0,
       duration: 100});
     characters = [
       {
         description: 'ENDS TURN WHITE',
         name: 'BOAR',
-        image: kz.r.images['b'],
+        image: kz.r.i.b,
         unlock_message: '13 WHITE ORBS IN A ROW',
         unlocked: getRecord('max_white_orbs') >= 13,
         zodiac: function (data) {
@@ -41,7 +41,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR ROW ABOVE',
         name: 'CAT',
-        image: kz.r.images['c'],
+        image: kz.r.i.c,
         unlocked: true,
         zodiac: function (data) {
           var state = data.state;
@@ -65,7 +65,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR LEFT SIDE',
         name: 'DOG',
-        image: kz.r.images['d'],
+        image: kz.r.i.d,
         unlock_message: '169 ORBS SHOT',
         unlocked: getRecord('total_orbs') >= 169,
         zodiac: function (data) {
@@ -83,7 +83,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR 4 ON ENDS',
         name: 'DRAGON',
-        image: kz.r.images['e'],
+        image: kz.r.i.e,
         unlock_message: 'SCORE 169',
         unlocked: getRecord('max_score') >= 169,
         zodiac: function(data) {
@@ -114,7 +114,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR 12 RANDOM',
         name: 'HARE',
-        image: kz.r.images['f'],
+        image: kz.r.i.f,
         unlock_message: 'REACH LEVEL 13',
         unlocked: getRecord('max_level') >= 13,
         zodiac: function(data) {
@@ -144,7 +144,7 @@ var scene_character_select = (function () {
       {
         description: 'SCORE +2',
         name: 'HORSE',
-        image: kz.r.images['g'],
+        image: kz.r.i.g,
         unlock_message: 'ZODIAC 13 TIMES',
         unlocked: getRecord('total_zodiac') >= 13,
         zodiac: function(data) {
@@ -154,7 +154,7 @@ var scene_character_select = (function () {
       {
         description: 'DELAY ROW DROP',
         name: 'MONKEY',
-        image: kz.r.images['h'],
+        image: kz.r.i.h,
         unlock_message: 'ZODIAC 169 TIMES',
         unlocked: getRecord('total_zodiac') >= 169,
         zodiac: function (data) {
@@ -169,7 +169,7 @@ var scene_character_select = (function () {
       {
         description: 'ENDS TURN BLACK',
         name: 'OX',
-        image: kz.r.images['i'],
+        image: kz.r.i.i,
         unlock_message: '13 BLACK ORBS IN A ROW',
         unlocked: getRecord('max_black_orbs') >= 13,
         zodiac: function (data) {
@@ -190,7 +190,7 @@ var scene_character_select = (function () {
       {
         description: 'NEXT ALL WHITE',
         name: 'RAT',
-        image: kz.r.images['k'],
+        image: kz.r.i.k,
         unlock_message: '1313 ORBS SHOT',
         unlocked: getRecord('total_orbs') >= 1313,
         zodiac: function (data) {
@@ -202,7 +202,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR RIGHT SIDE',
         name: 'ROOSTER',
-        image: kz.r.images['l'],
+        image: kz.r.i.l,
         unlock_message: 'SURVIVE 13 MINUTES',
         unlocked: getRecord('max_time') >= 13*60,
         zodiac: function (data) {
@@ -221,7 +221,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR TOP ROW',
         name: 'SHEEP',
-        image: kz.r.images['m'],
+        image: kz.r.i.m,
         unlock_message: 'SCORE 13',
         unlocked: getRecord('max_score') >= 13,
         zodiac: function (data) {
@@ -242,7 +242,7 @@ var scene_character_select = (function () {
       {
         description: 'NEXT ALL BLACK',
         name: 'SNAKE',
-        image: kz.r.images['n'],
+        image: kz.r.i.n,
         unlock_message: 'PLAY 13 GAMES',
         unlocked: getRecord('play_count') >= 13,
         zodiac: function (data) {
@@ -254,7 +254,7 @@ var scene_character_select = (function () {
       {
         description: 'SCORE +LEVEL/3',
         name: 'TIGER',
-        image: kz.r.images['o'],
+        image: kz.r.i.o,
         unlock_message: '169 ROWS CLEARED',
         unlocked: getRecord('total_rows') >= 169,
         zodiac: function (data) {
@@ -264,7 +264,7 @@ var scene_character_select = (function () {
       {
         description: '',
         name: 'RANDOM',
-        image: kz.r.images['p'],
+        image: kz.r.i.p,
         unlocked: true
       }
     ];
@@ -306,14 +306,14 @@ var scene_character_select = (function () {
     if (Math.floor(now/200) % 3) {
       kz.x.strokeStyle = '#fff';
       kz.x.lineWidth = 1;
-      kz.x.strokeRect((state.selected%2)*49 + 10, Math.floor(state.selected/2)*49 + 20, 50, 50) ;
+      kz.x.strokeRect((state.s%2)*49 + 10, Math.floor(state.s/2)*49 + 20, 50, 50) ;
     }
     kz.x.textAlign = 'right';
     kz.x.textBaseline = 'center';
     kz.x.font = '24px f';
     kz.x.fillStyle = 'white';
     kz.x.fillText(
-      characters[state.selected].name,
+      characters[state.s].name,
       kz.v.width - 10,
       330
     );
@@ -321,9 +321,9 @@ var scene_character_select = (function () {
     kz.x.textBaseline = 'center';
     kz.x.font = '16px f';
     kz.x.fillStyle = 'white';
-    if (characters[state.selected].unlocked) {
+    if (characters[state.s].unlocked) {
       kz.x.fillText(
-        characters[state.selected].description,
+        characters[state.s].description,
         kz.v.width - 10,
         360
       );
@@ -331,12 +331,12 @@ var scene_character_select = (function () {
       kz.x.font = '12px f';
       kz.x.fillStyle = '#50605b';
       kz.x.fillText(
-        characters[state.selected].unlock_message,
+        characters[state.s].unlock_message,
         kz.v.width - 10,
         360
       );
     }
-    kz.x.fillStyle = 'rgba(0,0,0,'+state.fadeAlpha+')';
+    kz.x.fillStyle = 'rgba(0,0,0,'+state.f+')';
     kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
@@ -345,27 +345,27 @@ var scene_character_select = (function () {
       if (state.exiting) continue;
       if (kz.events[ii].kztype == 'keypress') {
         if (kz.events[ii].which == kz.K.R) {
-          state.selected = Math.min(13, state.selected+1);
+          state.s = Math.min(13, state.s+1);
         } else if (kz.events[ii].which == kz.K.D) {
-          state.selected = Math.min(13, state.selected+2);
+          state.s = Math.min(13, state.s+2);
         } else if (kz.events[ii].which == kz.K.L) {
-          state.selected = Math.max(0, state.selected-1);
+          state.s = Math.max(0, state.s-1);
         } else if (kz.events[ii].which == kz.K.U) {
-          state.selected = Math.max(0, state.selected-2);
+          state.s = Math.max(0, state.s-2);
         } else if (kz.events[ii].which == kz.K.Z) {
-          if (state.selected == 13) {
-            state.selected = Math.floor(Math.random() * 13);
-            while (!characters[state.selected].unlocked) {
-              state.selected = Math.floor(Math.random() * 13);
+          if (state.s == 13) {
+            state.s = Math.floor(Math.random() * 13);
+            while (!characters[state.s].unlocked) {
+              state.s = Math.floor(Math.random() * 13);
             }
           }
-          if (characters[state.selected].unlocked) {
+          if (characters[state.s].unlocked) {
             kz.r.sounds['sfx_select'].play();
-            character = characters[state.selected];
+            character = characters[state.s];
             state.exiting = true;
             kz.t({
               object: state,
-              property: 'fadeAlpha',
+              property: 'f',
               value: 1,
               duration: 100
             }).then(function () {
@@ -378,7 +378,7 @@ var scene_character_select = (function () {
           state.exiting = true;
           kz.t({
             object: state,
-            property: 'fadeAlpha',
+            property: 'f',
             value: 1,
             duration: 100
           }).then(function () {
