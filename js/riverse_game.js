@@ -96,9 +96,9 @@ var scene_game = (function () {
 
   function pieceTypeImage(piece_type) {
     return [
-      kz.resources.images['piece_red'],
-      kz.resources.images['piece_blue'],
-      kz.resources.images['piece_zodiac']
+      kz.r.images['piece_red'],
+      kz.r.images['piece_blue'],
+      kz.r.images['piece_zodiac']
     ][piece_type-1];
   }
 
@@ -219,7 +219,7 @@ var scene_game = (function () {
   }
 
   function animateClearPieces(pieces) {
-    kz.resources.sounds['sfx_clear'].play();
+    kz.r.sounds['sfx_clear'].play();
     // animate fade away
     // ensure that all row piece animations have finished
     var promise  = [];
@@ -331,7 +331,7 @@ var scene_game = (function () {
   }
 
   function addRow() {
-    kz.resources.sounds['sfx_drop'].play();
+    kz.r.sounds['sfx_drop'].play();
     var new_row = [];
     for (var ii = 0; ii < config.board_width; ii++) {
       var piece_type = randomPieceType(normal_piece_types);
@@ -387,14 +387,14 @@ var scene_game = (function () {
 
   function initialize() {
     incrementRecord('play_count', 1);
-    bgm = kz.resources.sounds['bgm_game'].play(true);
+    bgm = kz.r.sounds['bgm_game'].play(true);
     bgm.mystop = function () {
       if (!bgm.stopped) {bgm.stop(0); bgm.stopped = 1;}
     };
   // initialize graphics
     graphics = {
       background_pattern: kz.context.createPattern(
-        kz.resources.images['background'],
+        kz.r.images['background'],
         'repeat'),
       pause_alpha: 0,
       gameover_background_alpha: 0,
@@ -467,10 +467,10 @@ var scene_game = (function () {
     // initialize player
     state.player = new kz.Entity({
       frames: [
-        kz.resources.images['shooter_0'],
-        kz.resources.images['shooter_1'],
-        kz.resources.images['shooter_2'],
-        kz.resources.images['shooter_3']
+        kz.r.images['shooter_0'],
+        kz.r.images['shooter_1'],
+        kz.r.images['shooter_2'],
+        kz.r.images['shooter_3']
       ],
       frame_lengths: [
         500,
@@ -598,7 +598,7 @@ var scene_game = (function () {
         reverse(this.x, target_y);
 
         piece.actions_promise = piece.actions_promise.then(function () {
-          kz.resources.sounds['sfx_shoot'].play();
+          kz.r.sounds['sfx_shoot'].play();
           return kz.tween({
             object: piece,
             property: 'y',

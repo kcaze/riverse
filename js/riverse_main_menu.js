@@ -94,7 +94,7 @@ var scene_main_menu = (function () {
       if (kz.events[ii].kztype == 'keypress') {
         if (graphics.exiting) continue;
         if (kz.events[ii].which == kz.K.Z) {
-          kz.resources.sounds['sfx_select'].play();
+          kz.r.sounds['sfx_select'].play();
           if (!graphics.state) {
             graphics.state = 1;
           } else {

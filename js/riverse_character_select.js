@@ -20,7 +20,7 @@ var scene_character_select = (function () {
       {
         description: 'ENDS TURN WHITE',
         name: 'BOAR',
-        image: kz.resources.images['character_boar'],
+        image: kz.r.images['character_boar'],
         unlock_message: '13 WHITE ORBS IN A ROW',
         unlocked: getRecord('max_white_orbs') >= 13,
         zodiac: function (data) {
@@ -41,7 +41,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR ROW ABOVE',
         name: 'CAT',
-        image: kz.resources.images['character_cat'],
+        image: kz.r.images['character_cat'],
         unlocked: true,
         zodiac: function (data) {
           var state = data.state;
@@ -65,7 +65,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR LEFT SIDE',
         name: 'DOG',
-        image: kz.resources.images['character_dog'],
+        image: kz.r.images['character_dog'],
         unlock_message: '169 ORBS SHOT',
         unlocked: getRecord('total_orbs') >= 169,
         zodiac: function (data) {
@@ -83,7 +83,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR 4 ON ENDS',
         name: 'DRAGON',
-        image: kz.resources.images['character_dragon'],
+        image: kz.r.images['character_dragon'],
         unlock_message: 'SCORE 169',
         unlocked: getRecord('max_score') >= 169,
         zodiac: function(data) {
@@ -114,7 +114,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR 12 RANDOM',
         name: 'HARE',
-        image: kz.resources.images['character_hare'],
+        image: kz.r.images['character_hare'],
         unlock_message: 'REACH LEVEL 13',
         unlocked: getRecord('max_level') >= 13,
         zodiac: function(data) {
@@ -144,7 +144,7 @@ var scene_character_select = (function () {
       {
         description: 'SCORE +2',
         name: 'HORSE',
-        image: kz.resources.images['character_horse'],
+        image: kz.r.images['character_horse'],
         unlock_message: 'ZODIAC 13 TIMES',
         unlocked: getRecord('total_zodiac') >= 13,
         zodiac: function(data) {
@@ -154,7 +154,7 @@ var scene_character_select = (function () {
       {
         description: 'DELAY ROW DROP',
         name: 'MONKEY',
-        image: kz.resources.images['character_monkey'],
+        image: kz.r.images['character_monkey'],
         unlock_message: 'ZODIAC 169 TIMES',
         unlocked: getRecord('total_zodiac') >= 169,
         zodiac: function (data) {
@@ -169,7 +169,7 @@ var scene_character_select = (function () {
       {
         description: 'ENDS TURN BLACK',
         name: 'OX',
-        image: kz.resources.images['character_ox'],
+        image: kz.r.images['character_ox'],
         unlock_message: '13 BLACK ORBS IN A ROW',
         unlocked: getRecord('max_black_orbs') >= 13,
         zodiac: function (data) {
@@ -190,7 +190,7 @@ var scene_character_select = (function () {
       {
         description: 'NEXT ALL WHITE',
         name: 'RAT',
-        image: kz.resources.images['character_rat'],
+        image: kz.r.images['character_rat'],
         unlock_message: '1313 ORBS SHOT',
         unlocked: getRecord('total_orbs') >= 1313,
         zodiac: function (data) {
@@ -202,7 +202,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR RIGHT SIDE',
         name: 'ROOSTER',
-        image: kz.resources.images['character_rooster'],
+        image: kz.r.images['character_rooster'],
         unlock_message: 'SURVIVE 13 MINUTES',
         unlocked: getRecord('max_time') >= 13*60,
         zodiac: function (data) {
@@ -221,7 +221,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR TOP ROW',
         name: 'SHEEP',
-        image: kz.resources.images['character_sheep'],
+        image: kz.r.images['character_sheep'],
         unlock_message: 'SCORE 13',
         unlocked: getRecord('max_score') >= 13,
         zodiac: function (data) {
@@ -242,7 +242,7 @@ var scene_character_select = (function () {
       {
         description: 'NEXT ALL BLACK',
         name: 'SNAKE',
-        image: kz.resources.images['character_snake'],
+        image: kz.r.images['character_snake'],
         unlock_message: 'PLAY 13 GAMES',
         unlocked: getRecord('play_count') >= 13,
         zodiac: function (data) {
@@ -254,7 +254,7 @@ var scene_character_select = (function () {
       {
         description: 'SCORE +LEVEL/3',
         name: 'TIGER',
-        image: kz.resources.images['character_tiger'],
+        image: kz.r.images['character_tiger'],
         unlock_message: '169 ROWS CLEARED',
         unlocked: getRecord('total_rows') >= 169,
         zodiac: function (data) {
@@ -264,7 +264,7 @@ var scene_character_select = (function () {
       {
         description: '',
         name: 'RANDOM',
-        image: kz.resources.images['character_random'],
+        image: kz.r.images['character_random'],
         unlocked: true
       }
     ];
@@ -360,7 +360,7 @@ var scene_character_select = (function () {
             }
           }
           if (characters[state.selected].unlocked) {
-            kz.resources.sounds['sfx_select'].play();
+            kz.r.sounds['sfx_select'].play();
             character = characters[state.selected];
             state.exiting = true;
             kz.tween({
@@ -372,7 +372,7 @@ var scene_character_select = (function () {
               kz.run(scene_game);
             });
           } else {
-            kz.resources.sounds['sfx_denied'].play();
+            kz.r.sounds['sfx_denied'].play();
           }
         } else if (kz.events[ii].which == kz.K.X) {
           state.exiting = true;

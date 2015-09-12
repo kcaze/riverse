@@ -2,6 +2,8 @@
 // I -- loadImages
 // S -- loadSounds
 // K -- KEYS
+// T -- TOUCHES
+// r -- resources
 
 var kz = {};
 
@@ -9,14 +11,14 @@ var kz = {};
 // queue is an object with names as keys and image paths as values
 kz.L = function (resources) {
   var promises = [];
-  kz.resources = {};
+  kz.r = {};
 
   promises.push(kz.I(resources.images));
   promises.push(kz.S(resources.sounds));
 
   return Promise.all(promises)
     .then(function () {
-      return kz.resources;
+      return kz.r;
     });
 };
 
@@ -47,8 +49,8 @@ kz.I = function (queue) {
 
   return Promise.all(promises)
                 .then(function () {
-                  kz.resources.images = images;
-                  return kz.resources.images;
+                  kz.r.images = images;
+                  return kz.r.images;
                 });
 };
 
@@ -83,8 +85,8 @@ kz.S = function (queue) {
 
   return Promise.all(promises)
                 .then(function () {
-                  kz.resources.sounds = sounds;
-                  return kz.resources.sounds;
+                  kz.r.sounds = sounds;
+                  return kz.r.sounds;
                 });
 };
 /*$ Functions for loading resources */
@@ -106,7 +108,7 @@ for (var ii = 0; ii < 256; ii++) {
 /*$ Keys */
 
 /*^ Touches */
-kz.TOUCHES = {};
+kz.T = {};
 /*$ Touches */
 
 /*^ Tween */
@@ -287,8 +289,8 @@ kz.initialize = function (canvas_id) {
     //event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
-      if (kz.TOUCHES[touch.identifier]) continue;
-      kz.TOUCHES[touch.identifier] = {
+      if (kz.T[touch.identifier]) continue;
+      kz.T[touch.identifier] = {
         initial: {x: touch.screenX, y: touch.screenY},
         current: {x: touch.screenX, y: touch.screenY}
       };
@@ -299,23 +301,23 @@ kz.initialize = function (canvas_id) {
     event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
-      if (!kz.TOUCHES[touch.identifier]) continue;
-      kz.TOUCHES[touch.identifier].current = {x: touch.screenX, y:touch.screenY};
+      if (!kz.T[touch.identifier]) continue;
+      kz.T[touch.identifier].current = {x: touch.screenX, y:touch.screenY};
     }
   });
 
   document.addEventListener('touchend', function(event) {
     event.preventDefault();
-    for (var id in kz.TOUCHES) {
+    for (var id in kz.T) {
       var found = false;
       for (var ii = 0; ii < event.touches.length; ii++) {
         if (event.touches[ii].identifier == id) found = true;
       }
       if (found) continue;
-      var start_x = kz.TOUCHES[id].initial.x;
-      var start_y = kz.TOUCHES[id].initial.y;
-      var end_x = kz.TOUCHES[id].current.x;
-      var end_y = kz.TOUCHES[id].current.y;
+      var start_x = kz.T[id].initial.x;
+      var start_y = kz.T[id].initial.y;
+      var end_x = kz.T[id].current.x;
+      var end_y = kz.T[id].current.y;
       if (Math.abs(start_x - end_x) + Math.abs(start_y - end_y) < 20) {
         kz.events.push({
           kztype: 'keypress',
@@ -352,7 +354,7 @@ kz.initialize = function (canvas_id) {
       }
 
 
-      delete kz.TOUCHES[id];
+      delete kz.T[id];
     }
   });
 };
