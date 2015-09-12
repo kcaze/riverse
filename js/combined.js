@@ -2410,7 +2410,7 @@ var sg = (function () {
         $.r.i.u,
         $.r.i.v,
         $.r.i.w,
-        $.r.i.u
+        $.r.i.v
       ],
       frame_lengths: [
         500,
@@ -2690,8 +2690,6 @@ var sg = (function () {
     i_x.font = '20px f';
     i_x.textBaseline = 'bottom';
     i_x.fillText(character.name, 48, 101);
-
-    i_x.font = '20px f';
     i_x.fillText('' + $S.level, 48, 316);
     var score_string = '' + $S.score;
         // pad with zeroes
@@ -2758,8 +2756,6 @@ var sg = (function () {
 
   function drawPause(now) {
     $.x.clearAll();
-    $.x.save();
-    $.x.globalAlpha = 1;
     $.x.drawImage(
       p_v,
       0,
@@ -2773,8 +2769,7 @@ var sg = (function () {
       $.v.width,
       $.v.height
     );
-    $.x.restore();
-    $.x.save();
+    $.x.globalAlpha = 1;
     $.x.textAlign = 'center';
     $.x.textBaseline = 'center';
     $.x.font = '24px f';
@@ -2784,7 +2779,6 @@ var sg = (function () {
     $.x.fillText('RESTART', $.v.width/2, $.v.height/2);
     $.x.fillStyle = pause_choice == 2 ? '#fff' : '#666';
     $.x.fillText('QUIT', $.v.width/2, $.v.height/2+48);
-    $.x.restore();
     $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
     $.x.fillRect(0,0,$.v.width,$.v.height);
   }
@@ -2799,7 +2793,7 @@ var sg = (function () {
       0
     );
     $.x.globalAlpha = gfx.gba;
-    $.x.fillStyle = 'rgb(142, 212, 165)';
+    $.x.fillStyle = '#8ed4a5';
     $.x.fillRect(
       10,
       ($.v.height / 2) - 28,
@@ -2845,14 +2839,16 @@ var sg = (function () {
         if ($S.exiting) continue;
         if ($.events[ii].which == $.K.X) {
           resume();
-        } else if ($.events[ii].which == $.K.D) {
+        }
+        if ($.events[ii].which == $.K.D) {
           pause_choice = Math.min(2, pause_choice+1);
-        } else if ($.events[ii].which == $.K.U) {
+        }
+        if ($.events[ii].which == $.K.U) {
           pause_choice = Math.max(0, pause_choice-1);
-        } else if ($.events[ii].which == $.K.Z) {
+        }
+        if ($.events[ii].which == $.K.Z) {
           resume();
-          if (pause_choice == 0) {
-          } else if (pause_choice == 1) {
+          if (pause_choice == 1) {
             $S.exiting = true;
             $.t({
               o: gfx,
@@ -2861,7 +2857,7 @@ var sg = (function () {
               d: 100}).then(function () {
                 $.run(sg);
               });
-          } else {
+          } else if (pause_choice) {
             $S.exiting = true;
             $.t({
               o: gfx,
