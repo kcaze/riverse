@@ -4,7 +4,7 @@
 
 function loadJSFXR(data, resolve) {
   var buff = base64ToArrayBuffer(data.substr(22));
-  kz.audio_context.decodeAudioData(buff, resolve);
+  kz.a.decodeAudioData(buff, resolve);
 }
 
 function loadSonant(data, resolve) {
@@ -14,28 +14,27 @@ function loadSonant(data, resolve) {
 
 var resources = {
   images: {
-    background: {x:36,y:263,w:32,h:32},
-    character_boar: {x:0,y:0,w:50,h:50,W:37,H:39,f:1},
-    character_cat: {x:37,y:0,w:50,h:50,W:42,H:38,f:1},
-    character_dog: {x:0,y:39,w:50,h:50,W:40,H:42,f:1},
-    character_dragon: {x:40,y:38,w:50,h:50,W:45,H:40,f:1},
-    character_hare: {x:0,y:81,w:50,h:50,W:35,H:40,f:1},
-    character_horse: {x:35,y:81,w:50,h:50,W:41,H:43,f:1},
-    character_monkey: {x:0,y:121,w:50,h:50,W:30,H:44,f:1},
-    character_ox: {x:30,y:124,w:50,h:50,W:42,H:32,f:1},
-    character_rat: {x:0,y:165,w:50,h:50,W:41,H:39,f:1},
-    character_rooster: {x:41,y:156,w:50,h:50,W:35,H:36,f:1},
-    character_sheep: {x:0,y:205,w:50,h:50,W:43,H:43,f:1},
-    character_snake: {x:43,y:192,w:50,h:50,W:34,H:34,f:1},
-    character_tiger: {x:0,y:248,w:50,h:50,W:36,H:41,f:1},
-    character_random: {x:43,y:226,w:50,h:50,W:21,H:37,f:1},
-    piece_blue: {x:65,y:226,w:17,h:17},
-    piece_red: {x:64,y:243,w:17,h:17},
-    piece_zodiac: {x:72,y:124,w:17,h:17},
-    shooter_0: {x:68,y:260,w:9,h:22,W:9,H:22,f:1},
-    shooter_1: {x:76,y:81,w:9,h:22,W:5,H:22,f:1},
-    shooter_2: {x:76,y:156,w:9,h:22,W:1,H:22,f:1},
-    shooter_3: {x:68,y:260,w:9,h:22,W:9,H:22,f:1}
+    a: {x:36,y:263,w:32,h:32}, //background
+    b: {x:0,y:0,w:50,h:50,W:37,H:39,f:1}, //character_boar
+    c: {x:37,y:0,w:50,h:50,W:42,H:38,f:1}, //character_cat
+    d: {x:0,y:39,w:50,h:50,W:40,H:42,f:1}, //character_dog
+    e: {x:40,y:38,w:50,h:50,W:45,H:40,f:1}, //character_dragon
+    f: {x:0,y:81,w:50,h:50,W:35,H:40,f:1}, //character_hare
+    g: {x:35,y:81,w:50,h:50,W:41,H:43,f:1}, //character_horse
+    h: {x:0,y:121,w:50,h:50,W:30,H:44,f:1}, //character_monkey
+    i: {x:30,y:124,w:50,h:50,W:42,H:32,f:1}, //character_ox
+    k: {x:0,y:165,w:50,h:50,W:41,H:39,f:1}, //character_rat
+    l: {x:41,y:156,w:50,h:50,W:35,H:36,f:1}, //character_rooster
+    m: {x:0,y:205,w:50,h:50,W:43,H:43,f:1}, //character_sheep
+    n: {x:43,y:192,w:50,h:50,W:34,H:34,f:1}, //character_snake
+    o: {x:0,y:248,w:50,h:50,W:36,H:41,f:1}, //chraacter_tiger
+    p: {x:43,y:226,w:50,h:50,W:21,H:37,f:1}, //character_random
+    r: {x:65,y:226,w:17,h:17}, // piece_black
+    s: {x:64,y:243,w:17,h:17}, // piece_white
+    t: {x:72,y:124,w:17,h:17}, //piece_zodiac
+    u: {x:68,y:260,w:9,h:22,W:9,H:22,f:1}, //shooter_0
+    v: {x:76,y:81,w:9,h:22,W:5,H:22,f:1}, // shooter_1
+    w: {x:76,y:156,w:9,h:22,W:1,H:22,f:1}, //shooter_2
   },
   sounds: {
     'sfx_shoot': {
@@ -1301,8 +1300,8 @@ var resources = {
   }
 };
 
-window.onload = function() {
-  var fontHack = document.getElementById('fontHack');
+$W.onload = function() {
+  var fontHack = $D.getElementById('fontHack');
   fontHack.parentNode.removeChild(fontHack);
 
   kz.initialize('canvas');

@@ -6,6 +6,8 @@
 // r -- resources
 // x -- context
 // v -- canvas
+// t -- tween
+// a -- audio_context
 
 var kz = {};
 
@@ -31,7 +33,7 @@ kz.I = function (queue) {
   for (var key in queue) {
     promises.push(new Promise(function(resolve) {
       var c = queue[key];
-      var canvas = document.createElement('canvas');
+      var canvas = $D.createElement('canvas');
       images[key] = canvas;
       var image = new Image();
       image.addEventListener('load', function() {
@@ -56,7 +58,7 @@ kz.I = function (queue) {
                 });
 };
 
-kz.audio_context = new AudioContext();
+kz.a = new AudioContext();
 kz.S = function (queue) {
   var sounds = {};
   var promises = [];
@@ -71,10 +73,10 @@ kz.S = function (queue) {
         sounds[name] = {
           play: function (loop) {
             loop = typeof loop == undefined ? false : loop;
-            var source = kz.audio_context.createBufferSource();
+            var source = kz.a.createBufferSource();
             source.loop = loop;
             source.buffer = this.buffer;
-            source.connect(kz.audio_context.destination);
+            source.connect(kz.a.destination);
             source.start(0);
             return source;
           },
@@ -131,7 +133,7 @@ kz.T = {};
  *   }
  *   Only one of 'rate' or 'duration' should be set.
  */
-kz.tween = function (tween) {
+kz.t = function (tween) {
   var start_time = performance.now();
   var old_value = tween.object[tween.property];
   var new_value = tween.value;
@@ -148,10 +150,10 @@ kz.tween = function (tween) {
         resolve();
       } else {
         tween.object[tween.property] = t * new_value + (1 - t) * old_value;
-        window.requestAnimationFrame(update);
+        $W.requestAnimationFrame(update);
       }
     }
-    window.requestAnimationFrame(update);
+    $W.requestAnimationFrame(update);
   });
 };
 /*$ Tween */
@@ -258,7 +260,7 @@ kz.Scene.prototype.exit = function () {
 
 /*^ Essential functions such as initialize, tick, and run */
 kz.initializeCanvas = function (canvas_id) {
-  kz.v = document.getElementById(canvas_id);
+  kz.v = $D.getElementById(canvas_id);
   kz.x = kz.v.getContext('2d');
   kz.x.clearAll = function () {
     kz.x.clearRect(0, 0, kz.v.width, kz.v.height);
@@ -268,7 +270,7 @@ kz.initializeCanvas = function (canvas_id) {
 kz.initialize = function (canvas_id) {
   kz.initializeCanvas(canvas_id);
 
-  document.addEventListener('keydown', function(event) {
+  $D.addEventListener('keydown', function(event) {
     event.preventDefault();
     if (kz.keys_status[event.which] == 0) {
       kz.keys_status[event.which] = 1;
@@ -279,7 +281,7 @@ kz.initialize = function (canvas_id) {
     kz.events.push(event);
   });
 
-  document.addEventListener('keyup', function(event) {
+  $D.addEventListener('keyup', function(event) {
     event.preventDefault();
     event.kztype = 'keyup';
     kz.keys_status[event.which] = 0;
@@ -287,7 +289,7 @@ kz.initialize = function (canvas_id) {
   });
 
   // touch events
-  document.addEventListener('touchstart', function(event) {
+  $D.addEventListener('touchstart', function(event) {
     //event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
@@ -299,7 +301,7 @@ kz.initialize = function (canvas_id) {
     }
   });
 
-  document.addEventListener('touchmove', function(event) {
+  $D.addEventListener('touchmove', function(event) {
     event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
@@ -308,7 +310,7 @@ kz.initialize = function (canvas_id) {
     }
   });
 
-  document.addEventListener('touchend', function(event) {
+  $D.addEventListener('touchend', function(event) {
     event.preventDefault();
     for (var id in kz.T) {
       var found = false;
@@ -367,12 +369,12 @@ kz.tick = function (now) {
   kz.scene.preUpdate(kz.performance.now());
   kz.scene.draw(kz.performance.now());
   kz.scene.postUpdate(kz.performance.now());
-  tickID = window.requestAnimationFrame(kz.tick);
+  tickID = $W.requestAnimationFrame(kz.tick);
 };
 
 kz.run = function (scene) {
   if (tickID) {
-    window.cancelAnimationFrame(tickID);
+    $W.cancelAnimationFrame(tickID);
   }
   if (kz.scene) {
     kz.scene.exit();
@@ -382,7 +384,7 @@ kz.run = function (scene) {
   kz.scene = scene;
   kz.scene.initialize();
   kz.alive = true;
-  tickID = window.requestAnimationFrame(kz.tick);
+  tickID = $W.requestAnimationFrame(kz.tick);
 };
 
 kz.performance = {

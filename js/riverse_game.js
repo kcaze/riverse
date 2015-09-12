@@ -9,10 +9,10 @@ var scene_game = (function () {
     next_length: 8,
     next_row_interval: 20000
   };
-  var board_canvas = document.createElement('canvas');
-  var info_canvas = document.createElement('canvas');
-  var pause_canvas = document.createElement('canvas');
-  var gameover_canvas = document.createElement('canvas');
+  var board_canvas = $D.createElement('canvas');
+  var info_canvas = $D.createElement('canvas');
+  var pause_canvas = $D.createElement('canvas');
+  var gameover_canvas = $D.createElement('canvas');
   board_canvas.width = $c.w*$c.g;
   board_canvas.height = 390;
   info_canvas.width = 96;
@@ -25,14 +25,7 @@ var scene_game = (function () {
   var info_context = info_canvas.getContext('2d');
   var gameover_context = gameover_canvas.getContext('2d');
   var pause_context = pause_canvas.getContext('2d');
-  var PieceTypes = {
-    Empty: 0,
-    Red: 1,
-    Blue: 2,
-    Zodiac: 3
-  };
-  var normal_piece_types = [PieceTypes.Red, PieceTypes.Blue];
-
+  var normal_piece_types = [1, 2];
   var state;
   var pause_choice;
   var graphics;
@@ -53,7 +46,7 @@ var scene_game = (function () {
       0,
       0
     );
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'pause_alpha',
       value: 0.8,
@@ -62,7 +55,7 @@ var scene_game = (function () {
   }
 
   function resume() {
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'pause_alpha',
       value: 0,
@@ -96,9 +89,9 @@ var scene_game = (function () {
 
   function pieceTypeImage(piece_type) {
     return [
-      kz.r.images['piece_red'],
-      kz.r.images['piece_blue'],
-      kz.r.images['piece_zodiac']
+      kz.r.images['s'],
+      kz.r.images['r'],
+      kz.r.images['t']
     ][piece_type-1];
   }
 
@@ -128,13 +121,13 @@ var scene_game = (function () {
       0
     );
     // fade to black
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'gameover_background_alpha',
       value: 1,
       duration: 1000
     }).then(function () {
-      return kz.tween({
+      return kz.t({
         object: graphics,
         property: 'gameover_text_alpha',
         value: 1,
@@ -154,7 +147,7 @@ var scene_game = (function () {
       var zodiacCounter = 0;
       var cleared = true;
       for (var xx = 0; xx < $c.w; xx++) {
-        if (state.board[yy][xx].piece_type == PieceTypes.Zodiac) {
+        if (state.board[yy][xx].piece_type == 3) {
           zodiacCounter++;
         }
         // wow, much hack. this works because zodiac = 3, so it ANDs with
@@ -196,7 +189,7 @@ var scene_game = (function () {
     // update of underlying board
     for (xx = 0; xx < $c.w; xx++) {
       state.board[row][xx] = {
-        piece_type: PieceTypes.Empty
+        piece_type:0
       };
     }
 
@@ -229,7 +222,7 @@ var scene_game = (function () {
     promise = Promise.all(promise);
     pieces.forEach(function (piece) {
       var piecePromise = promise.then(function () {
-        return kz.tween({
+        return kz.t({
           object: piece,
           property: 'alpha',
           value: 0,
@@ -248,13 +241,13 @@ var scene_game = (function () {
         if (state.board[yy][xx].piece_type && !state.board[yy-1][xx].piece_type) {
           state.board[yy-1][xx] = state.board[yy][xx];
           state.board[yy][xx] = {
-            piece_type: PieceTypes.Empty
+            piece_type:0
           };
           var piece = state.board[yy-1][xx].piece;
           (function (piece) {
             // ensure we start the animation AFTER the row fades away
             piece.actions_promise = piece.actions_promise.then(function () {
-              return kz.tween({
+              return kz.t({
                 object: piece,
                 property: 'y',
                 value: piece.y - $c.g,
@@ -272,7 +265,7 @@ var scene_game = (function () {
     var dys = [0, 0, 1, -1, 1, -1, 1, -1];
     var piece_type = state.board[board_y][board_x].piece_type;
 
-    if (piece_type == PieceTypes.Empty || piece_type == PieceTypes.Zodiac) return
+    if (piece_type == 0|| piece_type == 3) return
 
     for (var ii = 0; ii < 8; ii++) {
       var dx = dxs[ii];
@@ -285,8 +278,8 @@ var scene_game = (function () {
              && 0 <= y
              && x < $c.w
              && y < $c.h) {
-        if (state.board[y][x].piece_type == PieceTypes.Empty
-          || state.board[y][x].piece_type == PieceTypes.Zodiac) break;
+        if (state.board[y][x].piece_type ==0
+          || state.board[y][x].piece_type == 3) break;
         if (state.board[y][x].piece_type == piece_type) {
           reverse = true;
           break;
@@ -315,7 +308,7 @@ var scene_game = (function () {
     piece.actions_promise = piece.actions_promise.then(function () {
       return new Promise(function(resolve) {
         piece.blend_type = to_type;
-        kz.tween({
+        kz.t({
           object: piece,
           property: 'blend_alpha',
           value: 1,
@@ -357,7 +350,7 @@ var scene_game = (function () {
     // update board
     for (var xx = 0; xx < $c.w; xx++) {
       if (state.board[$c.h-1][xx].piece_type
-          != PieceTypes.Empty) {
+          != 0) {
         lose();
         return;
       }
@@ -373,7 +366,7 @@ var scene_game = (function () {
         var piece = square.piece;
         if (!piece) return;
         piece.actions_promise = piece.actions_promise.then(function () {
-          return kz.tween({
+          return kz.t({
             object: piece,
             property: 'y',
             value: piece.y + $c.g,
@@ -394,14 +387,14 @@ var scene_game = (function () {
   // initialize graphics
     graphics = {
       background_pattern: kz.x.createPattern(
-        kz.r.images['background'],
+        kz.r.images['a'],
         'repeat'),
       pause_alpha: 0,
       gameover_background_alpha: 0,
       gameover_text_alpha: 0,
       fadeAlpha: 1
     }
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'fadeAlpha',
       value: 0,
@@ -459,7 +452,7 @@ var scene_game = (function () {
           }
         } else {
           state.board[yy].push({
-            piece_type: PieceTypes.Empty
+            piece_type:0
           });
         }
       }
@@ -468,10 +461,10 @@ var scene_game = (function () {
     // initialize player
     state.player = new kz.Entity({
       frames: [
-        kz.r.images['shooter_0'],
-        kz.r.images['shooter_1'],
-        kz.r.images['shooter_2'],
-        kz.r.images['shooter_3']
+        kz.r.images['u'],
+        kz.r.images['v'],
+        kz.r.images['w'],
+        kz.r.images['u']
       ],
       frame_lengths: [
         500,
@@ -501,7 +494,7 @@ var scene_game = (function () {
         // draw aiming line
         var h;
         for (h = $c.h-1; h >= 0; h--) {
-          if (state.board[h][this.x].piece_type != PieceTypes.Empty) {
+          if (state.board[h][this.x].piece_type != 0) {
             break;
           }
         }
@@ -536,7 +529,7 @@ var scene_game = (function () {
         if (this.x+dx >= 0 && this.x+dx < $c.w) {
           this.x += dx;
           this.actions_promise = this.actions_promise.then(function () {
-            return kz.tween({
+            return kz.t({
               object: this,
               property: 'sprite_x',
               value: this.sprite_x + dx*$c.g,
@@ -550,7 +543,7 @@ var scene_game = (function () {
       next: [],
       shoot : function() {
         if (state.board[$c.h-1][this.x].piece_type
-            != PieceTypes.Empty) {
+            != 0) {
           lose();
           return;
         }
@@ -560,16 +553,16 @@ var scene_game = (function () {
         var piece_type = this.next.shift();
         var next_piece_type = Math.random()*16 > 1
           ? randomPieceType(normal_piece_types)
-          : PieceTypes.Zodiac;
+          : 3;
         this.next.push(next_piece_type);
 
         // update consecutive counts
         if (state.consecutive[piece_type]) {
           state.consecutive[piece_type]++;
         } else {
-          state.consecutive[PieceTypes.Red] = 0;
-          state.consecutive[PieceTypes.Blue] = 0;
-          state.consecutive[PieceTypes.Zodiac] = 0;
+          state.consecutive[1] = 0;
+          state.consecutive[2] = 0;
+          state.consecutive[3] = 0;
           state.consecutive[piece_type] = 1;
         }
         var pieceTypeRecordMap = {
@@ -582,7 +575,7 @@ var scene_game = (function () {
         var target_y = $c.h-1;
         while (target_y > 0) {
           if (state.board[target_y-1][this.x].piece_type
-              != PieceTypes.Empty) {
+              != 0) {
             break;
           }
           target_y--;
@@ -600,7 +593,7 @@ var scene_game = (function () {
 
         piece.actions_promise = piece.actions_promise.then(function () {
           kz.r.sounds['sfx_shoot'].play();
-          return kz.tween({
+          return kz.t({
             object: piece,
             property: 'y',
             value: board_to_piece(target_y),
@@ -612,7 +605,7 @@ var scene_game = (function () {
     for (var ii = 0; ii < 8; ii++) {
       state.player.next.push(randomPieceType(normal_piece_types));
       if (Math.random()*16 < 1) {
-        state.player.next[ii] = PieceTypes.Zodiac;
+        state.player.next[ii] = 3;
       }
     }
   }
@@ -889,7 +882,7 @@ var scene_game = (function () {
           kz.events[ii].which == kz.K.Z &&
           state.can_restart) {
         state.exiting = true;
-        kz.tween({
+        kz.t({
           object: graphics,
           property: 'fadeAlpha',
           value: 1,
@@ -916,7 +909,7 @@ var scene_game = (function () {
           if (pause_choice == 0) {
           } else if (pause_choice == 1) {
             state.exiting = true;
-            kz.tween({
+            kz.t({
               object: graphics,
               property: 'fadeAlpha',
               value: 1,
@@ -925,7 +918,7 @@ var scene_game = (function () {
               });
           } else {
             state.exiting = true;
-            kz.tween({
+            kz.t({
               object: graphics,
               property: 'fadeAlpha',
               value: 1,

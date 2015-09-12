@@ -37,6 +37,11 @@ document.addEventListener('touchstart', function(event) {
 	source.connect(kz.audio_context.destination);
 	source.noteOn(0);
 }, false);
+//$a = sonantx
+//M = MusicGenerator
+//A = AudioGenerator
+//S = SoundGenerator
+
 // a -- osc2_waveform
 // b -- osc2_xenv
 // c -- fx_pan_amt
@@ -100,10 +105,10 @@ document.addEventListener('touchstart', function(event) {
 // 3. This notice may not be removed or altered from any source
 //    distribution.
 
-var sonantx;
+var $x;
 (function() {
 "use strict";
-sonantx = {};
+$x = {};
 
 var WAVE_SPS = 44100;                    // Samples per second
 var WAVE_CHAN = 2;                       // Channels
@@ -213,11 +218,11 @@ function applyDelay(chnBuf, waveSamples, instr, rowLen, callBack) {
 /**
  * @constructor
  */
-sonantx.AudioGenerator = function(mixBuf) {
+$x.A = function(mixBuf) {
     this.mixBuf = mixBuf;
     this.waveSize = mixBuf.length / WAVE_CHAN / 2;
 };
-sonantx.AudioGenerator.prototype.getWave = function() {
+$x.A.prototype.getWave = function() {
     var mixBuf = this.mixBuf;
     var waveSize = this.waveSize;
     // Local variables
@@ -251,14 +256,14 @@ sonantx.AudioGenerator.prototype.getWave = function() {
     }
     return wave;
 };
-sonantx.AudioGenerator.prototype.getAudio = function() {
+$x.A.prototype.getAudio = function() {
     var wave = this.getWave();
     var a = new Audio("data:audio/wav;base64," + btoa(wave));
     a.preload = "none";
     a.load();
     return a;
 };
-sonantx.AudioGenerator.prototype.getAudioBuffer = function(callBack) {
+$x.A.prototype.getAudioBuffer = function(callBack) {
     if (audioCtx === null)
         audioCtx = new AudioContext();
     var mixBuf = this.mixBuf;
@@ -293,7 +298,7 @@ sonantx.AudioGenerator.prototype.getAudioBuffer = function(callBack) {
 /**
  * @constructor
  */
-sonantx.SoundGenerator = function(instr, rowLen) {
+$x.S = function(instr, rowLen) {
     this.instr = instr;
     this.rowLen = rowLen || 5605;
 
@@ -306,7 +311,7 @@ sonantx.SoundGenerator = function(instr, rowLen) {
     this.panFreq = Math.pow(2, instr.l - 8) / this.rowLen;
     this.lfoFreq = Math.pow(2, instr.z - 8) / this.rowLen;
 };
-sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
+$x.S.prototype.genSound = function(n, chnBuf, currentpos) {
     var marker = new Date();
     var c1 = 0;
     var c2 = 0;
@@ -391,22 +396,22 @@ sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
         }
     }
 };
-sonantx.SoundGenerator.prototype.getAudioGenerator = function(n, callBack) {
+$x.S.prototype.getAudioGenerator = function(n, callBack) {
     var bufferSize = (this.attack + this.sustain + this.release - 1) + (32 * this.rowLen);
     var self = this;
     genBuffer(bufferSize, function(buffer) {
         self.genSound(n, buffer, 0);
         applyDelay(buffer, bufferSize, self.instr, self.rowLen, function() {
-            callBack(new sonantx.AudioGenerator(buffer));
+            callBack(new $x.A(buffer));
         });
     });
 };
-sonantx.SoundGenerator.prototype.createAudio = function(n, callBack) {
+$x.S.prototype.createAudio = function(n, callBack) {
     this.getAudioGenerator(n, function(ag) {
         callBack(ag.getAudio());
     });
 };
-sonantx.SoundGenerator.prototype.createAudioBuffer = function(n, callBack) {
+$x.S.prototype.createAudioBuffer = function(n, callBack) {
     this.getAudioGenerator(n, function(ag) {
         ag.getAudioBuffer(callBack);
     });
@@ -415,19 +420,19 @@ sonantx.SoundGenerator.prototype.createAudioBuffer = function(n, callBack) {
 /**
  * @constructor
  */
-sonantx.MusicGenerator = function(song) {
+$x.M = function(song) {
     this.song = song;
     // Wave data configuration
     this.waveSize = WAVE_SPS * song.songLen; // Total song size (in samples)
 };
-sonantx.MusicGenerator.prototype.generateTrack = function (instr, mixBuf, callBack) {
+$x.M.prototype.generateTrack = function (instr, mixBuf, callBack) {
     var self = this;
     genBuffer(this.waveSize, function(chnBuf) {
         // Preload/precalc some properties/expressions (for improved performance)
         var waveSamples = self.waveSize,
             waveBytes = self.waveSize * WAVE_CHAN * 2,
             rowLen = self.song.rowLen,
-            soundGen = new sonantx.SoundGenerator(instr, rowLen);
+            soundGen = new $x.S(instr, rowLen);
 
         var endPattern = instr.notes.length;
         var currentpos = 0;
@@ -478,7 +483,7 @@ sonantx.MusicGenerator.prototype.generateTrack = function (instr, mixBuf, callBa
         setTimeout(recordSounds, 0);
     });
 };
-sonantx.MusicGenerator.prototype.getAudioGenerator = function(callBack) {
+$x.M.prototype.getAudioGenerator = function(callBack) {
     var self = this;
     genBuffer(this.waveSize, function(mixBuf) {
         var t = 0;
@@ -487,18 +492,18 @@ sonantx.MusicGenerator.prototype.getAudioGenerator = function(callBack) {
                 t += 1;
                 self.generateTrack(self.song.songData[t - 1], mixBuf, recu);
             } else {
-                callBack(new sonantx.AudioGenerator(mixBuf));
+                callBack(new $x.A(mixBuf));
             }
         };
         recu();
     });
 };
-sonantx.MusicGenerator.prototype.createAudio = function(callBack) {
+$x.M.prototype.createAudio = function(callBack) {
     this.getAudioGenerator(function(ag) {
         callBack(ag.getAudio());
     });
 };
-sonantx.MusicGenerator.prototype.createAudioBuffer = function(callBack) {
+$x.M.prototype.createAudioBuffer = function(callBack) {
     this.getAudioGenerator(function(ag) {
         ag.getAudioBuffer(callBack);
     });
@@ -987,25 +992,33 @@ window['jsfxr'] = function(settings) {
   }
   return output;
 }
+// L -- loadResources
+// I -- loadImages
+// S -- loadSounds
+// K -- KEYS
+// T -- TOUCHES
+// r -- resources
+// x -- context
+// v -- canvas
 
 var kz = {};
 
 /*^ Functions for loading resources */
 // queue is an object with names as keys and image paths as values
-kz.loadResources = function (resources) {
+kz.L = function (resources) {
   var promises = [];
-  kz.resources = {};
+  kz.r = {};
 
-  promises.push(kz.loadImages(resources.images));
-  promises.push(kz.loadSounds(resources.sounds));
+  promises.push(kz.I(resources.images));
+  promises.push(kz.S(resources.sounds));
 
   return Promise.all(promises)
     .then(function () {
-      return kz.resources;
+      return kz.r;
     });
 };
 
-kz.loadImages = function (queue) {
+kz.I = function (queue) {
   var images = {};
   var promises = [];
 
@@ -1032,13 +1045,13 @@ kz.loadImages = function (queue) {
 
   return Promise.all(promises)
                 .then(function () {
-                  kz.resources.images = images;
-                  return kz.resources.images;
+                  kz.r.images = images;
+                  return kz.r.images;
                 });
 };
 
 kz.audio_context = new AudioContext();
-kz.loadSounds = function (queue) {
+kz.S = function (queue) {
   var sounds = {};
   var promises = [];
 
@@ -1068,22 +1081,20 @@ kz.loadSounds = function (queue) {
 
   return Promise.all(promises)
                 .then(function () {
-                  kz.resources.sounds = sounds;
-                  return kz.resources.sounds;
+                  kz.r.sounds = sounds;
+                  return kz.r.sounds;
                 });
 };
 /*$ Functions for loading resources */
 
 /*^ Keys */
-kz.KEYS = {
-  ENTER: 13,
-  ESCAPE: 27,
-  SPACE: 32,
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40,
-  Z: 90
+kz.K = {
+  X: 27, // ESCAPE
+  L: 37, // LEFT
+  U: 38, // UP
+  R: 39, // RIGHT
+  D: 40, // DOWN
+  Z: 90 // Z
 };
 
 kz.keys_status = {};
@@ -1093,7 +1104,7 @@ for (var ii = 0; ii < 256; ii++) {
 /*$ Keys */
 
 /*^ Touches */
-kz.TOUCHES = {};
+kz.T = {};
 /*$ Touches */
 
 /*^ Tween */
@@ -1241,10 +1252,10 @@ kz.Scene.prototype.exit = function () {
 
 /*^ Essential functions such as initialize, tick, and run */
 kz.initializeCanvas = function (canvas_id) {
-  kz.canvas = document.getElementById(canvas_id);
-  kz.context = kz.canvas.getContext('2d');
-  kz.context.clearAll = function () {
-    kz.context.clearRect(0, 0, kz.canvas.width, kz.canvas.height);
+  kz.v = document.getElementById(canvas_id);
+  kz.x = kz.v.getContext('2d');
+  kz.x.clearAll = function () {
+    kz.x.clearRect(0, 0, kz.v.width, kz.v.height);
   };
 };
 
@@ -1274,8 +1285,8 @@ kz.initialize = function (canvas_id) {
     //event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
-      if (kz.TOUCHES[touch.identifier]) continue;
-      kz.TOUCHES[touch.identifier] = {
+      if (kz.T[touch.identifier]) continue;
+      kz.T[touch.identifier] = {
         initial: {x: touch.screenX, y: touch.screenY},
         current: {x: touch.screenX, y: touch.screenY}
       };
@@ -1286,60 +1297,60 @@ kz.initialize = function (canvas_id) {
     event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
-      if (!kz.TOUCHES[touch.identifier]) continue;
-      kz.TOUCHES[touch.identifier].current = {x: touch.screenX, y:touch.screenY};
+      if (!kz.T[touch.identifier]) continue;
+      kz.T[touch.identifier].current = {x: touch.screenX, y:touch.screenY};
     }
   });
 
   document.addEventListener('touchend', function(event) {
     event.preventDefault();
-    for (var id in kz.TOUCHES) {
+    for (var id in kz.T) {
       var found = false;
       for (var ii = 0; ii < event.touches.length; ii++) {
         if (event.touches[ii].identifier == id) found = true;
       }
       if (found) continue;
-      var start_x = kz.TOUCHES[id].initial.x;
-      var start_y = kz.TOUCHES[id].initial.y;
-      var end_x = kz.TOUCHES[id].current.x;
-      var end_y = kz.TOUCHES[id].current.y;
+      var start_x = kz.T[id].initial.x;
+      var start_y = kz.T[id].initial.y;
+      var end_x = kz.T[id].current.x;
+      var end_y = kz.T[id].current.y;
       if (Math.abs(start_x - end_x) + Math.abs(start_y - end_y) < 20) {
         kz.events.push({
           kztype: 'keypress',
-          which: kz.KEYS.Z
+          which: kz.K.Z
         });
       }
       if (Math.abs(start_y - end_y) < 60
                  && start_x - end_x > 20) {
         kz.events.push({
           kztype: 'keypress',
-          which: kz.KEYS.LEFT
+          which: kz.K.L
         });
       }
       if (Math.abs(start_y - end_y) < 60
                  && end_x - start_x > 20) {
         kz.events.push({
           kztype: 'keypress',
-          which: kz.KEYS.RIGHT
+          which: kz.K.R
         });
       }
       if (Math.abs(start_x - end_x) < 60
                  && end_y - start_y > 20) {
         kz.events.push({
           kztype: 'keypress',
-          which: kz.KEYS.DOWN
+          which: kz.K.D
         });
       }
       if (Math.abs(start_x - end_x) < 60
                  && start_y - end_y > 20) {
         kz.events.push({
           kztype: 'keypress',
-          which: kz.KEYS.UP
+          which: kz.K.U
         });
       }
 
 
-      delete kz.TOUCHES[id];
+      delete kz.T[id];
     }
   });
 };
@@ -1397,31 +1408,31 @@ scene_loading.preUpdate = function (now) {
 };
 
 scene_loading.draw = function (now) {
-  kz.context.clearAll();
-  kz.context.save();
-  kz.context.fillStyle = '#30403b';
-  kz.context.fillRect(
+  kz.x.clearAll();
+  kz.x.save();
+  kz.x.fillStyle = '#30403b';
+  kz.x.fillRect(
     0,
     0,
-    kz.canvas.width,
-    kz.canvas.height
+    kz.v.width,
+    kz.v.height
   );
-  kz.context.restore();
+  kz.x.restore();
 
   text = ['LOADING', 'LOADING.', 'LOADING..', 'LOADING...']
 
-  kz.context.save();
-  kz.context.textAlign = 'center';
-  kz.context.textBaseline = 'center';
-  kz.context.font = '18px f';
-  kz.context.fillStyle = 'rgb(142, 212, 165)';
-  kz.context.lineWidth = 2;
-  kz.context.fillText(
+  kz.x.save();
+  kz.x.textAlign = 'center';
+  kz.x.textBaseline = 'center';
+  kz.x.font = '18px f';
+  kz.x.fillStyle = 'rgb(142, 212, 165)';
+  kz.x.lineWidth = 2;
+  kz.x.fillText(
     text[Math.round(now/500)%4],
-    kz.canvas.width / 2,
-    kz.canvas.height / 2
+    kz.v.width / 2,
+    kz.v.height / 2
   );
-  kz.context.restore();
+  kz.x.restore();
 };
 // three '/' represents comments for minification purposes
 var scene_main_menu = (function () {
@@ -1449,77 +1460,72 @@ var scene_main_menu = (function () {
   }
 
   scene_main_menu.draw = function () {
-    kz.context.clearAll();
+    kz.x.clearAll();
 
-    kz.context.save();
-    kz.context.fillStyle = '#30403b';
-    kz.context.fillRect(
+    kz.x.save();
+    kz.x.fillStyle = '#30403b';
+    kz.x.fillRect(
       0,
       0,
-      kz.canvas.width,
-      kz.canvas.height
+      kz.v.width,
+      kz.v.height
     );
-    kz.context.restore();
+    kz.x.restore();
 
-    kz.context.textAlign = 'center';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '48px f';
-    ///kz.context.fillStyle = 'rgb(142, 212, 165)';
-    kz.context.fillStyle = '#8ed4a5';
-    kz.context.fillText(
+    kz.x.textAlign = 'center';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '48px f';
+    kz.x.fillStyle = '#8ed4a5';
+    kz.x.fillText(
       'ZODIAC 13',
-      kz.canvas.width / 2,
+      kz.v.width / 2,
       125
     );
 
     if (graphics.state == 0 && graphics.press_space_visible) {
-      kz.context.save();
-      kz.context.globalAlpha = graphics.text_alpha;
-      ///kz.context.textAlign = 'center';
-      ///kz.context.textBaseline = 'center';
-      kz.context.font = '24px f';
-      kz.context.fillStyle = 'white';
-      kz.context.fillText(
+      kz.x.save();
+      kz.x.globalAlpha = graphics.text_alpha;
+      kz.x.font = '24px f';
+      kz.x.fillStyle = 'white';
+      kz.x.fillText(
         'PRESS   Z',
-        kz.canvas.width / 2,
+        kz.v.width / 2,
         250
       );
-      kz.context.restore();
+      kz.x.restore();
     }
     if (graphics.state == 1) {
-      kz.context.textAlign = 'center';
-      kz.context.textBaseline = 'center';
-      kz.context.font = '24px f';
-      kz.context.fillStyle = graphics.choice == 0 ? '#fff' : '#666';
-      kz.context.fillText('GAME START', kz.canvas.width/2, kz.canvas.height/2+40);
-      kz.context.fillStyle = graphics.choice == 1 ? '#fff' : '#666';
-      kz.context.fillText('RECORDS', kz.canvas.width/2, kz.canvas.height/2+88);
-      kz.context.restore();
+      kz.x.textAlign = 'center';
+      kz.x.textBaseline = 'center';
+      kz.x.font = '24px f';
+      kz.x.fillStyle = graphics.choice == 0 ? '#fff' : '#666';
+      kz.x.fillText('GAME START', kz.v.width/2, kz.v.height/2+40);
+      kz.x.fillStyle = graphics.choice == 1 ? '#fff' : '#666';
+      kz.x.fillText('RECORDS', kz.v.width/2, kz.v.height/2+88);
+      kz.x.restore();
     }
 
-    kz.context.save();
-    kz.context.globalAlpha = graphics.text_alpha;
-    ///kz.context.textAlign = 'center';
-    ///kz.context.textBaseline = 'center';
-    kz.context.font = '10px f';
-    kz.context.fillStyle = '#50605b';
-    kz.context.lineWidth = 2;
-    kz.context.fillText(
+    kz.x.save();
+    kz.x.globalAlpha = graphics.text_alpha;
+    kz.x.font = '10px f';
+    kz.x.fillStyle = '#50605b';
+    kz.x.lineWidth = 2;
+    kz.x.fillText(
       'HERMAN CHAU (KCAZE)',
-      kz.canvas.width / 2,
+      kz.v.width / 2,
       380
     );
-    kz.context.restore();
-    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+    kz.x.restore();
+    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   scene_main_menu.preUpdate = function (now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress') {
         if (graphics.exiting) continue;
-        if (kz.events[ii].which == kz.KEYS.Z) {
-          kz.resources.sounds['sfx_select'].play();
+        if (kz.events[ii].which == kz.K.Z) {
+          kz.r.sounds['sfx_select'].play();
           if (!graphics.state) {
             graphics.state = 1;
           } else {
@@ -1537,12 +1543,12 @@ var scene_main_menu = (function () {
           }
         }
       }
-      if (kz.events[ii].which == kz.KEYS.UP) {
+      if (kz.events[ii].which == kz.K.U) {
         if (graphics.state) {
           graphics.choice = Math.max(0, graphics.choice-1);
         }
       }
-      if (kz.events[ii].which == kz.KEYS.DOWN) {
+      if (kz.events[ii].which == kz.K.D) {
         if (graphics.state) {
           graphics.choice = Math.min(1, graphics.choice+1);
         }
@@ -1574,34 +1580,34 @@ var scene_records = (function () {
   }
 
   scene.draw = function () {
-    kz.context.clearAll();
+    kz.x.clearAll();
 
-    kz.context.save();
-    kz.context.fillStyle = '#30403b';
-    kz.context.fillRect(
+    kz.x.save();
+    kz.x.fillStyle = '#30403b';
+    kz.x.fillRect(
       0,
       0,
-      kz.canvas.width,
-      kz.canvas.height
+      kz.v.width,
+      kz.v.height
     );
-    kz.context.restore();
+    kz.x.restore();
 
-    kz.context.textAlign = 'center';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '32px f';
-    kz.context.fillStyle = '#fff';
-    kz.context.fillText(
+    kz.x.textAlign = 'center';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '32px f';
+    kz.x.fillStyle = '#fff';
+    kz.x.fillText(
       'RECORDS',
-      kz.canvas.width / 2,
+      kz.v.width / 2,
       48
     );
-    kz.context.font = '12px f';
+    kz.x.font = '12px f';
     for (var ii = 0; ii < records.length; ii++) {
-      kz.context.fillStyle = '#fff';
-      kz.context.textAlign = 'left';
-      kz.context.fillText(records[ii].text + ': ', 12, 90 + ii*20);
-      kz.context.textAlign = 'right';
-      kz.context.fillStyle = '#8ed4a5';
+      kz.x.fillStyle = '#fff';
+      kz.x.textAlign = 'left';
+      kz.x.fillText(records[ii].text + ': ', 12, 90 + ii*20);
+      kz.x.textAlign = 'right';
+      kz.x.fillStyle = '#8ed4a5';
       var value;
       if (records[ii].name == 'total_time' || records[ii].name == 'max_time') {
         var time = getRecord(records[ii].name);
@@ -1612,18 +1618,18 @@ var scene_records = (function () {
       } else {
         value = getRecord(records[ii].name);
       }
-      kz.context.fillText(value, kz.canvas.width-12, 90+ii*20);
+      kz.x.fillText(value, kz.v.width-12, 90+ii*20);
     }
 
-    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   scene.preUpdate = function (now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (state.exiting) continue;
       if (kz.events[ii].kztype == 'keypress') {
-        if (kz.events[ii].which == kz.KEYS.ESCAPE || kz.events[ii].which == kz.KEYS.Z) {
+        if (kz.events[ii].which == kz.K.X || kz.events[ii].which == kz.K.Z) {
           state.exiting = true;
           kz.tween({
             object: graphics,
@@ -1663,20 +1669,20 @@ var scene_character_select = (function () {
       {
         description: 'ENDS TURN WHITE',
         name: 'BOAR',
-        image: kz.resources.images['character_boar'],
+        image: kz.r.images['character_boar'],
         unlock_message: '13 WHITE ORBS IN A ROW',
         unlocked: getRecord('max_white_orbs') >= 13,
         zodiac: function (data) {
           var state = data.state;
-          var config = data.config;
-          for (var yy = 0; yy < config.board_height; yy++) {
+          var config = data.$c;
+          for (var yy = 0; yy < config.w; yy++) {
             if (state.board[yy][0].piece_type && state.board[yy][0].piece_type != 1) {
               state.board[yy][0].piece_type = 1;
               data.animateColorChange(state.board[yy][0].piece, 1);
             }
-            if (state.board[yy][config.board_width-1].piece_type && state.board[yy][config.board_width-1].piece_type != 1) {
-              state.board[yy][config.board_width-1].piece_type = 1;
-              data.animateColorChange(state.board[yy][config.board_width-1].piece, 1);
+            if (state.board[yy][config.w-1].piece_type && state.board[yy][config.w-1].piece_type != 1) {
+              state.board[yy][config.w-1].piece_type = 1;
+              data.animateColorChange(state.board[yy][config.w-1].piece, 1);
             }
           }
         }
@@ -1684,20 +1690,20 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR ROW ABOVE',
         name: 'CAT',
-        image: kz.resources.images['character_cat'],
+        image: kz.r.images['character_cat'],
         unlocked: true,
         zodiac: function (data) {
           var state = data.state;
-          var config = data.config;
+          var config = data.$c;
           var row = data.row;
           row--;
           var row_pieces = [];
-          for (var xx = 0; xx < config.board_width; xx++) {
+          for (var xx = 0; xx < config.w; xx++) {
             if (state.board[row][xx].piece) {
               row_pieces.push(state.board[row][xx].piece);
             }
           }
-          for (xx = 0; xx < config.board_width; xx++) {
+          for (xx = 0; xx < config.w; xx++) {
             state.board[row][xx] = {
               piece_type: 0
             };
@@ -1708,13 +1714,13 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR LEFT SIDE',
         name: 'DOG',
-        image: kz.resources.images['character_dog'],
+        image: kz.r.images['character_dog'],
         unlock_message: '169 ORBS SHOT',
         unlocked: getRecord('total_orbs') >= 169,
         zodiac: function (data) {
           var board = data.state.board;
           var pieces = [];
-          for (var yy = 0; yy < data.config.board_height; yy++) {
+          for (var yy = 0; yy < data.$c.w; yy++) {
             if (board[yy][0].piece_type) {
               pieces.push(board[yy][0].piece);
               board[yy][0].piece_type = 0;
@@ -1726,7 +1732,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR 4 ON ENDS',
         name: 'DRAGON',
-        image: kz.resources.images['character_dragon'],
+        image: kz.r.images['character_dragon'],
         unlock_message: 'SCORE 169',
         unlocked: getRecord('max_score') >= 169,
         zodiac: function(data) {
@@ -1734,8 +1740,8 @@ var scene_character_select = (function () {
           var rightCounter = 4;
           var pieces = [];
           var board = data.state.board;
-          var width = data.config.board_width;
-          for (var yy = data.config.board_height - 1; yy >= 0; yy--) {
+          var width = data.$c.w;
+          for (var yy = data.$c.w - 1; yy >= 0; yy--) {
             if (leftCounter) {
               if (board[yy][0].piece_type) {
                 pieces.push(board[yy][0].piece);
@@ -1757,7 +1763,7 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR 12 RANDOM',
         name: 'HARE',
-        image: kz.resources.images['character_hare'],
+        image: kz.r.images['character_hare'],
         unlock_message: 'REACH LEVEL 13',
         unlocked: getRecord('max_level') >= 13,
         zodiac: function(data) {
@@ -1765,8 +1771,8 @@ var scene_character_select = (function () {
           var count = 0;
           var pieces = [];
           var piece_locs = [];
-          for (var yy = 0; yy < data.config.board_height; yy++) {
-            for (var xx = 0; xx < data.config.board_width; xx++) {
+          for (var yy = 0; yy < data.$c.w; yy++) {
+            for (var xx = 0; xx < data.$c.w; xx++) {
               if (board[yy][xx].piece_type) {
                 piece_locs.push({x:xx,y:yy});
               }
@@ -1787,9 +1793,9 @@ var scene_character_select = (function () {
       {
         description: 'SCORE +2',
         name: 'HORSE',
-        image: kz.resources.images['character_horse'],
+        image: kz.r.images['character_horse'],
         unlock_message: 'ZODIAC 13 TIMES',
-        unlocked: getRecord('total_zodiac') >= 13,
+        unlocked: getRecord('total_zodiac') >= 13,
         zodiac: function(data) {
           data.incrementScore(2);
         }
@@ -1797,7 +1803,7 @@ var scene_character_select = (function () {
       {
         description: 'DELAY ROW DROP',
         name: 'MONKEY',
-        image: kz.resources.images['character_monkey'],
+        image: kz.r.images['character_monkey'],
         unlock_message: 'ZODIAC 169 TIMES',
         unlocked: getRecord('total_zodiac') >= 169,
         zodiac: function (data) {
@@ -1812,20 +1818,20 @@ var scene_character_select = (function () {
       {
         description: 'ENDS TURN BLACK',
         name: 'OX',
-        image: kz.resources.images['character_ox'],
+        image: kz.r.images['character_ox'],
         unlock_message: '13 BLACK ORBS IN A ROW',
         unlocked: getRecord('max_black_orbs') >= 13,
         zodiac: function (data) {
           var state = data.state;
-          var config = data.config;
-          for (var yy = 0; yy < config.board_height; yy++) {
+          var config = data.$c;
+          for (var yy = 0; yy < $c.w; yy++) {
             if (state.board[yy][0].piece_type && state.board[yy][0].piece_type != 2) {
               state.board[yy][0].piece_type = 2;
               data.animateColorChange(state.board[yy][0].piece, 2);
             }
-            if (state.board[yy][config.board_width-1].piece_type && state.board[yy][config.board_width-1].piece_type != 2) {
-              state.board[yy][config.board_width-1].piece_type = 2;
-              data.animateColorChange(state.board[yy][config.board_width-1].piece, 2);
+            if (state.board[yy][config.w-1].piece_type && state.board[yy][config.w-1].piece_type != 2) {
+              state.board[yy][config.w-1].piece_type = 2;
+              data.animateColorChange(state.board[yy][config.w-1].piece, 2);
             }
           }
         }
@@ -1833,7 +1839,7 @@ var scene_character_select = (function () {
       {
         description: 'NEXT ALL WHITE',
         name: 'RAT',
-        image: kz.resources.images['character_rat'],
+        image: kz.r.images['character_rat'],
         unlock_message: '1313 ORBS SHOT',
         unlocked: getRecord('total_orbs') >= 1313,
         zodiac: function (data) {
@@ -1845,14 +1851,14 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR RIGHT SIDE',
         name: 'ROOSTER',
-        image: kz.resources.images['character_rooster'],
+        image: kz.r.images['character_rooster'],
         unlock_message: 'SURVIVE 13 MINUTES',
         unlocked: getRecord('max_time') >= 13*60,
         zodiac: function (data) {
           var board = data.state.board;
           var pieces = [];
-          var width = data.state.board_width;
-          for (var yy = 0; yy < data.config.board_height; yy++) {
+          var width = data.state.w;
+          for (var yy = 0; yy < data.$c.w; yy++) {
             if (board[yy][width-1].piece_type) {
               pieces.push(board[yy][width-1].piece);
               board[yy][width-1].piece_type = 0;
@@ -1864,14 +1870,14 @@ var scene_character_select = (function () {
       {
         description: 'CLEAR TOP ROW',
         name: 'SHEEP',
-        image: kz.resources.images['character_sheep'],
+        image: kz.r.images['character_sheep'],
         unlock_message: 'SCORE 13',
         unlocked: getRecord('max_score') >= 13,
         zodiac: function (data) {
           var state = data.state;
-          var config = data.config;
+          var config = data.$c;
           var row_pieces = [];
-          for (var xx = 0; xx < config.board_width; xx++) {
+          for (var xx = 0; xx < config.w; xx++) {
             if (state.board[0][xx].piece) {
               row_pieces.push(state.board[0][xx].piece);
             }
@@ -1885,7 +1891,7 @@ var scene_character_select = (function () {
       {
         description: 'NEXT ALL BLACK',
         name: 'SNAKE',
-        image: kz.resources.images['character_snake'],
+        image: kz.r.images['character_snake'],
         unlock_message: 'PLAY 13 GAMES',
         unlocked: getRecord('play_count') >= 13,
         zodiac: function (data) {
@@ -1897,7 +1903,7 @@ var scene_character_select = (function () {
       {
         description: 'SCORE +LEVEL/3',
         name: 'TIGER',
-        image: kz.resources.images['character_tiger'],
+        image: kz.r.images['character_tiger'],
         unlock_message: '169 ROWS CLEARED',
         unlocked: getRecord('total_rows') >= 169,
         zodiac: function (data) {
@@ -1907,95 +1913,95 @@ var scene_character_select = (function () {
       {
         description: '',
         name: 'RANDOM',
-        image: kz.resources.images['character_random'],
+        image: kz.r.images['character_random'],
         unlocked: true
       }
     ];
   }
 
   scene.draw = function (now) {
-    kz.context.clearAll();
+    kz.x.clearAll();
 
-    kz.context.save();
-    kz.context.fillStyle = '#30403b';
-    kz.context.fillRect(
+    kz.x.save();
+    kz.x.fillStyle = '#30403b';
+    kz.x.fillRect(
       0,
       0,
-      kz.canvas.width,
-      kz.canvas.height
+      kz.v.width,
+      kz.v.height
     );
-    kz.context.restore();
+    kz.x.restore();
 
     for (var yy = 0; yy < 7; yy++) {
       for (var xx = 0; xx < 2; xx++) {
         var idx = yy*2 + xx;
         if (idx >= characters.length) break;
-        kz.context.strokeStyle = '#89928e';
-        kz.context.lineWidth = 0.5;
-        kz.context.fillStyle = '#50605b';
-        kz.context.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
-        kz.context.strokeRect(xx*49 + 10, yy*49 + 20, 50, 50) ;
-        kz.context.drawImage(
+        kz.x.strokeStyle = '#89928e';
+        kz.x.lineWidth = 0.5;
+        kz.x.fillStyle = '#50605b';
+        kz.x.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
+        kz.x.strokeRect(xx*49 + 10, yy*49 + 20, 50, 50) ;
+        kz.x.drawImage(
           characters[idx].image,
           xx*49 + 10,
           yy*49 + 20
         )
         if (!characters[idx].unlocked) {
-          kz.context.fillStyle = 'rgba(0,0,0,0.7)';
-          kz.context.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
+          kz.x.fillStyle = 'rgba(0,0,0,0.7)';
+          kz.x.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
         }
       }
     }
     if (Math.floor(now/200) % 3) {
-      kz.context.strokeStyle = '#fff';
-      kz.context.lineWidth = 1;
-      kz.context.strokeRect((state.selected%2)*49 + 10, Math.floor(state.selected/2)*49 + 20, 50, 50) ;
+      kz.x.strokeStyle = '#fff';
+      kz.x.lineWidth = 1;
+      kz.x.strokeRect((state.selected%2)*49 + 10, Math.floor(state.selected/2)*49 + 20, 50, 50) ;
     }
-    kz.context.textAlign = 'right';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '24px f';
-    kz.context.fillStyle = 'white';
-    kz.context.fillText(
+    kz.x.textAlign = 'right';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '24px f';
+    kz.x.fillStyle = 'white';
+    kz.x.fillText(
       characters[state.selected].name,
-      kz.canvas.width - 10,
+      kz.v.width - 10,
       330
     );
-    kz.context.textAlign = 'right';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '16px f';
-    kz.context.fillStyle = 'white';
+    kz.x.textAlign = 'right';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '16px f';
+    kz.x.fillStyle = 'white';
     if (characters[state.selected].unlocked) {
-      kz.context.fillText(
+      kz.x.fillText(
         characters[state.selected].description,
-        kz.canvas.width - 10,
+        kz.v.width - 10,
         360
       );
     } else {
-      kz.context.font = '12px f';
-      kz.context.fillStyle = '#50605b';
-      kz.context.fillText(
+      kz.x.font = '12px f';
+      kz.x.fillStyle = '#50605b';
+      kz.x.fillText(
         characters[state.selected].unlock_message,
-        kz.canvas.width - 10,
+        kz.v.width - 10,
         360
       );
     }
-    kz.context.fillStyle = 'rgba(0,0,0,'+state.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+    kz.x.fillStyle = 'rgba(0,0,0,'+state.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   scene.preUpdate = function (now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (state.exiting) continue;
       if (kz.events[ii].kztype == 'keypress') {
-        if (kz.events[ii].which == kz.KEYS.RIGHT) {
+        if (kz.events[ii].which == kz.K.R) {
           state.selected = Math.min(13, state.selected+1);
-        } else if (kz.events[ii].which == kz.KEYS.DOWN) {
+        } else if (kz.events[ii].which == kz.K.D) {
           state.selected = Math.min(13, state.selected+2);
-        } else if (kz.events[ii].which == kz.KEYS.LEFT) {
+        } else if (kz.events[ii].which == kz.K.L) {
           state.selected = Math.max(0, state.selected-1);
-        } else if (kz.events[ii].which == kz.KEYS.UP) {
+        } else if (kz.events[ii].which == kz.K.U) {
           state.selected = Math.max(0, state.selected-2);
-        } else if (kz.events[ii].which == kz.KEYS.Z) {
+        } else if (kz.events[ii].which == kz.K.Z) {
           if (state.selected == 13) {
             state.selected = Math.floor(Math.random() * 13);
             while (!characters[state.selected].unlocked) {
@@ -2003,7 +2009,7 @@ var scene_character_select = (function () {
             }
           }
           if (characters[state.selected].unlocked) {
-            kz.resources.sounds['sfx_select'].play();
+            kz.r.sounds['sfx_select'].play();
             character = characters[state.selected];
             state.exiting = true;
             kz.tween({
@@ -2015,9 +2021,9 @@ var scene_character_select = (function () {
               kz.run(scene_game);
             });
           } else {
-            kz.resources.sounds['sfx_denied'].play();
+            kz.r.sounds['sfx_denied'].play();
           }
-        } else if (kz.events[ii].which == kz.KEYS.ESCAPE) {
+        } else if (kz.events[ii].which == kz.K.X) {
           state.exiting = true;
           kz.tween({
             object: state,
@@ -2039,10 +2045,10 @@ var scene_character_select = (function () {
 var previous_time;
 
 var scene_game = (function () {
-  var config = {
-    board_width: 8,
-    board_height: 17,
-    grid_size: 20,
+  var $c = {
+    w: 8, // board_width
+    h: 17, // board_height
+    g: 20, // grid_size
     next_length: 8,
     next_row_interval: 20000
   };
@@ -2050,7 +2056,7 @@ var scene_game = (function () {
   var info_canvas = document.createElement('canvas');
   var pause_canvas = document.createElement('canvas');
   var gameover_canvas = document.createElement('canvas');
-  board_canvas.width = config.board_width*config.grid_size;
+  board_canvas.width = $c.w*$c.g;
   board_canvas.height = 390;
   info_canvas.width = 96;
   info_canvas.height = 390;
@@ -2086,7 +2092,7 @@ var scene_game = (function () {
       pause_canvas.height
     );
     pause_context.drawImage(
-      kz.canvas,
+      kz.v,
       0,
       0
     );
@@ -2133,9 +2139,9 @@ var scene_game = (function () {
 
   function pieceTypeImage(piece_type) {
     return [
-      kz.resources.images['piece_red'],
-      kz.resources.images['piece_blue'],
-      kz.resources.images['piece_zodiac']
+      kz.r.images['piece_red'],
+      kz.r.images['piece_blue'],
+      kz.r.images['piece_zodiac']
     ][piece_type-1];
   }
 
@@ -2160,9 +2166,9 @@ var scene_game = (function () {
       gameover_canvas.height
     );
     gameover_context.drawImage(
-      kz.canvas,
+      kz.v,
       0,
-      0
+      0
     );
     // fade to black
     kz.tween({
@@ -2186,11 +2192,11 @@ var scene_game = (function () {
     var row;
     var activateAbility = false;
 
-    for (var yy = 0; yy < config.board_height; yy++) {
+    for (var yy = 0; yy < $c.h; yy++) {
       var piece_type = state.board[yy][0].piece_type;
       var zodiacCounter = 0;
       var cleared = true;
-      for (var xx = 0; xx < config.board_width; xx++) {
+      for (var xx = 0; xx < $c.w; xx++) {
         if (state.board[yy][xx].piece_type == PieceTypes.Zodiac) {
           zodiacCounter++;
         }
@@ -2226,12 +2232,12 @@ var scene_game = (function () {
 
     // capture row pieces before we update board so we can animate them
     var row_pieces = [];
-    for (var xx = 0; xx < config.board_width; xx++) {
+    for (var xx = 0; xx < $c.w; xx++) {
       row_pieces.push(state.board[row][xx].piece);
     }
 
     // update of underlying board
-    for (xx = 0; xx < config.board_width; xx++) {
+    for (xx = 0; xx < $c.w; xx++) {
       state.board[row][xx] = {
         piece_type: PieceTypes.Empty
       };
@@ -2249,14 +2255,14 @@ var scene_game = (function () {
       state: state,
       animateClearPieces: animateClearPieces,
       animateColorChange: animateColorChange,
-      config: config,
+      $c: $c,
       incrementScore: incrementScore,
       row: row
     });
   }
 
   function animateClearPieces(pieces) {
-    kz.resources.sounds['sfx_clear'].play();
+    kz.r.sounds['sfx_clear'].play();
     // animate fade away
     // ensure that all row piece animations have finished
     var promise  = [];
@@ -2280,8 +2286,8 @@ var scene_game = (function () {
   }
 
   function drop() {
-    for (var yy = config.board_height-1; yy > 0; yy--) {
-      for (var xx = 0; xx < config.board_width; xx++) {
+    for (var yy = $c.h-1; yy > 0; yy--) {
+      for (var xx = 0; xx < $c.w; xx++) {
         if (state.board[yy][xx].piece_type && !state.board[yy-1][xx].piece_type) {
           state.board[yy-1][xx] = state.board[yy][xx];
           state.board[yy][xx] = {
@@ -2294,7 +2300,7 @@ var scene_game = (function () {
               return kz.tween({
                 object: piece,
                 property: 'y',
-                value: piece.y - config.grid_size,
+                value: piece.y - $c.g,
                 duration: 100
               });
             });
@@ -2320,8 +2326,8 @@ var scene_game = (function () {
       var y = board_y + length * dy;
       while (0 <= x
              && 0 <= y
-             && x < config.board_width
-             && y < config.board_height) {
+             && x < $c.w
+             && y < $c.h) {
         if (state.board[y][x].piece_type == PieceTypes.Empty
           || state.board[y][x].piece_type == PieceTypes.Zodiac) break;
         if (state.board[y][x].piece_type == piece_type) {
@@ -2368,9 +2374,9 @@ var scene_game = (function () {
   }
 
   function addRow() {
-    kz.resources.sounds['sfx_drop'].play();
+    kz.r.sounds['sfx_drop'].play();
     var new_row = [];
-    for (var ii = 0; ii < config.board_width; ii++) {
+    for (var ii = 0; ii < $c.w; ii++) {
       var piece_type = randomPieceType(normal_piece_types);
       new_row.push({
         piece_type: piece_type,
@@ -2382,23 +2388,23 @@ var scene_game = (function () {
       });
     }
     // if all colors the same, change the color of last one
-    var piece_type = new_row[config.board_width-1].piece_type;
-    for (var ii = 0; ii < config.board_width; ii++) {
+    var piece_type = new_row[$c.w-1].piece_type;
+    for (var ii = 0; ii < $c.w; ii++) {
       piece_type ^= new_row[ii].piece_type;
     }
     if (piece_type) {
-      new_row[config.board_width-1].piece_type ^= 3;
-      new_row[config.board_width-1].piece.type ^= 3;
+      new_row[$c.w-1].piece_type ^= 3;
+      new_row[$c.w-1].piece.type ^= 3;
     }
 
     // update board
-    for (var xx = 0; xx < config.board_width; xx++) {
-      if (state.board[config.board_height-1][xx].piece_type
+    for (var xx = 0; xx < $c.w; xx++) {
+      if (state.board[$c.h-1][xx].piece_type
           != PieceTypes.Empty) {
         lose();
         return;
       }
-      for (var yy = config.board_height-1; yy > 0; yy--) {
+      for (var yy = $c.h-1; yy > 0; yy--) {
         state.board[yy][xx] = state.board[yy-1][xx];
       }
       state.board[0][xx] = new_row[xx];
@@ -2413,7 +2419,7 @@ var scene_game = (function () {
           return kz.tween({
             object: piece,
             property: 'y',
-            value: piece.y + config.grid_size,
+            value: piece.y + $c.g,
             rate: 1
           });
         });
@@ -2424,14 +2430,14 @@ var scene_game = (function () {
 
   function initialize() {
     incrementRecord('play_count', 1);
-    bgm = kz.resources.sounds['bgm_game'].play(true);
+    bgm = kz.r.sounds['bgm_game'].play(true);
     bgm.mystop = function () {
       if (!bgm.stopped) {bgm.stop(0); bgm.stopped = 1;}
     };
   // initialize graphics
     graphics = {
-      background_pattern: kz.context.createPattern(
-        kz.resources.images['background'],
+      background_pattern: kz.x.createPattern(
+        kz.r.images['background'],
         'repeat'),
       pause_alpha: 0,
       gameover_background_alpha: 0,
@@ -2451,10 +2457,11 @@ var scene_game = (function () {
       begin: kz.performance.now(),
       board: [],
       can_restart: false,
+      exiting: false,
       score: 0,
       level: 1,
       rows_cleared: 0,
-      next_row_interval: config.next_row_interval,
+      next_row_interval: $c.next_row_interval,
       next_row_time: 0,
       next_row_time_diff: 0,
       next_row_freeze: false,
@@ -2467,9 +2474,9 @@ var scene_game = (function () {
     };
     state.next_row_time = kz.performance.now() + state.next_row_interval;
     // initialize board
-    for (var yy = 0; yy < config.board_height; yy++) {
+    for (var yy = 0; yy < $c.h; yy++) {
       state.board.push([]);
-      for (var xx = 0; xx < config.board_width; xx++) {
+      for (var xx = 0; xx < $c.w; xx++) {
         // initialize board to have two random rows
         if (yy < 2) {
           var piece_type = randomPieceType(normal_piece_types);
@@ -2483,14 +2490,14 @@ var scene_game = (function () {
             piece: piece
           });
           // check if all colors if the same. if so, change the color of the last
-          if (xx == config.board_width - 1) {
+          if (xx == $c.w - 1) {
             var piece_type = state.board[yy][0].piece_type;
-            for (var xxx = 0; xxx < config.board_width; xxx++) {
+            for (var xxx = 0; xxx < $c.w; xxx++) {
               piece_type &= state.board[yy][xxx].piece_type
             }
             if (piece_type) {
-              state.board[yy][config.board_width - 1].piece_type ^= 3;
-              state.board[yy][config.board_width - 1].piece.type ^= 3;
+              state.board[yy][$c.w - 1].piece_type ^= 3;
+              state.board[yy][$c.w - 1].piece.type ^= 3;
             }
           }
         } else {
@@ -2504,10 +2511,10 @@ var scene_game = (function () {
     // initialize player
     state.player = new kz.Entity({
       frames: [
-        kz.resources.images['shooter_0'],
-        kz.resources.images['shooter_1'],
-        kz.resources.images['shooter_2'],
-        kz.resources.images['shooter_3']
+        kz.r.images['shooter_0'],
+        kz.r.images['shooter_1'],
+        kz.r.images['shooter_2'],
+        kz.r.images['shooter_3']
       ],
       frame_lengths: [
         500,
@@ -2525,9 +2532,9 @@ var scene_game = (function () {
           this.animate_timer = now;
         }
       },
-      x: Math.floor(config.board_width/2),
-      sprite_x: 4+Math.floor(config.board_width/2)*config.grid_size,
-      sprite_y: config.board_height*config.grid_size+23,
+      x: Math.floor($c.w/2),
+      sprite_x: 4+Math.floor($c.w/2)*$c.g,
+      sprite_y: $c.h*$c.g+23,
       actions_promise: blankPromise(),
       draw: function (context) {
         context.drawImage(
@@ -2536,7 +2543,7 @@ var scene_game = (function () {
           this.sprite_y);
         // draw aiming line
         var h;
-        for (h = config.board_height-1; h >= 0; h--) {
+        for (h = $c.h-1; h >= 0; h--) {
           if (state.board[h][this.x].piece_type != PieceTypes.Empty) {
             break;
           }
@@ -2548,48 +2555,34 @@ var scene_game = (function () {
         board_context.strokeStyle = '#8ed4a5';
         board_context.beginPath();
         board_context.moveTo(
-          this.sprite_x+config.grid_size/2-5,
+          this.sprite_x+$c.g/2-5,
           this.sprite_y-8
         );
         board_context.lineTo(
-          this.sprite_x+config.grid_size/2-5,
-          (h+1) * config.grid_size + 20
+          this.sprite_x+$c.g/2-5,
+          (h+1) * $c.g + 20
         );
         board_context.stroke();
         board_context.restore();
       },
       listen: function (event) {
         if (event.kztype == 'keypress') {
-          switch (event.which) {
-            case kz.KEYS.LEFT:
-              this.move(-1);
-              break;
-            case kz.KEYS.RIGHT:
-              this.move(1);
-              break;
-            case kz.KEYS.Z:
-              this.shoot();
-              break;
-          }
+          if (event.which == kz.K.L) this.move(-1);
+          if (event.which == kz.K.R) this.move(1);
+          if (event.which == kz.K.Z) this.shoot();
         } else if (event.kztype == 'keyheld') {
-          switch (event.which) {
-            case kz.KEYS.LEFT:
-              this.move(-1);
-              break;
-            case kz.KEYS.RIGHT:
-              this.move(1);
-              break;
-          }
+          if (event.which == kz.K.L) this.move(-1);
+          if (event.which == kz.K.R) this.move(1);
         }
       },
       move: function (dx) {
-        if (this.x+dx >= 0 && this.x+dx < config.board_width) {
+        if (this.x+dx >= 0 && this.x+dx < $c.w) {
           this.x += dx;
           this.actions_promise = this.actions_promise.then(function () {
             return kz.tween({
               object: this,
               property: 'sprite_x',
-              value: this.sprite_x + dx*config.grid_size,
+              value: this.sprite_x + dx*$c.g,
               rate: 0.7
             }).then(function () {
               return blankPromise();
@@ -2599,7 +2592,7 @@ var scene_game = (function () {
       },
       next: [],
       shoot : function() {
-        if (state.board[config.board_height-1][this.x].piece_type
+        if (state.board[$c.h-1][this.x].piece_type
             != PieceTypes.Empty) {
           lose();
           return;
@@ -2629,7 +2622,7 @@ var scene_game = (function () {
         };
         maxRecord(pieceTypeRecordMap[piece_type], state.consecutive[piece_type]);
 
-        var target_y = config.board_height-1;
+        var target_y = $c.h-1;
         while (target_y > 0) {
           if (state.board[target_y-1][this.x].piece_type
               != PieceTypes.Empty) {
@@ -2638,8 +2631,8 @@ var scene_game = (function () {
           target_y--;
         }
         var piece = makePiece(
-          this.x*config.grid_size + 1,
-          (config.board_height-1)*config.grid_size + 1,
+          this.x*$c.g + 1,
+          ($c.h-1)*$c.g + 1,
           piece_type
         );
         state.board[target_y][this.x] = {
@@ -2649,7 +2642,7 @@ var scene_game = (function () {
         reverse(this.x, target_y);
 
         piece.actions_promise = piece.actions_promise.then(function () {
-          kz.resources.sounds['sfx_shoot'].play();
+          kz.r.sounds['sfx_shoot'].play();
           return kz.tween({
             object: piece,
             property: 'y',
@@ -2673,7 +2666,7 @@ var scene_game = (function () {
       0,
       0,
       board_canvas.width,
-      board_canvas.height
+      board_canvas.height
     );
     info_context.clearRect(
       0,
@@ -2699,11 +2692,11 @@ var scene_game = (function () {
     board_context.beginPath();
     board_context.moveTo(
       0,
-      config.board_height * config.grid_size + 20
+      $c.h * $c.g + 20
     );
     board_context.lineTo(
-      config.board_width * config.grid_size,
-      config.board_height * config.grid_size + 20
+      $c.w * $c.g,
+      $c.h * $c.g + 20
     );
     board_context.stroke();
     board_context.restore();
@@ -2816,10 +2809,10 @@ var scene_game = (function () {
     info_context.fillText(time_string, 48, 377);
 
       // draw sprites
-    for (var ii = 0; ii < config.next_length; ii++) {
+    for (var ii = 0; ii < $c.next_length; ii++) {
       info_context.drawImage(
         pieceTypeImage(state.player.next[ii]),
-        9+(ii%4)*config.grid_size,
+        9+(ii%4)*$c.g,
         148 + Math.floor(ii/4)*23
       );
     }
@@ -2831,25 +2824,25 @@ var scene_game = (function () {
     );
 
     // main context drawing
-    kz.context.fillStyle = '#50605b';
-    kz.context.fillRect(0, 0, kz.canvas.width, kz.canvas.height);
-    kz.context.fillStyle = graphics.background_pattern;
-    kz.context.fillRect(0, 0, kz.canvas.width, kz.canvas.height);
-    kz.context.drawImage(board_canvas, 10, 0);
-    kz.context.drawImage(
+    kz.x.fillStyle = '#50605b';
+    kz.x.fillRect(0, 0, kz.v.width, kz.v.height);
+    kz.x.fillStyle = graphics.background_pattern;
+    kz.x.fillRect(0, 0, kz.v.width, kz.v.height);
+    kz.x.drawImage(board_canvas, 10, 0);
+    kz.x.drawImage(
       info_canvas,
       10 + board_canvas.width + 7,
       0
     );
-    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   function preUpdateAlive(now) {
     maxRecord('max_time', Math.floor((now - state.begin)/1000));
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress' &&
-          kz.events[ii].which == kz.KEYS.ESCAPE) {
+          kz.events[ii].which == kz.K.X) {
         pause();
         kz.events = [];
         return;
@@ -2869,74 +2862,76 @@ var scene_game = (function () {
   }
 
   function drawPause(now) {
-    kz.context.clearAll();
-    kz.context.save();
-    kz.context.globalAlpha = 1;
-    kz.context.drawImage(
+    kz.x.clearAll();
+    kz.x.save();
+    kz.x.globalAlpha = 1;
+    kz.x.drawImage(
       pause_canvas,
       0,
       0
     );
-    kz.context.globalAlpha = graphics.pause_alpha;
-    kz.context.fillStyle = '#000000';
-    kz.context.fillRect(
+    kz.x.globalAlpha = graphics.pause_alpha;
+    kz.x.fillStyle = '#000000';
+    kz.x.fillRect(
       0,
       0,
-      kz.canvas.width,
-      kz.canvas.height
+      kz.v.width,
+      kz.v.height
     );
-    kz.context.restore();
-    kz.context.save();
-    kz.context.textAlign = 'center';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '24px f';
-    kz.context.fillStyle = pause_choice == 0 ? '#fff' : '#666';
-    kz.context.fillText('RESUME', kz.canvas.width/2, kz.canvas.height/2-48);
-    kz.context.fillStyle = pause_choice == 1 ? '#fff' : '#666';
-    kz.context.fillText('RESTART', kz.canvas.width/2, kz.canvas.height/2);
-    kz.context.fillStyle = pause_choice == 2 ? '#fff' : '#666';
-    kz.context.fillText('QUIT', kz.canvas.width/2, kz.canvas.height/2+48);
-    kz.context.restore();
-    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+    kz.x.restore();
+    kz.x.save();
+    kz.x.textAlign = 'center';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '24px f';
+    kz.x.fillStyle = pause_choice == 0 ? '#fff' : '#666';
+    kz.x.fillText('RESUME', kz.v.width/2, kz.v.height/2-48);
+    kz.x.fillStyle = pause_choice == 1 ? '#fff' : '#666';
+    kz.x.fillText('RESTART', kz.v.width/2, kz.v.height/2);
+    kz.x.fillStyle = pause_choice == 2 ? '#fff' : '#666';
+    kz.x.fillText('QUIT', kz.v.width/2, kz.v.height/2+48);
+    kz.x.restore();
+    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   function drawDead(now) {
-    kz.context.clearAll();
-    kz.context.save();
-    kz.context.globalAlpha = 1;
-    kz.context.drawImage(
+    kz.x.clearAll();
+    kz.x.save();
+    kz.x.globalAlpha = 1;
+    kz.x.drawImage(
       gameover_canvas,
       0,
       0
     );
-    kz.context.globalAlpha = graphics.gameover_background_alpha;
-    kz.context.fillStyle = 'rgb(142, 212, 165)';
-    kz.context.fillRect(
+    kz.x.globalAlpha = graphics.gameover_background_alpha;
+    kz.x.fillStyle = 'rgb(142, 212, 165)';
+    kz.x.fillRect(
       10,
-      (kz.canvas.height / 2) - 28,
+      (kz.v.height / 2) - 28,
       160,
       42
     );
-    kz.context.globalAlpha = graphics.gameover_text_alpha;
-    kz.context.textAlign = 'center';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '24px f';
-    kz.context.fillStyle = '#fff';
-    kz.context.fillText(
+    kz.x.globalAlpha = graphics.gameover_text_alpha;
+    kz.x.textAlign = 'center';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '24px f';
+    kz.x.fillStyle = '#fff';
+    kz.x.fillText(
       'GAME OVER',
-      kz.canvas.width / 2 - 46,
-      kz.canvas.height / 2);
-    kz.context.restore();
-    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+      kz.v.width / 2 - 46,
+      kz.v.height / 2);
+    kz.x.restore();
+    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   function preUpdateDead(now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
+      if (state.exiting) continue;
       if (kz.events[ii].kztype == 'keypress' &&
-          kz.events[ii].which == kz.KEYS.Z &&
+          kz.events[ii].which == kz.K.Z &&
           state.can_restart) {
+        state.exiting = true;
         kz.tween({
           object: graphics,
           property: 'fadeAlpha',
@@ -2952,17 +2947,18 @@ var scene_game = (function () {
   function preUpdatePause(now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress') {
-        if (kz.events[ii].which == kz.KEYS.ESCAPE) {
+        if (state.exiting) continue;
+        if (kz.events[ii].which == kz.K.X) {
           resume();
-        } else if (kz.events[ii].which == kz.KEYS.DOWN) {
+        } else if (kz.events[ii].which == kz.K.D) {
           pause_choice = Math.min(2, pause_choice+1);
-        } else if (kz.events[ii].which == kz.KEYS.UP) {
+        } else if (kz.events[ii].which == kz.K.U) {
           pause_choice = Math.max(0, pause_choice-1);
-        } else if (kz.events[ii].which == kz.KEYS.Z) {
+        } else if (kz.events[ii].which == kz.K.Z) {
           resume();
           if (pause_choice == 0) {
           } else if (pause_choice == 1) {
-            // TODO: this is dangerous. need to add an exiting variable in state.
+            state.exiting = true;
             kz.tween({
               object: graphics,
               property: 'fadeAlpha',
@@ -2971,6 +2967,7 @@ var scene_game = (function () {
                 kz.run(scene_game);
               });
           } else {
+            state.exiting = true;
             kz.tween({
               object: graphics,
               property: 'fadeAlpha',
@@ -3006,13 +3003,17 @@ var scene_game = (function () {
   }
   return scene_game
 })();
+// Globals(prefixed with $):
+// $x -- sonantx
+
+
 function loadJSFXR(data, resolve) {
   var buff = base64ToArrayBuffer(data.substr(22));
   kz.audio_context.decodeAudioData(buff, resolve);
 }
 
 function loadSonant(data, resolve) {
-  var songGen = new sonantx.MusicGenerator(data);
+  var songGen = new $x.M(data);
   songGen.createAudioBuffer(resolve);
 }
 
@@ -3029,7 +3030,7 @@ var resources = {
     character_ox: {x:30,y:124,w:50,h:50,W:42,H:32,f:1},
     character_rat: {x:0,y:165,w:50,h:50,W:41,H:39,f:1},
     character_rooster: {x:41,y:156,w:50,h:50,W:35,H:36,f:1},
-    character_sheep: {x:0,y:205,w:50,h:50,W:43,H:43,f:1},
+    character_sheep: {x:0,y:205,w:50,h:50,W:43,H:43,f:1},
     character_snake: {x:43,y:192,w:50,h:50,W:34,H:34,f:1},
     character_tiger: {x:0,y:248,w:50,h:50,W:36,H:41,f:1},
     character_random: {x:43,y:226,w:50,h:50,W:21,H:37,f:1},
@@ -3153,10 +3154,6 @@ var resources = {
                 0,
                 0,
                 0,
-                147,
-                0,
-                0,
-                0,
                 147,
                 0,
                 0,
@@ -3203,7 +3200,11 @@ var resources = {
                 0,
                 147,
                 0,
-                0,
+                0,
+                0,
+                147,
+                0,
+                0,
                 0,
                 147,
                 0,
@@ -4312,7 +4313,7 @@ window.onload = function() {
   kz.initialize('canvas');
   kz.run(scene_loading);
 
-  kz.loadResources(resources).then(function () {
+  kz.L(resources).then(function () {
     kz.run(scene_main_menu);
     setInterval(function () {
       incrementRecord('total_time', 1);

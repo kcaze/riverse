@@ -7,7 +7,7 @@ var scene_records = (function () {
     graphics = {
       fadeAlpha: 1
     };
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'fadeAlpha',
       value: 0,
@@ -70,7 +70,7 @@ var scene_records = (function () {
       if (kz.events[ii].kztype == 'keypress') {
         if (kz.events[ii].which == kz.K.X || kz.events[ii].which == kz.K.Z) {
           state.exiting = true;
-          kz.tween({
+          kz.t({
             object: graphics,
             property: 'fadeAlpha',
             value: 1,

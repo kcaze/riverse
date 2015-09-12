@@ -1,8 +1,8 @@
 /**
  * So that this actually runs on ios
  */
-var performance = window.performance ? window.performance : window.Date;
-var AudioContext = window.AudioContext ? window.AudioContext : window.webkitAudioContext;
+var performance = $W.performance ? $W.performance : $W.Date;
+var AudioContext = $W.AudioContext ? $W.AudioContext : $W.webkitAudioContext;
 if (!String.prototype.repeat) {
   String.prototype.repeat = function(count) {
     var str = '' + this;
@@ -20,11 +20,11 @@ if (!String.prototype.repeat) {
     return rpt;
   }
 }
-document.addEventListener('touchstart', function(event) {
+$D.addEventListener('touchstart', function(event) {
   /* EXTREMELY DUMB HACK TO GET AUDIO WORKING ON IOS */
-	var buffer = kz.audio_context.createBuffer(1, 1, 22050);
-	var source = kz.audio_context.createBufferSource();
+	var buffer = kz.a.createBuffer(1, 1, 22050);
+	var source = kz.a.createBufferSource();
 	source.buffer = buffer;
-	source.connect(kz.audio_context.destination);
+	source.connect(kz.a.destination);
 	source.noteOn(0);
 }, false);

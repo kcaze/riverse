@@ -12,7 +12,7 @@ var scene_main_menu = (function () {
       choice: 0,
       state: 0
     };
-    kz.tween({
+    kz.t({
       object: graphics,
       property: 'fadeAlpha',
       value: 0,
@@ -95,7 +95,7 @@ var scene_main_menu = (function () {
           } else {
             var s = graphics.choice ? scene_records : scene_character_select;
             graphics.exiting = true;
-            kz.tween({
+            kz.t({
               object: graphics,
               property: 'fadeAlpha',
               value: 1,
