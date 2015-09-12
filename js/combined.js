@@ -24,10 +24,10 @@ if (!String.prototype.repeat) {
 }
 $D.addEventListener('touchstart', function(event) {
   /* EXTREMELY DUMB HACK TO GET AUDIO WORKING ON IOS */
-	var buffer = kz.a.createBuffer(1, 1, 22050);
-	var source = kz.a.createBufferSource();
+	var buffer = $.a.createBuffer(1, 1, 22050);
+	var source = $.a.createBufferSource();
 	source.buffer = buffer;
-	source.connect(kz.a.destination);
+	source.connect($.a.destination);
 	source.noteOn(0);
 }, false);
 //$a = sonantx
@@ -147,10 +147,10 @@ function getnotefreq(n)
     return 0.00390625 * Math.pow(1.059463094, n - 128);
 }
 
-function genBuffer(waveSize, callBack) {
+function genBuffer($w, callBack) {
     setTimeout(function() {
         // Create the channel work buffer
-        var buf = new Uint8Array(waveSize * WAVE_CHAN * 2);
+        var buf = new Uint8Array($w * WAVE_CHAN * 2);
         var b = buf.length - 2;
         var iterate = function() {
             var begin = new Date();
@@ -211,28 +211,28 @@ function applyDelay($c, $w, $i, rowLen, callBack) {
 /**
  * @constructor
  */
-$x.A = function(mixBuf) {
-    this.mixBuf = mixBuf;
-    this.waveSize = mixBuf.length / WAVE_CHAN / 2;
+$x.A = function($m) {
+    this.$m = $m;
+    this.$w = $m.length / WAVE_CHAN / 2;
 };
 $x.A.prototype.getAudioBuffer = function(callBack) {
     if (audioCtx === null)
         audioCtx = new AudioContext();
-    var mixBuf = this.mixBuf;
-    var waveSize = this.waveSize;
+    var $m = this.$m;
+    var $w = this.$w;
 
-    var buffer = audioCtx.createBuffer(WAVE_CHAN, this.waveSize, WAVE_SPS); // Create Mono Source Buffer from Raw Binary
+    var buffer = audioCtx.createBuffer(WAVE_CHAN, this.$w, WAVE_SPS); // Create Mono Source Buffer from Raw Binary
     var lchan = buffer.getChannelData(0);
     var rchan = buffer.getChannelData(1);
     var b = 0;
     var iterate = function() {
         var beginning = new Date();
         var count = 0;
-        while (b < waveSize) {
-            var y = 4 * (mixBuf[b * 4] + (mixBuf[(b * 4) + 1] << 8) - 32768);
+        while (b < $w) {
+            var y = 4 * ($m[b * 4] + ($m[(b * 4) + 1] << 8) - 32768);
             y = y < -32768 ? -32768 : (y > 32767 ? 32767 : y);
             lchan[b] = y / 32768;
-            y = 4 * (mixBuf[(b * 4) + 2] + (mixBuf[(b * 4) + 3] << 8) - 32768);
+            y = 4 * ($m[(b * 4) + 2] + ($m[(b * 4) + 3] << 8) - 32768);
             y = y < -32768 ? -32768 : (y > 32767 ? 32767 : y);
             rchan[b] = y / 32768;
             b += 1;
@@ -272,7 +272,7 @@ $x.S.prototype.genSound = function(n, $c, currentpos) {
     var o1t = getnotefreq(n + (this.$i.ac - 8) * 12 + this.$i.aa) * (1 + 0.0008 * this.$i.h);
     var o2t = getnotefreq(n + (this.$i.i - 8) * 12 + this.$i.m) * (1 + 0.0008 * this.$i.v);
 
-    // State variable init
+    // $S variable init
     var q = this.$i.k / 255;
     var low = 0;
     var band = 0;
@@ -308,7 +308,7 @@ $x.S.prototype.genSound = function(n, $c, currentpos) {
 
         rsample *= e / 255;
 
-        // State variable filter
+        // $S variable filter
         var f = this.$i.o;
         if(this.$i.u) f *= lfor;
         f = 1.5 * Math.sin(f * 3.141592 / WAVE_SPS);
@@ -370,14 +370,14 @@ $x.S.prototype.createAudioBuffer = function(n, callBack) {
 $x.M = function(song) {
     this.song = song;
     // Wave data configuration
-    this.waveSize = WAVE_SPS * song.songLen; // Total song size (in samples)
+    this.$w = WAVE_SPS * song.songLen; // Total song size (in samples)
 };
-$x.M.prototype.generateTrack = function ($i, mixBuf, callBack) {
+$x.M.prototype.generateTrack = function ($i, $m, callBack) {
     var self = this;
-    genBuffer(this.waveSize, function($c) {
+    genBuffer(this.$w, function($c) {
         // Preload/precalc some properties/expressions (for improved performance)
-        var $w = self.waveSize,
-            waveBytes = self.waveSize * WAVE_CHAN * 2,
+        var $w = self.$w,
+            waveBytes = self.$w * WAVE_CHAN * 2,
             rowLen = self.song.rowLen,
             soundGen = new $x.S($i, rowLen);
 
@@ -415,9 +415,9 @@ $x.M.prototype.generateTrack = function ($i, mixBuf, callBack) {
             // Add to mix buffer
             while(b2 < waveBytes)
             {
-                var x2 = mixBuf[b2] + (mixBuf[b2+1] << 8) + $c[b2] + ($c[b2+1] << 8) - 32768;
-                mixBuf[b2] = x2 & 255;
-                mixBuf[b2+1] = (x2 >> 8) & 255;
+                var x2 = $m[b2] + ($m[b2+1] << 8) + $c[b2] + ($c[b2+1] << 8) - 32768;
+                $m[b2] = x2 & 255;
+                $m[b2+1] = (x2 >> 8) & 255;
                 b2 += 2;
                 count += 1;
                 if (count % 1000 === 0 && (new Date() - beginning) > MAX_TIME) {
@@ -432,14 +432,14 @@ $x.M.prototype.generateTrack = function ($i, mixBuf, callBack) {
 };
 $x.M.prototype.getAudioGenerator = function(callBack) {
     var self = this;
-    genBuffer(this.waveSize, function(mixBuf) {
+    genBuffer(this.$w, function($m) {
         var t = 0;
         var recu = function() {
             if (t < self.song.songData.length) {
                 t += 1;
-                self.generateTrack(self.song.songData[t - 1], mixBuf, recu);
+                self.generateTrack(self.song.songData[t - 1], $m, recu);
             } else {
-                callBack(new $x.A(mixBuf));
+                callBack(new $x.A($m));
             }
         };
         recu();
@@ -944,30 +944,32 @@ $W['jsfxr'] = function(settings) {
 // S -- loadSounds
 // K -- KEYS
 // T -- TOUCHES
+// E -- Entity
+// C -- C
 // r -- resources
 // x -- context
 // v -- canvas
 // t -- tween
 // a -- audio_context
 
-var kz = {};
+var $ = {};
 
 /*^ Functions for loading resources */
 // queue is an object with names as keys and image paths as values
-kz.L = function (resources) {
+$.L = function (resources) {
   var promises = [];
-  kz.r = {};
+  $.r = {};
 
-  promises.push(kz.I(resources.i));
-  promises.push(kz.S(resources.sounds));
+  promises.push($.I(resources.i));
+  promises.push($.S(resources.sounds));
 
   return Promise.all(promises)
     .then(function () {
-      return kz.r;
+      return $.r;
     });
 };
 
-kz.I = function (queue) {
+$.I = function (queue) {
   var i = {};
   var promises = [];
 
@@ -994,13 +996,13 @@ kz.I = function (queue) {
 
   return Promise.all(promises)
                 .then(function () {
-                  kz.r.i = i;
-                  return kz.r.i;
+                  $.r.i = i;
+                  return $.r.i;
                 });
 };
 
-kz.a = new AudioContext();
-kz.S = function (queue) {
+$.a = new AudioContext();
+$.S = function (queue) {
   var sounds = {};
   var promises = [];
 
@@ -1014,10 +1016,10 @@ kz.S = function (queue) {
         sounds[name] = {
           play: function (loop) {
             loop = typeof loop == undefined ? false : loop;
-            var source = kz.a.createBufferSource();
+            var source = $.a.createBufferSource();
             source.loop = loop;
             source.buffer = this.buffer;
-            source.connect(kz.a.destination);
+            source.connect($.a.destination);
             source.start(0);
             return source;
           },
@@ -1030,14 +1032,14 @@ kz.S = function (queue) {
 
   return Promise.all(promises)
                 .then(function () {
-                  kz.r.sounds = sounds;
-                  return kz.r.sounds;
+                  $.r.sounds = sounds;
+                  return $.r.sounds;
                 });
 };
 /*$ Functions for loading resources */
 
 /*^ Keys */
-kz.K = {
+$.K = {
   X: 27, // ESCAPE
   L: 37, // LEFT
   U: 38, // UP
@@ -1046,19 +1048,19 @@ kz.K = {
   Z: 90 // Z
 };
 
-kz.keys_status = {};
+$.keys_status = {};
 for (var ii = 0; ii < 256; ii++) {
-  kz.keys_status[ii] = 0;
+  $.keys_status[ii] = 0;
 }
 /*$ Keys */
 
 /*^ Touches */
-kz.T = {};
+$.T = {};
 /*$ Touches */
 
 /*^ Tween */
 /**
- * kz.tween()
+ * $.tween()
  *
  * Description:
  *  Does a simple linear tween for numerical values.
@@ -1074,7 +1076,7 @@ kz.T = {};
  *   }
  *   Only one of 'rate' or 'duration' should be set.
  */
-kz.t = function (tween) {
+$.t = function (tween) {
   var start_time = performance.now();
   var old_value = tween.o[tween.p];
   var new_value = tween.v;
@@ -1100,133 +1102,105 @@ kz.t = function (tween) {
 /*$ Tween */
 
 /*^ Events */
-kz.events = [];
+$.events = [];
 
-kz.sendEvent = function(event) {
-  kz.events.push(event);
+$.sendEvent = function(event) {
+  $.events.push(event);
 }
 
-kz.processEvents = function () {
-  for (var ii = 0; ii < kz.events.length; ii++) {
-    for (var id in kz.entities) {
-      kz.entities[id].listen(kz.events[ii]);
+$.processEvents = function () {
+  for (var ii = 0; ii < $.events.length; ii++) {
+    for (var id in $.entities) {
+      $.entities[id].listen($.events[ii]);
     }
   }
-  kz.events = [];
+  $.events = [];
 };
 /*$ Events */
 
-/*^ The Entity object */
-kz.__entity_id__ = 0;
+/*^ The E object */
+$._i = 0;
 /**
  * @constructor
  */
-kz.Entity = function (properties) {
+$.E = function (properties) {
   for (name in properties) {
     if (!properties.hasOwnProperty(name)) continue;
     this[name] = properties[name];
   }
   /*if (typeof this.x !== 'number') {
-    throw 'Entity.x must be a number';
+    throw 'E.x must be a number';
   }
   if (typeof this.y !== 'number') {
-    throw 'Entity.y must be a number';
+    throw 'E.y must be a number';
   }
   if (typeof this.listen !== 'function') {
-    throw 'Entity.listen must be a function';
+    throw 'E.listen must be a function';
   }*/
-  this.__entity_id__ = kz.__entity_id__;
-  kz.entities[this.__entity_id__] = this;
-  kz.__entity_id__++;
+  this._i = $._i;
+  $.entities[this._i] = this;
+  $._i++;
 };
 
-kz.Entity.prototype.x = 0;
-kz.Entity.prototype.y = 0;
-kz.Entity.prototype.listen = function () {
+$.E.prototype.x = 0;
+$.E.prototype.y = 0;
+$.E.prototype.listen = function () {
 };
-kz.Entity.prototype.destroy = function () {
-  delete kz.entities[this.__entity_id__];
+$.E.prototype.destroy = function () {
+  delete $.entities[this._i];
 };
-/*$ The Entity object */
+/*$ The E object */
 
-/*^ The Scene object */
+/*^ The C object */
 /**
  * @constructor
  */
-kz.Scene = function () {};
-/*kz.Scene = function (functions) {
-  if (typeof functions.initialize === 'function') {
-    this.initialize = functions.initialize;
-    //throw 'Scene.initialize must be function';
-  }
-  if (typeof functions.preUpdate === 'function') {
-    this.preUpdate = functions.preUpdate;
-    //throw 'Scene.preUpdate must be function';
-  }
-  if (typeof functions.postUpdate === 'function') {
-    this.postUpdate = functions.postUpdate;
-    //throw 'Scene.postUpdate must be function';
-  }
-  if (typeof functions.draw === 'function') {
-    this.draw = functions.draw;
-    //throw 'Scene.draw must be function';
-  }
-};*/
-
-kz.Scene.prototype.initialize = function () {
+$.C = function () {};
+$.C.prototype.initialize = function () {
 };
 
-kz.Scene.prototype.preUpdate = function () {
+$.C.prototype.preUpdate = function () {
 };
 
-kz.Scene.prototype.postUpdate = function () {
+$.C.prototype.postUpdate = function () {
 };
 
-kz.Scene.prototype.draw = function () {
+$.C.prototype.draw = function () {
 };
 
-kz.Scene.prototype.exit = function () {
+$.C.prototype.exit = function () {
 };
 
-// duck-typing check
-/*kz.isSceneLike = function(object) {
-  return (object !== undefined &&
-    object !== null &&
-    typeof object.initialize === 'function' &&
-    typeof object.preUpdate === 'function' &&
-    typeof object.postUpdate === 'function' &&
-    typeof object.draw === 'function');
-};*/
-/*$ The Scene object */
+/*$ The C object */
 
 /*^ Essential functions such as initialize, tick, and run */
-kz.initializeCanvas = function (canvas_id) {
-  kz.v = $D.getElementById(canvas_id);
-  kz.x = kz.v.getContext('2d');
-  kz.x.clearAll = function () {
-    kz.x.clearRect(0, 0, kz.v.width, kz.v.height);
+$.initializeCanvas = function (canvas_id) {
+  $.v = $D.getElementById(canvas_id);
+  $.x = $.v.getContext('2d');
+  $.x.clearAll = function () {
+    $.x.clearRect(0, 0, $.v.width, $.v.height);
   };
 };
 
-kz.initialize = function (canvas_id) {
-  kz.initializeCanvas(canvas_id);
+$.initialize = function (canvas_id) {
+  $.initializeCanvas(canvas_id);
 
   $D.addEventListener('keydown', function(event) {
     event.preventDefault();
-    if (kz.keys_status[event.which] == 0) {
-      kz.keys_status[event.which] = 1;
-      event.kztype = 'keypress';
+    if ($.keys_status[event.which] == 0) {
+      $.keys_status[event.which] = 1;
+      event.$type = 'keypress';
     } else {
-      event.kztype = 'keyheld';
+      event.$type = 'keyheld';
     }
-    kz.events.push(event);
+    $.events.push(event);
   });
 
   $D.addEventListener('keyup', function(event) {
     event.preventDefault();
-    event.kztype = 'keyup';
-    kz.keys_status[event.which] = 0;
-    kz.events.push(event);
+    event.$type = 'keyup';
+    $.keys_status[event.which] = 0;
+    $.events.push(event);
   });
 
   // touch events
@@ -1234,8 +1208,8 @@ kz.initialize = function (canvas_id) {
     //event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
-      if (kz.T[touch.identifier]) continue;
-      kz.T[touch.identifier] = {
+      if ($.T[touch.identifier]) continue;
+      $.T[touch.identifier] = {
         initial: {x: touch.screenX, y: touch.screenY},
         current: {x: touch.screenX, y: touch.screenY}
       };
@@ -1246,371 +1220,370 @@ kz.initialize = function (canvas_id) {
     event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
-      if (!kz.T[touch.identifier]) continue;
-      kz.T[touch.identifier].current = {x: touch.screenX, y:touch.screenY};
+      if (!$.T[touch.identifier]) continue;
+      $.T[touch.identifier].current = {x: touch.screenX, y:touch.screenY};
     }
   });
 
   $D.addEventListener('touchend', function(event) {
     event.preventDefault();
-    for (var id in kz.T) {
+    for (var id in $.T) {
       var found = false;
       for (var ii = 0; ii < event.touches.length; ii++) {
         if (event.touches[ii].identifier == id) found = true;
       }
       if (found) continue;
-      var start_x = kz.T[id].initial.x;
-      var start_y = kz.T[id].initial.y;
-      var end_x = kz.T[id].current.x;
-      var end_y = kz.T[id].current.y;
+      var start_x = $.T[id].initial.x;
+      var start_y = $.T[id].initial.y;
+      var end_x = $.T[id].current.x;
+      var end_y = $.T[id].current.y;
       if (Math.abs(start_x - end_x) + Math.abs(start_y - end_y) < 20) {
-        kz.events.push({
-          kztype: 'keypress',
-          which: kz.K.Z
+        $.events.push({
+          $type: 'keypress',
+          which: $.K.Z
         });
       }
       if (Math.abs(start_y - end_y) < 60
                  && start_x - end_x > 20) {
-        kz.events.push({
-          kztype: 'keypress',
-          which: kz.K.L
+        $.events.push({
+          $type: 'keypress',
+          which: $.K.L
         });
       }
       if (Math.abs(start_y - end_y) < 60
                  && end_x - start_x > 20) {
-        kz.events.push({
-          kztype: 'keypress',
-          which: kz.K.R
+        $.events.push({
+          $type: 'keypress',
+          which: $.K.R
         });
       }
       if (Math.abs(start_x - end_x) < 60
                  && end_y - start_y > 20) {
-        kz.events.push({
-          kztype: 'keypress',
-          which: kz.K.D
+        $.events.push({
+          $type: 'keypress',
+          which: $.K.D
         });
       }
       if (Math.abs(start_x - end_x) < 60
                  && start_y - end_y > 20) {
-        kz.events.push({
-          kztype: 'keypress',
-          which: kz.K.U
+        $.events.push({
+          $type: 'keypress',
+          which: $.K.U
         });
       }
 
 
-      delete kz.T[id];
+      delete $.T[id];
     }
   });
 };
 
 var tickID;
 
-kz.tick = function (now) {
-  kz.scene.preUpdate(kz.performance.now());
-  kz.scene.draw(kz.performance.now());
-  kz.scene.postUpdate(kz.performance.now());
-  tickID = $W.requestAnimationFrame(kz.tick);
+$.tick = function (now) {
+  $.scene.preUpdate($.performance.now());
+  $.scene.draw($.performance.now());
+  $.scene.postUpdate($.performance.now());
+  tickID = $W.requestAnimationFrame($.tick);
 };
 
-kz.run = function (scene) {
+$.run = function (scene) {
   if (tickID) {
     $W.cancelAnimationFrame(tickID);
   }
-  if (kz.scene) {
-    kz.scene.exit();
+  if ($.scene) {
+    $.scene.exit();
   }
-  //if (!kz.isSceneLike(scene)) throw 'No scene attached!';
-  kz.entities = {};
-  kz.scene = scene;
-  kz.scene.initialize();
-  kz.alive = true;
-  tickID = $W.requestAnimationFrame(kz.tick);
+  $.entities = {};
+  $.scene = scene;
+  $.scene.initialize();
+  $.alive = true;
+  tickID = $W.requestAnimationFrame($.tick);
 };
 
-kz.performance = {
+$.performance = {
   pauseTime: 0,
   now: function () {
-    if (kz.paused) {
-        return kz.pauseNow;
+    if ($.paused) {
+        return $.pauseNow;
     } else {
-      return performance.now() - kz.performance.pauseTime;
+      return performance.now() - $.performance.pauseTime;
     }
   }
 };
-kz.paused = false;
-kz.pauseTime = 0;
-kz.pause = function () {
-  kz.pauseNow = kz.performance.now();
-  kz.pauseTime = performance.now();
-  kz.paused = true;
+$.paused = false;
+$.pauseTime = 0;
+$.pause = function () {
+  $.pauseNow = $.performance.now();
+  $.pauseTime = performance.now();
+  $.paused = true;
 };
-kz.resume = function () {
-  kz.performance.pauseTime += performance.now() - kz.pauseTime;
-  kz.paused = false;
+$.resume = function () {
+  $.performance.pauseTime += performance.now() - $.pauseTime;
+  $.paused = false;
 };
 /*$ Essential functions such as tick and run */
-var scene_loading = new kz.Scene();
+var sl = new $.C();
 
-scene_loading.preUpdate = function (now) {
-  kz.events = [];
+sl.preUpdate = function (now) {
+  $.events = [];
 };
 
-scene_loading.draw = function (now) {
-  kz.x.clearAll();
-  kz.x.save();
-  kz.x.fillStyle = '#30403b';
-  kz.x.fillRect(
+sl.draw = function (now) {
+  $.x.clearAll();
+  $.x.save();
+  $.x.fillStyle = '#30403b';
+  $.x.fillRect(
     0,
     0,
-    kz.v.width,
-    kz.v.height
+    $.v.width,
+    $.v.height
   );
-  kz.x.restore();
+  $.x.restore();
 
-  text = ['LOADING', 'LOADING.', 'LOADING..', 'LOADING...']
+  text = ['', '.', '..', '...']
 
-  kz.x.save();
-  kz.x.textAlign = 'center';
-  kz.x.textBaseline = 'center';
-  kz.x.font = '18px f';
-  kz.x.fillStyle = 'rgb(142, 212, 165)';
-  kz.x.lineWidth = 2;
-  kz.x.fillText(
-    text[Math.round(now/500)%4],
-    kz.v.width / 2,
-    kz.v.height / 2
+  $.x.save();
+  $.x.textAlign = 'center';
+  $.x.textBaseline = 'center';
+  $.x.font = '18px f';
+  $.x.fillStyle = '#8ed4a5';
+  $.x.lineWidth = 2;
+  $.x.fillText(
+    'LOADING'+text[Math.round(now/500)%4],
+    $.v.width / 2,
+    $.v.height / 2
   );
-  kz.x.restore();
+  $.x.restore();
 };
 // three '/' represents comments for minification purposes
-var scene_main_menu = (function () {
-  var scene_main_menu = new kz.Scene();
-  var graphics;
+var smm = (function () {
+  var smm = new $.C();
+  var gfx;
 
-  scene_main_menu.initialize = function () {
-    graphics = {
+  smm.initialize = function () {
+    gfx = {
       a: 1, //press_space_visible
       text_alpha: 1,
-      fadeAlpha: 1,
+      f: 1,
       exiting: false,
       choice: 0,
-      state: 0
+      $S: 0
     };
-    kz.t({
-      o: graphics,
-      p: 'fadeAlpha',
+    $.t({
+      o: gfx,
+      p: 'f',
       v: 0,
       d: 100
     });
-    graphics.blinkID = setInterval(function() {
-      graphics.a ^= 1;
+    gfx.blinkID = setInterval(function() {
+      gfx.a ^= 1;
     }, 400);
   }
 
-  scene_main_menu.draw = function () {
-    kz.x.clearAll();
+  smm.draw = function () {
+    $.x.clearAll();
 
-    kz.x.save();
-    kz.x.fillStyle = '#30403b';
-    kz.x.fillRect(
+    $.x.save();
+    $.x.fillStyle = '#30403b';
+    $.x.fillRect(
       0,
       0,
-      kz.v.width,
-      kz.v.height
+      $.v.width,
+      $.v.height
     );
-    kz.x.restore();
+    $.x.restore();
 
-    kz.x.textAlign = 'center';
-    kz.x.textBaseline = 'center';
-    kz.x.font = '48px f';
-    kz.x.fillStyle = '#8ed4a5';
-    kz.x.fillText(
+    $.x.textAlign = 'center';
+    $.x.textBaseline = 'center';
+    $.x.font = '48px f';
+    $.x.fillStyle = '#8ed4a5';
+    $.x.fillText(
       'ZODIAC 13',
-      kz.v.width / 2,
+      $.v.width / 2,
       125
     );
 
-    if (graphics.state == 0 && graphics.a) {
-      kz.x.save();
-      kz.x.globalAlpha = graphics.text_alpha;
-      kz.x.font = '24px f';
-      kz.x.fillStyle = 'white';
-      kz.x.fillText(
+    if (gfx.$S == 0 && gfx.a) {
+      $.x.save();
+      $.x.globalAlpha = gfx.text_alpha;
+      $.x.font = '24px f';
+      $.x.fillStyle = 'white';
+      $.x.fillText(
         'PRESS   Z',
-        kz.v.width / 2,
+        $.v.width / 2,
         250
       );
-      kz.x.restore();
+      $.x.restore();
     }
-    if (graphics.state == 1) {
-      kz.x.textAlign = 'center';
-      kz.x.textBaseline = 'center';
-      kz.x.font = '24px f';
-      kz.x.fillStyle = graphics.choice == 0 ? '#fff' : '#666';
-      kz.x.fillText('GAME START', kz.v.width/2, kz.v.height/2+40);
-      kz.x.fillStyle = graphics.choice == 1 ? '#fff' : '#666';
-      kz.x.fillText('RECORDS', kz.v.width/2, kz.v.height/2+88);
-      kz.x.restore();
+    if (gfx.$S == 1) {
+      $.x.textAlign = 'center';
+      $.x.textBaseline = 'center';
+      $.x.font = '24px f';
+      $.x.fillStyle = gfx.choice == 0 ? '#fff' : '#666';
+      $.x.fillText('GAME START', $.v.width/2, $.v.height/2+40);
+      $.x.fillStyle = gfx.choice == 1 ? '#fff' : '#666';
+      $.x.fillText('RECORDS', $.v.width/2, $.v.height/2+88);
+      $.x.restore();
     }
 
-    kz.x.save();
-    kz.x.globalAlpha = graphics.text_alpha;
-    kz.x.font = '10px f';
-    kz.x.fillStyle = '#50605b';
-    kz.x.lineWidth = 2;
-    kz.x.fillText(
+    $.x.save();
+    $.x.globalAlpha = gfx.text_alpha;
+    $.x.font = '10px f';
+    $.x.fillStyle = '#50605b';
+    $.x.lineWidth = 2;
+    $.x.fillText(
       'HERMAN CHAU (KCAZE)',
-      kz.v.width / 2,
+      $.v.width / 2,
       380
     );
-    kz.x.restore();
-    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
+    $.x.restore();
+    $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
+    $.x.fillRect(0,0,$.v.width,$.v.height);
   }
 
-  scene_main_menu.preUpdate = function (now) {
-    for (var ii = 0; ii < kz.events.length; ii++) {
-      if (kz.events[ii].kztype == 'keypress') {
-        if (graphics.exiting) continue;
-        if (kz.events[ii].which == kz.K.Z) {
-          kz.r.sounds['sfx_select'].play();
-          if (!graphics.state) {
-            graphics.state = 1;
+  smm.preUpdate = function (now) {
+    for (var ii = 0; ii < $.events.length; ii++) {
+      if ($.events[ii].$type == 'keypress') {
+        if (gfx.exiting) continue;
+        if ($.events[ii].which == $.K.Z) {
+          $.r.sounds['sfx_select'].play();
+          if (!gfx.$S) {
+            gfx.$S = 1;
           } else {
-            var s = graphics.choice ? scene_records : scene_character_select;
-            graphics.exiting = true;
-            kz.t({
-              o: graphics,
-              p: 'fadeAlpha',
+            var s = gfx.choice ? srs : scs;
+            gfx.exiting = true;
+            $.t({
+              o: gfx,
+              p: 'f',
               v: 1,
               d: 100
             }).then(function () {
-              clearInterval(graphics.blinkID);
-              kz.run(s);
+              clearInterval(gfx.blinkID);
+              $.run(s);
             });
           }
         }
       }
-      if (kz.events[ii].which == kz.K.U) {
-        if (graphics.state) {
-          graphics.choice = Math.max(0, graphics.choice-1);
+      if ($.events[ii].which == $.K.U) {
+        if (gfx.$S) {
+          gfx.choice = Math.max(0, gfx.choice-1);
         }
       }
-      if (kz.events[ii].which == kz.K.D) {
-        if (graphics.state) {
-          graphics.choice = Math.min(1, graphics.choice+1);
+      if ($.events[ii].which == $.K.D) {
+        if (gfx.$S) {
+          gfx.choice = Math.min(1, gfx.choice+1);
         }
       }
     }
-    kz.events = [];
+    $.events = [];
   }
 
-  return scene_main_menu;
+  return smm;
 })();
-var scene_records = (function () {
-  var scene = new kz.Scene();
-  var graphics;
-  var state;
+var srs = (function () {
+  var scene = new $.C();
+  var gfx;
+  var $S;
 
   scene.initialize = function () {
-    graphics = {
-      fadeAlpha: 1
+    gfx = {
+      f: 1
     };
-    kz.t({
-      o: graphics,
-      p: 'fadeAlpha',
+    $.t({
+      o: gfx,
+      p: 'f',
       v: 0,
       d: 100
     });
-    state = {
+    $S = {
       exiting: false
     };
   }
 
   scene.draw = function () {
-    kz.x.clearAll();
+    $.x.clearAll();
 
-    kz.x.save();
-    kz.x.fillStyle = '#30403b';
-    kz.x.fillRect(
+    $.x.save();
+    $.x.fillStyle = '#30403b';
+    $.x.fillRect(
       0,
       0,
-      kz.v.width,
-      kz.v.height
+      $.v.width,
+      $.v.height
     );
-    kz.x.restore();
+    $.x.restore();
 
-    kz.x.textAlign = 'center';
-    kz.x.textBaseline = 'center';
-    kz.x.font = '32px f';
-    kz.x.fillStyle = '#fff';
-    kz.x.fillText(
+    $.x.textAlign = 'center';
+    $.x.textBaseline = 'center';
+    $.x.font = '32px f';
+    $.x.fillStyle = '#fff';
+    $.x.fillText(
       'RECORDS',
-      kz.v.width / 2,
+      $.v.width / 2,
       48
     );
-    kz.x.font = '12px f';
+    $.x.font = '12px f';
     for (var ii = 0; ii < records.length; ii++) {
-      kz.x.fillStyle = '#fff';
-      kz.x.textAlign = 'left';
-      kz.x.fillText(records[ii].text + ': ', 12, 90 + ii*20);
-      kz.x.textAlign = 'right';
-      kz.x.fillStyle = '#8ed4a5';
+      $.x.fillStyle = '#fff';
+      $.x.textAlign = 'left';
+      $.x.fillText(records[ii].text + ': ', 12, 90 + ii*20);
+      $.x.textAlign = 'right';
+      $.x.fillStyle = '#8ed4a5';
       var value;
       if (records[ii].name == 'total_time' || records[ii].name == 'max_time') {
-        var time = getRecord(records[ii].name);
+        var time = gR(records[ii].name);
         var sec_string = '' + time%60;
         var min_string = '' + (Math.floor(time/60)%60);
         var hour_string = records[ii].name == 'total_time' ? '' + Math.floor(time/3600) + ':' : '';
         value = hour_string+'0'.repeat(2-min_string.length) + min_string + ':'  + '0'.repeat(2-sec_string.length)+sec_string;
       } else {
-        value = getRecord(records[ii].name);
+        value = gR(records[ii].name);
       }
-      kz.x.fillText(value, kz.v.width-12, 90+ii*20);
+      $.x.fillText(value, $.v.width-12, 90+ii*20);
     }
 
-    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
+    $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
+    $.x.fillRect(0,0,$.v.width,$.v.height);
   }
 
   scene.preUpdate = function (now) {
-    for (var ii = 0; ii < kz.events.length; ii++) {
-      if (state.exiting) continue;
-      if (kz.events[ii].kztype == 'keypress') {
-        if (kz.events[ii].which == kz.K.X || kz.events[ii].which == kz.K.Z) {
-          state.exiting = true;
-          kz.t({
-            o: graphics,
-            p: 'fadeAlpha',
+    for (var ii = 0; ii < $.events.length; ii++) {
+      if ($S.exiting) continue;
+      if ($.events[ii].$type == 'keypress') {
+        if ($.events[ii].which == $.K.X || $.events[ii].which == $.K.Z) {
+          $S.exiting = true;
+          $.t({
+            o: gfx,
+            p: 'f',
             v: 1,
             d: 100
           }).then(function () {
-            kz.run(scene_main_menu);
+            $.run(smm);
           });
         }
       }
     }
-    kz.events = [];
+    $.events = [];
   };
 
   return scene;
 })();
 var character;
-var scene_character_select = (function () {
-  var scene = new kz.Scene();
-  var state;
+var scs = (function () {
+  var scene = new $.C();
+  var $S;
 
   var characters;
 
   scene.initialize = function () {
-    state = {
+    $S = {
       s: 0, //selected
       exiting: false,
-      f: 1 //fadeAlpha
+      f: 1 //f
     }
-    kz.t({
-      o: state,
+    $.t({
+      o: $S,
       p: 'f',
       v: 0,
       d: 100});
@@ -1618,20 +1591,20 @@ var scene_character_select = (function () {
       {
         d: 'ENDS TURN WHITE',
         name: 'BOAR',
-        image: kz.r.i.b,
+        image: $.r.i.b,
         m: '13 WHITE ORBS IN A ROW',
-        u: getRecord('max_white_orbs') >= 13,
+        u: gR('max_white_orbs') >= 13,
         zodiac: function (data) {
-          var state = data.state;
+          var $S = data.$S;
           var config = data.$c;
           for (var yy = 0; yy < config.w; yy++) {
-            if (state.board[yy][0].piece_type && state.board[yy][0].piece_type != 1) {
-              state.board[yy][0].piece_type = 1;
-              data.animateColorChange(state.board[yy][0].piece, 1);
+            if ($S.board[yy][0].piece_type && $S.board[yy][0].piece_type != 1) {
+              $S.board[yy][0].piece_type = 1;
+              data.animateColorChange($S.board[yy][0].piece, 1);
             }
-            if (state.board[yy][config.w-1].piece_type && state.board[yy][config.w-1].piece_type != 1) {
-              state.board[yy][config.w-1].piece_type = 1;
-              data.animateColorChange(state.board[yy][config.w-1].piece, 1);
+            if ($S.board[yy][config.w-1].piece_type && $S.board[yy][config.w-1].piece_type != 1) {
+              $S.board[yy][config.w-1].piece_type = 1;
+              data.animateColorChange($S.board[yy][config.w-1].piece, 1);
             }
           }
         }
@@ -1639,21 +1612,21 @@ var scene_character_select = (function () {
       {
         d: 'CLEAR ROW ABOVE',
         name: 'CAT',
-        image: kz.r.i.c,
+        image: $.r.i.c,
         u: true,
         zodiac: function (data) {
-          var state = data.state;
+          var $S = data.$S;
           var config = data.$c;
           var row = data.row;
           row--;
           var row_pieces = [];
           for (var xx = 0; xx < config.w; xx++) {
-            if (state.board[row][xx].piece) {
-              row_pieces.push(state.board[row][xx].piece);
+            if ($S.board[row][xx].piece) {
+              row_pieces.push($S.board[row][xx].piece);
             }
           }
           for (xx = 0; xx < config.w; xx++) {
-            state.board[row][xx] = {
+            $S.board[row][xx] = {
               piece_type: 0
             };
           }
@@ -1663,11 +1636,11 @@ var scene_character_select = (function () {
       {
         d: 'CLEAR LEFT SIDE',
         name: 'DOG',
-        image: kz.r.i.d,
+        image: $.r.i.d,
         m: '169 ORBS SHOT',
-        u: getRecord('total_orbs') >= 169,
+        u: gR('total_orbs') >= 169,
         zodiac: function (data) {
-          var board = data.state.board;
+          var board = data.$S.board;
           var pieces = [];
           for (var yy = 0; yy < data.$c.w; yy++) {
             if (board[yy][0].piece_type) {
@@ -1681,14 +1654,14 @@ var scene_character_select = (function () {
       {
         d: 'CLEAR 4 ON ENDS',
         name: 'DRAGON',
-        image: kz.r.i.e,
+        image: $.r.i.e,
         m: 'SCORE 169',
-        u: getRecord('max_score') >= 169,
+        u: gR('max_score') >= 169,
         zodiac: function(data) {
           var leftCounter = 4;
           var rightCounter = 4;
           var pieces = [];
-          var board = data.state.board;
+          var board = data.$S.board;
           var width = data.$c.w;
           for (var yy = data.$c.w - 1; yy >= 0; yy--) {
             if (leftCounter) {
@@ -1712,11 +1685,11 @@ var scene_character_select = (function () {
       {
         d: 'CLEAR 12 RANDOM',
         name: 'HARE',
-        image: kz.r.i.f,
+        image: $.r.i.f,
         m: 'REACH LEVEL 13',
-        u: getRecord('max_level') >= 13,
+        u: gR('max_level') >= 13,
         zodiac: function(data) {
-          var board = data.state.board;
+          var board = data.$S.board;
           var count = 0;
           var pieces = [];
           var piece_locs = [];
@@ -1742,9 +1715,9 @@ var scene_character_select = (function () {
       {
         d: 'SCORE +2',
         name: 'HORSE',
-        image: kz.r.i.g,
+        image: $.r.i.g,
         m: 'ZODIAC 13 TIMES',
-        u: getRecord('total_zodiac') >= 13,
+        u: gR('total_zodiac') >= 13,
         zodiac: function(data) {
           data.incrementScore(2);
         }
@@ -1752,35 +1725,35 @@ var scene_character_select = (function () {
       {
         d: 'DELAY ROW DROP',
         name: 'MONKEY',
-        image: kz.r.i.h,
+        image: $.r.i.h,
         m: 'ZODIAC 169 TIMES',
-        u: getRecord('total_zodiac') >= 169,
+        u: gR('total_zodiac') >= 169,
         zodiac: function (data) {
-          var state = data.state;
-          state.next_row_time_diff = state.next_row_time - kz.performance.now();
-          state.next_row_freeze = true;
+          var $S = data.$S;
+          $S.next_row_time_diff = $S.next_row_time - $.performance.now();
+          $S.next_row_freeze = true;
           setTimeout(function() {
-            state.next_row_freeze = false;
+            $S.next_row_freeze = false;
           }, 5000);
         }
       },
       {
         d: 'ENDS TURN BLACK',
         name: 'OX',
-        image: kz.r.i.i,
+        image: $.r.i.i,
         m: '13 BLACK ORBS IN A ROW',
-        u: getRecord('max_black_orbs') >= 13,
+        u: gR('max_black_orbs') >= 13,
         zodiac: function (data) {
-          var state = data.state;
+          var $S = data.$S;
           var config = data.$c;
           for (var yy = 0; yy < $c.w; yy++) {
-            if (state.board[yy][0].piece_type && state.board[yy][0].piece_type != 2) {
-              state.board[yy][0].piece_type = 2;
-              data.animateColorChange(state.board[yy][0].piece, 2);
+            if ($S.board[yy][0].piece_type && $S.board[yy][0].piece_type != 2) {
+              $S.board[yy][0].piece_type = 2;
+              data.animateColorChange($S.board[yy][0].piece, 2);
             }
-            if (state.board[yy][config.w-1].piece_type && state.board[yy][config.w-1].piece_type != 2) {
-              state.board[yy][config.w-1].piece_type = 2;
-              data.animateColorChange(state.board[yy][config.w-1].piece, 2);
+            if ($S.board[yy][config.w-1].piece_type && $S.board[yy][config.w-1].piece_type != 2) {
+              $S.board[yy][config.w-1].piece_type = 2;
+              data.animateColorChange($S.board[yy][config.w-1].piece, 2);
             }
           }
         }
@@ -1788,25 +1761,25 @@ var scene_character_select = (function () {
       {
         d: 'NEXT ALL WHITE',
         name: 'RAT',
-        image: kz.r.i.k,
+        image: $.r.i.k,
         m: '1313 ORBS SHOT',
-        u: getRecord('total_orbs') >= 1313,
+        u: gR('total_orbs') >= 1313,
         zodiac: function (data) {
           for (var ii = 0; ii < 8; ii++) {
-            data.state.player.next[ii] = 1;
+            data.$S.player.next[ii] = 1;
           }
         }
       },
       {
         d: 'CLEAR RIGHT SIDE',
         name: 'ROOSTER',
-        image: kz.r.i.l,
+        image: $.r.i.l,
         m: 'SURVIVE 13 MINUTES',
-        u: getRecord('max_time') >= 13*60,
+        u: gR('max_time') >= 13*60,
         zodiac: function (data) {
-          var board = data.state.board;
+          var board = data.$S.board;
           var pieces = [];
-          var width = data.state.w;
+          var width = data.$S.w;
           for (var yy = 0; yy < data.$c.w; yy++) {
             if (board[yy][width-1].piece_type) {
               pieces.push(board[yy][width-1].piece);
@@ -1819,18 +1792,18 @@ var scene_character_select = (function () {
       {
         d: 'CLEAR TOP ROW',
         name: 'SHEEP',
-        image: kz.r.i.m,
+        image: $.r.i.m,
         m: 'SCORE 13',
-        u: getRecord('max_score') >= 13,
+        u: gR('max_score') >= 13,
         zodiac: function (data) {
-          var state = data.state;
+          var $S = data.$S;
           var config = data.$c;
           var row_pieces = [];
           for (var xx = 0; xx < config.w; xx++) {
-            if (state.board[0][xx].piece) {
-              row_pieces.push(state.board[0][xx].piece);
+            if ($S.board[0][xx].piece) {
+              row_pieces.push($S.board[0][xx].piece);
             }
-            state.board[0][xx] = {
+            $S.board[0][xx] = {
               piece_type: 0
             };
           }
@@ -1840,152 +1813,152 @@ var scene_character_select = (function () {
       {
         d: 'NEXT ALL BLACK',
         name: 'SNAKE',
-        image: kz.r.i.n,
+        image: $.r.i.n,
         m: 'PLAY 13 GAMES',
-        u: getRecord('play_count') >= 13,
+        u: gR('play_count') >= 13,
         zodiac: function (data) {
           for (var ii = 0; ii < 8; ii++) {
-            data.state.player.next[ii] = 2;
+            data.$S.player.next[ii] = 2;
           }
         }
       },
       {
         d: 'SCORE +LEVEL/3',
         name: 'TIGER',
-        image: kz.r.i.o,
+        image: $.r.i.o,
         m: '169 ROWS CLEARED',
-        u: getRecord('total_rows') >= 169,
+        u: gR('total_rows') >= 169,
         zodiac: function (data) {
-          data.incrementScore(Math.floor(data.state.level/3));
+          data.incrementScore(Math.floor(data.$S.level/3));
         }
       },
       {
         d: '',
         name: 'RANDOM',
-        image: kz.r.i.p,
+        image: $.r.i.p,
         u: true
       }
     ];
   }
 
   scene.draw = function (now) {
-    kz.x.clearAll();
+    $.x.clearAll();
 
-    kz.x.save();
-    kz.x.fillStyle = '#30403b';
-    kz.x.fillRect(
+    $.x.save();
+    $.x.fillStyle = '#30403b';
+    $.x.fillRect(
       0,
       0,
-      kz.v.width,
-      kz.v.height
+      $.v.width,
+      $.v.height
     );
-    kz.x.restore();
+    $.x.restore();
 
     for (var yy = 0; yy < 7; yy++) {
       for (var xx = 0; xx < 2; xx++) {
         var idx = yy*2 + xx;
         if (idx >= characters.length) break;
-        kz.x.strokeStyle = '#89928e';
-        kz.x.lineWidth = 0.5;
-        kz.x.fillStyle = '#50605b';
-        kz.x.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
-        kz.x.strokeRect(xx*49 + 10, yy*49 + 20, 50, 50) ;
-        kz.x.drawImage(
+        $.x.strokeStyle = '#89928e';
+        $.x.lineWidth = 0.5;
+        $.x.fillStyle = '#50605b';
+        $.x.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
+        $.x.strokeRect(xx*49 + 10, yy*49 + 20, 50, 50) ;
+        $.x.drawImage(
           characters[idx].image,
           xx*49 + 10,
           yy*49 + 20
         )
         if (!characters[idx].u) {
-          kz.x.fillStyle = 'rgba(0,0,0,0.7)';
-          kz.x.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
+          $.x.fillStyle = 'rgba(0,0,0,0.7)';
+          $.x.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
         }
       }
     }
     if (Math.floor(now/200) % 3) {
-      kz.x.strokeStyle = '#fff';
-      kz.x.lineWidth = 1;
-      kz.x.strokeRect((state.s%2)*49 + 10, Math.floor(state.s/2)*49 + 20, 50, 50) ;
+      $.x.strokeStyle = '#fff';
+      $.x.lineWidth = 1;
+      $.x.strokeRect(($S.s%2)*49 + 10, Math.floor($S.s/2)*49 + 20, 50, 50) ;
     }
-    kz.x.textAlign = 'right';
-    kz.x.textBaseline = 'center';
-    kz.x.font = '24px f';
-    kz.x.fillStyle = 'white';
-    kz.x.fillText(
-      characters[state.s].name,
-      kz.v.width - 10,
+    $.x.textAlign = 'right';
+    $.x.textBaseline = 'center';
+    $.x.font = '24px f';
+    $.x.fillStyle = 'white';
+    $.x.fillText(
+      characters[$S.s].name,
+      $.v.width - 10,
       330
     );
-    kz.x.textAlign = 'right';
-    kz.x.textBaseline = 'center';
-    kz.x.font = '16px f';
-    kz.x.fillStyle = 'white';
-    if (characters[state.s].u) {
-      kz.x.fillText(
-        characters[state.s].d,
-        kz.v.width - 10,
+    $.x.textAlign = 'right';
+    $.x.textBaseline = 'center';
+    $.x.font = '16px f';
+    $.x.fillStyle = 'white';
+    if (characters[$S.s].u) {
+      $.x.fillText(
+        characters[$S.s].d,
+        $.v.width - 10,
         360
       );
     } else {
-      kz.x.font = '12px f';
-      kz.x.fillStyle = '#50605b';
-      kz.x.fillText(
-        characters[state.s].m,
-        kz.v.width - 10,
+      $.x.font = '12px f';
+      $.x.fillStyle = '#50605b';
+      $.x.fillText(
+        characters[$S.s].m,
+        $.v.width - 10,
         360
       );
     }
-    kz.x.fillStyle = 'rgba(0,0,0,'+state.f+')';
-    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
+    $.x.fillStyle = 'rgba(0,0,0,'+$S.f+')';
+    $.x.fillRect(0,0,$.v.width,$.v.height);
   }
 
   scene.preUpdate = function (now) {
-    for (var ii = 0; ii < kz.events.length; ii++) {
-      if (state.exiting) continue;
-      if (kz.events[ii].kztype == 'keypress') {
-        if (kz.events[ii].which == kz.K.R) {
-          state.s = Math.min(13, state.s+1);
-        } else if (kz.events[ii].which == kz.K.D) {
-          state.s = Math.min(13, state.s+2);
-        } else if (kz.events[ii].which == kz.K.L) {
-          state.s = Math.max(0, state.s-1);
-        } else if (kz.events[ii].which == kz.K.U) {
-          state.s = Math.max(0, state.s-2);
-        } else if (kz.events[ii].which == kz.K.Z) {
-          if (state.s == 13) {
-            state.s = Math.floor(Math.random() * 13);
-            while (!characters[state.s].u) {
-              state.s = Math.floor(Math.random() * 13);
+    for (var ii = 0; ii < $.events.length; ii++) {
+      if ($S.exiting) continue;
+      if ($.events[ii].$type == 'keypress') {
+        if ($.events[ii].which == $.K.R) {
+          $S.s = Math.min(13, $S.s+1);
+        } else if ($.events[ii].which == $.K.D) {
+          $S.s = Math.min(13, $S.s+2);
+        } else if ($.events[ii].which == $.K.L) {
+          $S.s = Math.max(0, $S.s-1);
+        } else if ($.events[ii].which == $.K.U) {
+          $S.s = Math.max(0, $S.s-2);
+        } else if ($.events[ii].which == $.K.Z) {
+          if ($S.s == 13) {
+            $S.s = Math.floor(Math.random() * 13);
+            while (!characters[$S.s].u) {
+              $S.s = Math.floor(Math.random() * 13);
             }
           }
-          if (characters[state.s].u) {
-            kz.r.sounds['sfx_select'].play();
-            character = characters[state.s];
-            state.exiting = true;
-            kz.t({
-              o: state,
+          if (characters[$S.s].u) {
+            $.r.sounds['sfx_select'].play();
+            character = characters[$S.s];
+            $S.exiting = true;
+            $.t({
+              o: $S,
               p: 'f',
               v: 1,
               d: 100
             }).then(function () {
-              kz.run(scene_game);
+              $.run(sg);
             });
           } else {
-            kz.r.sounds['sfx_denied'].play();
+            $.r.sounds['sfx_denied'].play();
           }
-        } else if (kz.events[ii].which == kz.K.X) {
-          state.exiting = true;
-          kz.t({
-            o: state,
+        } else if ($.events[ii].which == $.K.X) {
+          $S.exiting = true;
+          $.t({
+            o: $S,
             p: 'f',
             v: 1,
             d: 100
           }).then(function () {
-            kz.run(scene_main_menu);
+            $.run(smm);
           });
         }
       }
     }
-    kz.events = [];
+    $.events = [];
   }
 
   return scene;
@@ -1993,7 +1966,7 @@ var scene_character_select = (function () {
 // three '/' represents comments for minification purposes
 var previous_time;
 
-var scene_game = (function () {
+var sg = (function () {
   var $c = {
     w: 8, // board_width
     h: 17, // board_height
@@ -2001,58 +1974,57 @@ var scene_game = (function () {
     next_length: 8,
     next_row_interval: 20000
   };
-  var board_canvas = $D.createElement('canvas');
-  var info_canvas = $D.createElement('canvas');
-  var pause_canvas = $D.createElement('canvas');
-  var gameover_canvas = $D.createElement('canvas');
-  board_canvas.width = $c.w*$c.g;
-  board_canvas.height = 390;
-  info_canvas.width = 96;
-  info_canvas.height = 390;
-  gameover_canvas.width = 280;
-  gameover_canvas.height = 390;
-  pause_canvas.width = 280;
-  pause_canvas.height = 390;
-  var board_context = board_canvas.getContext('2d');
-  var info_context = info_canvas.getContext('2d');
-  var gameover_context = gameover_canvas.getContext('2d');
-  var pause_context = pause_canvas.getContext('2d');
-  var normal_piece_types = [1, 2];
-  var state;
+  var b_v = $D.createElement('canvas');
+  var i_v = $D.createElement('canvas');
+  var p_v = $D.createElement('canvas');
+  var g_v = $D.createElement('canvas');
+  b_v.width = $c.w*$c.g;
+  b_v.height = 390;
+  i_v.width = 96;
+  i_v.height = 390;
+  g_v.width = 280;
+  g_v.height = 390;
+  p_v.width = 280;
+  p_v.height = 390;
+  var b_x = b_v.getContext('2d');
+  var i_x = i_v.getContext('2d');
+  var g_x = g_v.getContext('2d');
+  var p_x = p_v.getContext('2d');
+  var $S;
   var pause_choice;
-  var graphics;
+  var gfx;
   var bgm;
 
   function pause() {
-    kz.pause();
+    $.pause();
     pause_choice = 0;
     // copy over game picture at pause time
-    pause_context.clearRect(
+    p_x.clearRect(
       0,
       0,
-      pause_canvas.width,
-      pause_canvas.height
+      p_v.width,
+      p_v.height
     );
-    pause_context.drawImage(
-      kz.v,
+    p_x.drawImage(
+      $.v,
       0,
       0
     );
-    kz.t({
-      o: graphics,
-      p: 'pause_alpha',
+    $.t({
+      o: gfx,
+      p: 'p_a',
       v: 0.8,
       d: 50
     });
   }
 
   function resume() {
-    kz.t({
-      o: graphics,
-      p: 'pause_alpha',
+    $.t({
+      o: gfx,
+      p: 'p_a',
       v: 0,
       d: 50
-    }).then(kz.resume);
+    }).then($.resume);
   }
 
   // TODO: I think this is unnecessary and can be killed
@@ -2068,7 +2040,7 @@ var scene_game = (function () {
   }
 
   function makePiece(x, y, piece_type) {
-    return new kz.Entity({
+    return new $.E({
       x: x,
       y: y,
       type: piece_type,
@@ -2081,9 +2053,9 @@ var scene_game = (function () {
 
   function pieceTypeImage(piece_type) {
     return [
-      kz.r.i.s,
-      kz.r.i.r,
-      kz.r.i.t
+      $.r.i.s,
+      $.r.i.r,
+      $.r.i.t
     ][piece_type-1];
   }
 
@@ -2098,35 +2070,35 @@ var scene_game = (function () {
   /*^ Messy section of game logic */
   function lose() {
     bgm.mystop();
-    state.alive = false;
+    $S.alive = false;
 
     // copy over game picture at losing time
-    gameover_context.clearRect(
+    g_x.clearRect(
       0,
       0,
-      gameover_canvas.width,
-      gameover_canvas.height
+      g_v.width,
+      g_v.height
     );
-    gameover_context.drawImage(
-      kz.v,
+    g_x.drawImage(
+      $.v,
       0,
       0
     );
     // fade to black
-    kz.t({
-      o: graphics,
-      p: 'gameover_background_alpha',
+    $.t({
+      o: gfx,
+      p: 'gba',
       v: 1,
       d: 1000
     }).then(function () {
-      return kz.t({
-        o: graphics,
+      return $.t({
+        o: gfx,
         p: 'gameover_text_alpha',
         v: 1,
         d: 1000
       });
     }).then(function () {
-      state.can_restart = true;
+      $S.can_restart = true;
     });
   }
 
@@ -2135,16 +2107,16 @@ var scene_game = (function () {
     var activateAbility = false;
 
     for (var yy = 0; yy < $c.h; yy++) {
-      var piece_type = state.board[yy][0].piece_type;
+      var piece_type = $S.board[yy][0].piece_type;
       var zodiacCounter = 0;
       var cleared = true;
       for (var xx = 0; xx < $c.w; xx++) {
-        if (state.board[yy][xx].piece_type == 3) {
+        if ($S.board[yy][xx].piece_type == 3) {
           zodiacCounter++;
         }
         // wow, much hack. this works because zodiac = 3, so it ANDs with
         // both 1 (black) and 2 (white) to be nonzero.
-        piece_type &= state.board[yy][xx].piece_type;
+        piece_type &= $S.board[yy][xx].piece_type;
         if (piece_type == 0) {
           cleared = false;
           break;
@@ -2163,24 +2135,24 @@ var scene_game = (function () {
 
     // update score
     incrementScore(1);
-    state.rows_cleared += 1;
-    incrementRecord('total_rows', 1);
-    maxRecord('max_rows', state.rows_cleared);
-    if (state.rows_cleared % 10 == 0) {
-      state.level += 1;
-      maxRecord('max_level', state.level);
-      state.next_row_interval = Math.max(3000, state.next_row_interval - 750);
+    $S.rows_cleared += 1;
+    iR('total_rows', 1);
+    mR('max_rows', $S.rows_cleared);
+    if ($S.rows_cleared % 10 == 0) {
+      $S.level += 1;
+      mR('max_level', $S.level);
+      $S.next_row_interval = Math.max(3000, $S.next_row_interval - 750);
     }
 
     // capture row pieces before we update board so we can animate them
     var row_pieces = [];
     for (var xx = 0; xx < $c.w; xx++) {
-      row_pieces.push(state.board[row][xx].piece);
+      row_pieces.push($S.board[row][xx].piece);
     }
 
     // update of underlying board
     for (xx = 0; xx < $c.w; xx++) {
-      state.board[row][xx] = {
+      $S.board[row][xx] = {
         piece_type:0
       };
     }
@@ -2190,11 +2162,11 @@ var scene_game = (function () {
 
     // activate zodiac
     if (!activateAbility) return;
-    state.zodiacs++;
-    incrementRecord('total_zodiac', 1);
-    maxRecord('max_zodiac', state.zodiacs);
+    $S.zodiacs++;
+    iR('total_zodiac', 1);
+    mR('max_zodiac', $S.zodiacs);
     character.zodiac({
-      state: state,
+      $S: $S,
       animateClearPieces: animateClearPieces,
       animateColorChange: animateColorChange,
       $c: $c,
@@ -2204,7 +2176,7 @@ var scene_game = (function () {
   }
 
   function animateClearPieces(pieces) {
-    kz.r.sounds['sfx_clear'].play();
+    $.r.sounds['sfx_clear'].play();
     // animate fade away
     // ensure that all row piece animations have finished
     var promise  = [];
@@ -2214,7 +2186,7 @@ var scene_game = (function () {
     promise = Promise.all(promise);
     pieces.forEach(function (piece) {
       var piecePromise = promise.then(function () {
-        return kz.t({
+        return $.t({
           o: piece,
           p: 'alpha',
           v: 0,
@@ -2230,16 +2202,16 @@ var scene_game = (function () {
   function drop() {
     for (var yy = $c.h-1; yy > 0; yy--) {
       for (var xx = 0; xx < $c.w; xx++) {
-        if (state.board[yy][xx].piece_type && !state.board[yy-1][xx].piece_type) {
-          state.board[yy-1][xx] = state.board[yy][xx];
-          state.board[yy][xx] = {
+        if ($S.board[yy][xx].piece_type && !$S.board[yy-1][xx].piece_type) {
+          $S.board[yy-1][xx] = $S.board[yy][xx];
+          $S.board[yy][xx] = {
             piece_type:0
           };
-          var piece = state.board[yy-1][xx].piece;
+          var piece = $S.board[yy-1][xx].piece;
           (function (piece) {
             // ensure we start the animation AFTER the row fades away
             piece.a = piece.a.then(function () {
-              return kz.t({
+              return $.t({
                 o: piece,
                 p: 'y',
                 v: piece.y - $c.g,
@@ -2255,7 +2227,7 @@ var scene_game = (function () {
   function reverse(board_x, board_y) {
     var dxs = [1, -1, 0, 0, 1, 1, -1, -1];
     var dys = [0, 0, 1, -1, 1, -1, 1, -1];
-    var piece_type = state.board[board_y][board_x].piece_type;
+    var piece_type = $S.board[board_y][board_x].piece_type;
 
     if (piece_type == 0|| piece_type == 3) return
 
@@ -2270,9 +2242,9 @@ var scene_game = (function () {
              && 0 <= y
              && x < $c.w
              && y < $c.h) {
-        if (state.board[y][x].piece_type ==0
-          || state.board[y][x].piece_type == 3) break;
-        if (state.board[y][x].piece_type == piece_type) {
+        if ($S.board[y][x].piece_type ==0
+          || $S.board[y][x].piece_type == 3) break;
+        if ($S.board[y][x].piece_type == piece_type) {
           reverse = true;
           break;
         }
@@ -2284,23 +2256,23 @@ var scene_game = (function () {
       for (var jj = 1; jj < length; jj++) {
         var xx = board_x + jj * dx;
         var yy = board_y + jj * dy;
-        state.board[yy][xx].piece_type = piece_type;
-        var piece = state.board[yy][xx].piece;
+        $S.board[yy][xx].piece_type = piece_type;
+        var piece = $S.board[yy][xx].piece;
         animateColorChange(piece, piece_type);
       }
     }
   }
 
   function incrementScore(amount) {
-    state.score += amount;
-    maxRecord('max_score', state.score);
+    $S.score += amount;
+    mR('max_score', $S.score);
   }
 
   function animateColorChange(piece, to_type) {
     piece.a = piece.a.then(function () {
       return new Promise(function(resolve) {
         piece.blend_type = to_type;
-        kz.t({
+        $.t({
           o: piece,
           p: 'blend_alpha',
           v: 1,
@@ -2316,10 +2288,10 @@ var scene_game = (function () {
   }
 
   function addRow() {
-    kz.r.sounds['sfx_drop'].play();
+    $.r.sounds['sfx_drop'].play();
     var new_row = [];
     for (var ii = 0; ii < $c.w; ii++) {
-      var piece_type = randomPieceType(normal_piece_types);
+      var piece_type = randomPieceType([1,2]);
       new_row.push({
         piece_type: piece_type,
         piece: makePiece(
@@ -2341,24 +2313,24 @@ var scene_game = (function () {
 
     // update board
     for (var xx = 0; xx < $c.w; xx++) {
-      if (state.board[$c.h-1][xx].piece_type
+      if ($S.board[$c.h-1][xx].piece_type
           != 0) {
         lose();
         return;
       }
       for (var yy = $c.h-1; yy > 0; yy--) {
-        state.board[yy][xx] = state.board[yy-1][xx];
+        $S.board[yy][xx] = $S.board[yy-1][xx];
       }
-      state.board[0][xx] = new_row[xx];
+      $S.board[0][xx] = new_row[xx];
     }
 
     // animate pieces
-    state.board.forEach(function (row) {
+    $S.board.forEach(function (row) {
       row.forEach(function (square) {
         var piece = square.piece;
         if (!piece) return;
         piece.a = piece.a.then(function () {
-          return kz.t({
+          return $.t({
             o: piece,
             p: 'y',
             v: piece.y + $c.g,
@@ -2371,32 +2343,32 @@ var scene_game = (function () {
   /*$ Messy section of game logic */
 
   function initialize() {
-    incrementRecord('play_count', 1);
-    bgm = kz.r.sounds['bgm_game'].play(true);
+    iR('play_count', 1);
+    bgm = $.r.sounds['bgm_game'].play(true);
     bgm.mystop = function () {
       if (!bgm.stopped) {bgm.stop(0); bgm.stopped = 1;}
     };
-  // initialize graphics
-    graphics = {
-      background_pattern: kz.x.createPattern(
-        kz.r.i.a,
+  // initialize gfx
+    gfx = {
+      background_pattern: $.x.createPattern(
+        $.r.i.a,
         'repeat'),
-      pause_alpha: 0,
-      gameover_background_alpha: 0,
+      p_a: 0,
+      gba: 0,
       gameover_text_alpha: 0,
-      fadeAlpha: 1
+      f: 1
     }
-    kz.t({
-      o: graphics,
-      p: 'fadeAlpha',
+    $.t({
+      o: gfx,
+      p: 'f',
       v: 0,
       d: 100});
 
 
-  // intialize state
-    state = {
+  // intialize $S
+    $S = {
       alive: true,
-      begin: kz.performance.now(),
+      begin: $.performance.now(),
       board: [],
       can_restart: false,
       exiting: false,
@@ -2414,36 +2386,36 @@ var scene_game = (function () {
         3: 0
       }
     };
-    state.next_row_time = kz.performance.now() + state.next_row_interval;
+    $S.next_row_time = $.performance.now() + $S.next_row_interval;
     // initialize board
     for (var yy = 0; yy < $c.h; yy++) {
-      state.board.push([]);
+      $S.board.push([]);
       for (var xx = 0; xx < $c.w; xx++) {
         // initialize board to have two random rows
         if (yy < 2) {
-          var piece_type = randomPieceType(normal_piece_types);
+          var piece_type = randomPieceType([1,2]);
           var piece = makePiece(
             board_to_piece(xx),
             board_to_piece(yy),
             piece_type
           );
-          state.board[yy].push({
+          $S.board[yy].push({
             piece_type: piece_type,
             piece: piece
           });
           // check if all colors if the same. if so, change the color of the last
           if (xx == $c.w - 1) {
-            var piece_type = state.board[yy][0].piece_type;
+            var piece_type = $S.board[yy][0].piece_type;
             for (var xxx = 0; xxx < $c.w; xxx++) {
-              piece_type &= state.board[yy][xxx].piece_type
+              piece_type &= $S.board[yy][xxx].piece_type
             }
             if (piece_type) {
-              state.board[yy][$c.w - 1].piece_type ^= 3;
-              state.board[yy][$c.w - 1].piece.type ^= 3;
+              $S.board[yy][$c.w - 1].piece_type ^= 3;
+              $S.board[yy][$c.w - 1].piece.type ^= 3;
             }
           }
         } else {
-          state.board[yy].push({
+          $S.board[yy].push({
             piece_type:0
           });
         }
@@ -2451,12 +2423,12 @@ var scene_game = (function () {
     }
     pause_choice = 0;
     // initialize player
-    state.player = new kz.Entity({
+    $S.player = new $.E({
       frames: [
-        kz.r.i.u,
-        kz.r.i.v,
-        kz.r.i.w,
-        kz.r.i.u
+        $.r.i.u,
+        $.r.i.v,
+        $.r.i.w,
+        $.r.i.u
       ],
       frame_lengths: [
         500,
@@ -2465,7 +2437,7 @@ var scene_game = (function () {
         200
       ],
       current_frame: 0,
-      animate_timer: kz.performance.now(),
+      animate_timer: $.performance.now(),
       animate: function (now) {
         var dt = now - this.animate_timer;
         if (dt > this.frame_lengths[this.current_frame]) {
@@ -2486,42 +2458,42 @@ var scene_game = (function () {
         // draw aiming line
         var h;
         for (h = $c.h-1; h >= 0; h--) {
-          if (state.board[h][this.x].piece_type != 0) {
+          if ($S.board[h][this.x].piece_type != 0) {
             break;
           }
         }
-        board_context.save();
-        board_context.globalAlpha = 1;
-        board_context.lineWidth = 1;
-        board_context.setLineDash([2, 8]);
-        board_context.strokeStyle = '#8ed4a5';
-        board_context.beginPath();
-        board_context.moveTo(
+        b_x.save();
+        b_x.globalAlpha = 1;
+        b_x.lineWidth = 1;
+        b_x.setLineDash([2, 8]);
+        b_x.strokeStyle = '#8ed4a5';
+        b_x.beginPath();
+        b_x.moveTo(
           this.sprite_x+$c.g/2-5,
           this.sprite_y-8
         );
-        board_context.lineTo(
+        b_x.lineTo(
           this.sprite_x+$c.g/2-5,
           (h+1) * $c.g + 20
         );
-        board_context.stroke();
-        board_context.restore();
+        b_x.stroke();
+        b_x.restore();
       },
       listen: function (event) {
-        if (event.kztype == 'keypress') {
-          if (event.which == kz.K.L) this.move(-1);
-          if (event.which == kz.K.R) this.move(1);
-          if (event.which == kz.K.Z) this.shoot();
-        } else if (event.kztype == 'keyheld') {
-          if (event.which == kz.K.L) this.move(-1);
-          if (event.which == kz.K.R) this.move(1);
+        if (event.$type == 'keypress') {
+          if (event.which == $.K.L) this.move(-1);
+          if (event.which == $.K.R) this.move(1);
+          if (event.which == $.K.Z) this.shoot();
+        } else if (event.$type == 'keyheld') {
+          if (event.which == $.K.L) this.move(-1);
+          if (event.which == $.K.R) this.move(1);
         }
       },
       move: function (dx) {
         if (this.x+dx >= 0 && this.x+dx < $c.w) {
           this.x += dx;
           this.a = this.a.then(function () {
-            return kz.t({
+            return $.t({
               o: this,
               p: 'sprite_x',
               v: this.sprite_x + dx*$c.g,
@@ -2534,39 +2506,39 @@ var scene_game = (function () {
       },
       next: [],
       shoot : function() {
-        if (state.board[$c.h-1][this.x].piece_type
+        if ($S.board[$c.h-1][this.x].piece_type
             != 0) {
           lose();
           return;
         }
 
-        incrementRecord('total_orbs', 1);
+        iR('total_orbs', 1);
 
         var piece_type = this.next.shift();
         var next_piece_type = Math.random()*16 > 1
-          ? randomPieceType(normal_piece_types)
+          ? randomPieceType([1,2])
           : 3;
         this.next.push(next_piece_type);
 
         // update consecutive counts
-        if (state.consecutive[piece_type]) {
-          state.consecutive[piece_type]++;
+        if ($S.consecutive[piece_type]) {
+          $S.consecutive[piece_type]++;
         } else {
-          state.consecutive[1] = 0;
-          state.consecutive[2] = 0;
-          state.consecutive[3] = 0;
-          state.consecutive[piece_type] = 1;
+          $S.consecutive[1] = 0;
+          $S.consecutive[2] = 0;
+          $S.consecutive[3] = 0;
+          $S.consecutive[piece_type] = 1;
         }
         var pieceTypeRecordMap = {
           1: 'max_white_orbs',
           2: 'max_black_orbs',
           3: 'max_zodiac_orbs'
         };
-        maxRecord(pieceTypeRecordMap[piece_type], state.consecutive[piece_type]);
+        mR(pieceTypeRecordMap[piece_type], $S.consecutive[piece_type]);
 
         var target_y = $c.h-1;
         while (target_y > 0) {
-          if (state.board[target_y-1][this.x].piece_type
+          if ($S.board[target_y-1][this.x].piece_type
               != 0) {
             break;
           }
@@ -2577,15 +2549,15 @@ var scene_game = (function () {
           ($c.h-1)*$c.g + 1,
           piece_type
         );
-        state.board[target_y][this.x] = {
+        $S.board[target_y][this.x] = {
           piece_type: piece_type,
           piece: piece
         };
         reverse(this.x, target_y);
 
         piece.a = piece.a.then(function () {
-          kz.r.sounds['sfx_shoot'].play();
-          return kz.t({
+          $.r.sounds['sfx_shoot'].play();
+          return $.t({
             o: piece,
             p: 'y',
             v: board_to_piece(target_y),
@@ -2595,67 +2567,67 @@ var scene_game = (function () {
        }
     });
     for (var ii = 0; ii < 8; ii++) {
-      state.player.next.push(randomPieceType(normal_piece_types));
+      $S.player.next.push(randomPieceType([1,2]));
       if (Math.random()*16 < 1) {
-        state.player.next[ii] = 3;
+        $S.player.next[ii] = 3;
       }
     }
   }
 
   function drawAlive(now) {
     // clear contexts
-    board_context.clearRect(
+    b_x.clearRect(
       0,
       0,
-      board_canvas.width,
-      board_canvas.height
+      b_v.width,
+      b_v.height
     );
-    info_context.clearRect(
+    i_x.clearRect(
       0,
       0,
-      info_canvas.width,
-      info_canvas.height
+      i_v.width,
+      i_v.height
     );
 
     // board context drawing
       // background translucent box
-    board_context.fillStyle = 'rgba(0,0,0,0.5)';
-    board_context.fillRect(
+    b_x.fillStyle = 'rgba(0,0,0,0.5)';
+    b_x.fillRect(
       0,
       0,
-      board_canvas.width,
-      board_canvas.height
+      b_v.width,
+      b_v.height
     );
       // draw board line
-    board_context.save();
-    board_context.globalAlpha = 1;
-    board_context.lineWidth = 1;
-    board_context.strokeStyle = '#50605b';
-    board_context.beginPath();
-    board_context.moveTo(
+    b_x.save();
+    b_x.globalAlpha = 1;
+    b_x.lineWidth = 1;
+    b_x.strokeStyle = '#50605b';
+    b_x.beginPath();
+    b_x.moveTo(
       0,
       $c.h * $c.g + 20
     );
-    board_context.lineTo(
+    b_x.lineTo(
       $c.w * $c.g,
       $c.h * $c.g + 20
     );
-    board_context.stroke();
-    board_context.restore();
+    b_x.stroke();
+    b_x.restore();
       // draw pieces
-    for (var id in kz.entities) {
-      var piece = kz.entities[id];
+    for (var id in $.entities) {
+      var piece = $.entities[id];
       // only piece entities have a type field
       if (!piece.type) continue;
-      board_context.globalAlpha = piece.alpha;
-      board_context.drawImage(
+      b_x.globalAlpha = piece.alpha;
+      b_x.drawImage(
         pieceTypeImage(piece.type),
         piece.x,
         piece.y+20
       );
       if (piece.blend_type) {
-        board_context.globalAlpha = piece.blend_alpha;
-        board_context.drawImage(
+        b_x.globalAlpha = piece.blend_alpha;
+        b_x.drawImage(
           pieceTypeImage(piece.blend_type),
           piece.x,
           piece.y+20
@@ -2663,287 +2635,287 @@ var scene_game = (function () {
       }
     };
       // draw player
-    board_context.globalAlpha = 1;
-    state.player.draw(board_context);
+    b_x.globalAlpha = 1;
+    $S.player.draw(b_x);
 
       // draw timer
-    board_context.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    board_context.fillRect(
+    b_x.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    b_x.fillRect(
       0,
       8,
-      board_canvas.width,
+      b_v.width,
       5
     );
-    if (state.next_row_freeze) {
-      board_context.fillStyle = 'rgb(80, 96, 91)';
+    if ($S.next_row_freeze) {
+      b_x.fillStyle = 'rgb(80, 96, 91)';
     } else {
-      board_context.fillStyle = 'rgb(142, 212, 165)';
+      b_x.fillStyle = 'rgb(142, 212, 165)';
     }
-    board_context.fillRect(
+    b_x.fillRect(
       0,
       8,
-      board_canvas.width * (state.next_row_time - now) / state.next_row_interval,
+      b_v.width * ($S.next_row_time - now) / $S.next_row_interval,
       5
     );
 
     // info context drawing
       // draw translucent boxes
-    info_context.fillStyle = 'rgba(0, 0, 0, 0.5)';
+    i_x.fillStyle = 'rgba(0, 0, 0, 0.5)';
         // character box
-    info_context.fillRect(
+    i_x.fillRect(
       0,
       10,
-      info_canvas.width,
-      info_canvas.width
+      i_v.width,
+      i_v.width
     );
         // next pieces box
-    info_context.fillRect(
+    i_x.fillRect(
       0,
       117,
-      info_canvas.width,
+      i_v.width,
       80
     );
         // score box
-    info_context.fillRect(
+    i_x.fillRect(
       0,
       208,
-      info_canvas.width,
+      i_v.width,
       50
     );
         // level box
-    info_context.fillRect(
+    i_x.fillRect(
       0,
       269,
-      info_canvas.width,
+      i_v.width,
       50
     );
         // time box
-    info_context.fillRect(
+    i_x.fillRect(
       0,
       330,
-      info_canvas.width,
+      i_v.width,
       50
     );
 
       // draw text
-    info_context.textAlign = 'center';
-    info_context.textBaseline = 'top';
-    info_context.font = '24px f';
-    info_context.fillStyle = 'white';
-    info_context.fillText('NEXT', 48, 120);
-    info_context.fillText('SCORE', 48, 211);
-    info_context.fillText('LEVEL', 48, 272);
-    info_context.fillText('TIME', 48, 333);
-    info_context.font = '20px f';
-    info_context.textBaseline = 'bottom';
-    info_context.fillText(character.name, 48, 101);
+    i_x.textAlign = 'center';
+    i_x.textBaseline = 'top';
+    i_x.font = '24px f';
+    i_x.fillStyle = 'white';
+    i_x.fillText('NEXT', 48, 120);
+    i_x.fillText('SCORE', 48, 211);
+    i_x.fillText('LEVEL', 48, 272);
+    i_x.fillText('TIME', 48, 333);
+    i_x.font = '20px f';
+    i_x.textBaseline = 'bottom';
+    i_x.fillText(character.name, 48, 101);
 
-    info_context.font = '20px f';
-    info_context.fillText('' + state.level, 48, 316);
-    var score_string = '' + state.score;
+    i_x.font = '20px f';
+    i_x.fillText('' + $S.level, 48, 316);
+    var score_string = '' + $S.score;
         // pad with zeroes
     score_string = '0'.repeat(5 - score_string.length) + score_string;
-    info_context.fillText(score_string, 48, 255);
-    var time = Math.floor((kz.performance.now() - state.begin)/1000);
+    i_x.fillText(score_string, 48, 255);
+    var time = Math.floor(($.performance.now() - $S.begin)/1000);
     var sec_string = '' + time%60;
     var min_string = '' + Math.floor(time/60);
     time_string = '0'.repeat(2-min_string.length) + min_string + ':'  + '0'.repeat(2-sec_string.length)+sec_string;
-    info_context.fillText(time_string, 48, 377);
+    i_x.fillText(time_string, 48, 377);
 
       // draw sprites
     for (var ii = 0; ii < $c.next_length; ii++) {
-      info_context.drawImage(
-        pieceTypeImage(state.player.next[ii]),
+      i_x.drawImage(
+        pieceTypeImage($S.player.next[ii]),
         9+(ii%4)*$c.g,
         148 + Math.floor(ii/4)*23
       );
     }
 
-    info_context.drawImage(
+    i_x.drawImage(
       character.image,
       23,
       20
     );
 
     // main context drawing
-    kz.x.fillStyle = '#50605b';
-    kz.x.fillRect(0, 0, kz.v.width, kz.v.height);
-    kz.x.fillStyle = graphics.background_pattern;
-    kz.x.fillRect(0, 0, kz.v.width, kz.v.height);
-    kz.x.drawImage(board_canvas, 10, 0);
-    kz.x.drawImage(
-      info_canvas,
-      10 + board_canvas.width + 7,
+    $.x.fillStyle = '#50605b';
+    $.x.fillRect(0, 0, $.v.width, $.v.height);
+    $.x.fillStyle = gfx.background_pattern;
+    $.x.fillRect(0, 0, $.v.width, $.v.height);
+    $.x.drawImage(b_v, 10, 0);
+    $.x.drawImage(
+      i_v,
+      10 + b_v.width + 7,
       0
     );
-    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
+    $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
+    $.x.fillRect(0,0,$.v.width,$.v.height);
   }
 
   function preUpdateAlive(now) {
-    maxRecord('max_time', Math.floor((now - state.begin)/1000));
-    for (var ii = 0; ii < kz.events.length; ii++) {
-      if (kz.events[ii].kztype == 'keypress' &&
-          kz.events[ii].which == kz.K.X) {
+    mR('max_time', Math.floor((now - $S.begin)/1000));
+    for (var ii = 0; ii < $.events.length; ii++) {
+      if ($.events[ii].$type == 'keypress' &&
+          $.events[ii].which == $.K.X) {
         pause();
-        kz.events = [];
+        $.events = [];
         return;
       }
     }
-    kz.processEvents();
-    state.player.animate(now);
-    if (state.next_row_freeze) {
-      state.next_row_time = now + state.next_row_time_diff;
+    $.processEvents();
+    $S.player.animate(now);
+    if ($S.next_row_freeze) {
+      $S.next_row_time = now + $S.next_row_time_diff;
     }
-    if (state.next_row_time < now) {
+    if ($S.next_row_time < now) {
       addRow();
-      state.next_row_time = now + state.next_row_interval;
+      $S.next_row_time = now + $S.next_row_interval;
     }
     clearRow();
     drop();
   }
 
   function drawPause(now) {
-    kz.x.clearAll();
-    kz.x.save();
-    kz.x.globalAlpha = 1;
-    kz.x.drawImage(
-      pause_canvas,
+    $.x.clearAll();
+    $.x.save();
+    $.x.globalAlpha = 1;
+    $.x.drawImage(
+      p_v,
       0,
       0
     );
-    kz.x.globalAlpha = graphics.pause_alpha;
-    kz.x.fillStyle = '#000000';
-    kz.x.fillRect(
+    $.x.globalAlpha = gfx.p_a;
+    $.x.fillStyle = '#000000';
+    $.x.fillRect(
       0,
       0,
-      kz.v.width,
-      kz.v.height
+      $.v.width,
+      $.v.height
     );
-    kz.x.restore();
-    kz.x.save();
-    kz.x.textAlign = 'center';
-    kz.x.textBaseline = 'center';
-    kz.x.font = '24px f';
-    kz.x.fillStyle = pause_choice == 0 ? '#fff' : '#666';
-    kz.x.fillText('RESUME', kz.v.width/2, kz.v.height/2-48);
-    kz.x.fillStyle = pause_choice == 1 ? '#fff' : '#666';
-    kz.x.fillText('RESTART', kz.v.width/2, kz.v.height/2);
-    kz.x.fillStyle = pause_choice == 2 ? '#fff' : '#666';
-    kz.x.fillText('QUIT', kz.v.width/2, kz.v.height/2+48);
-    kz.x.restore();
-    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
+    $.x.restore();
+    $.x.save();
+    $.x.textAlign = 'center';
+    $.x.textBaseline = 'center';
+    $.x.font = '24px f';
+    $.x.fillStyle = pause_choice == 0 ? '#fff' : '#666';
+    $.x.fillText('RESUME', $.v.width/2, $.v.height/2-48);
+    $.x.fillStyle = pause_choice == 1 ? '#fff' : '#666';
+    $.x.fillText('RESTART', $.v.width/2, $.v.height/2);
+    $.x.fillStyle = pause_choice == 2 ? '#fff' : '#666';
+    $.x.fillText('QUIT', $.v.width/2, $.v.height/2+48);
+    $.x.restore();
+    $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
+    $.x.fillRect(0,0,$.v.width,$.v.height);
   }
 
   function drawDead(now) {
-    kz.x.clearAll();
-    kz.x.save();
-    kz.x.globalAlpha = 1;
-    kz.x.drawImage(
-      gameover_canvas,
+    $.x.clearAll();
+    $.x.save();
+    $.x.globalAlpha = 1;
+    $.x.drawImage(
+      g_v,
       0,
       0
     );
-    kz.x.globalAlpha = graphics.gameover_background_alpha;
-    kz.x.fillStyle = 'rgb(142, 212, 165)';
-    kz.x.fillRect(
+    $.x.globalAlpha = gfx.gba;
+    $.x.fillStyle = 'rgb(142, 212, 165)';
+    $.x.fillRect(
       10,
-      (kz.v.height / 2) - 28,
+      ($.v.height / 2) - 28,
       160,
       42
     );
-    kz.x.globalAlpha = graphics.gameover_text_alpha;
-    kz.x.textAlign = 'center';
-    kz.x.textBaseline = 'center';
-    kz.x.font = '24px f';
-    kz.x.fillStyle = '#fff';
-    kz.x.fillText(
+    $.x.globalAlpha = gfx.gameover_text_alpha;
+    $.x.textAlign = 'center';
+    $.x.textBaseline = 'center';
+    $.x.font = '24px f';
+    $.x.fillStyle = '#fff';
+    $.x.fillText(
       'GAME OVER',
-      kz.v.width / 2 - 46,
-      kz.v.height / 2);
-    kz.x.restore();
-    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
+      $.v.width / 2 - 46,
+      $.v.height / 2);
+    $.x.restore();
+    $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
+    $.x.fillRect(0,0,$.v.width,$.v.height);
   }
 
   function preUpdateDead(now) {
-    for (var ii = 0; ii < kz.events.length; ii++) {
-      if (state.exiting) continue;
-      if (kz.events[ii].kztype == 'keypress' &&
-          kz.events[ii].which == kz.K.Z &&
-          state.can_restart) {
-        state.exiting = true;
-        kz.t({
-          o: graphics,
-          p: 'fadeAlpha',
+    for (var ii = 0; ii < $.events.length; ii++) {
+      if ($S.exiting) continue;
+      if ($.events[ii].$type == 'keypress' &&
+          $.events[ii].which == $.K.Z &&
+          $S.can_restart) {
+        $S.exiting = true;
+        $.t({
+          o: gfx,
+          p: 'f',
           v: 1,
           d: 100}).then(function () {
-            kz.run(scene_main_menu);
+            $.run(smm);
           })
       }
     }
-    kz.events = [];
+    $.events = [];
   }
 
   function preUpdatePause(now) {
-    for (var ii = 0; ii < kz.events.length; ii++) {
-      if (kz.events[ii].kztype == 'keypress') {
-        if (state.exiting) continue;
-        if (kz.events[ii].which == kz.K.X) {
+    for (var ii = 0; ii < $.events.length; ii++) {
+      if ($.events[ii].$type == 'keypress') {
+        if ($S.exiting) continue;
+        if ($.events[ii].which == $.K.X) {
           resume();
-        } else if (kz.events[ii].which == kz.K.D) {
+        } else if ($.events[ii].which == $.K.D) {
           pause_choice = Math.min(2, pause_choice+1);
-        } else if (kz.events[ii].which == kz.K.U) {
+        } else if ($.events[ii].which == $.K.U) {
           pause_choice = Math.max(0, pause_choice-1);
-        } else if (kz.events[ii].which == kz.K.Z) {
+        } else if ($.events[ii].which == $.K.Z) {
           resume();
           if (pause_choice == 0) {
           } else if (pause_choice == 1) {
-            state.exiting = true;
-            kz.t({
-              o: graphics,
-              p: 'fadeAlpha',
+            $S.exiting = true;
+            $.t({
+              o: gfx,
+              p: 'f',
               v: 1,
               d: 100}).then(function () {
-                kz.run(scene_game);
+                $.run(sg);
               });
           } else {
-            state.exiting = true;
-            kz.t({
-              o: graphics,
-              p: 'fadeAlpha',
+            $S.exiting = true;
+            $.t({
+              o: gfx,
+              p: 'f',
               v: 1,
               d: 100}).then(function () {
-                kz.run(scene_main_menu);
+                $.run(smm);
               });
           }
         }
       }
     }
-    kz.events = [];
+    $.events = [];
   }
 
-  var scene_game = new kz.Scene();
-  scene_game.initialize = initialize;
-  scene_game.draw = function (now) {
-    if (!kz.paused) {
-      state.alive ? drawAlive(now) : drawDead(now);
+  var sg = new $.C();
+  sg.initialize = initialize;
+  sg.draw = function (now) {
+    if (!$.paused) {
+      $S.alive ? drawAlive(now) : drawDead(now);
     } else {
       drawPause(now);
     }
   };
-  scene_game.preUpdate = function (now) {
-    if (!kz.paused) {
-      state.alive ? preUpdateAlive(now) : preUpdateDead(now);
+  sg.preUpdate = function (now) {
+    if (!$.paused) {
+      $S.alive ? preUpdateAlive(now) : preUpdateDead(now);
     } else {
       preUpdatePause(now);
     }
   };
-  scene_game.exit = function () {
+  sg.exit = function () {
     bgm.mystop();
   }
-  return scene_game
+  return sg
 })();
 // Globals(prefixed with $):
 // $x -- sonantx
@@ -2956,7 +2928,7 @@ function lj(data, resolve) { //loadJSFXR
   for (var i = 0; i < len; i++)        {
       bytes[i] = binary_string.charCodeAt(i);
   }
-  kz.a.decodeAudioData(bytes.buffer, resolve);
+  $.a.decodeAudioData(bytes.buffer, resolve);
 }
 
 function ls(data, resolve) { //loadsonant
@@ -4256,13 +4228,13 @@ $W.onload = function() {
   var fontHack = $D.getElementById('fontHack');
   fontHack.parentNode.removeChild(fontHack);
 
-  kz.initialize('canvas');
-  kz.run(scene_loading);
+  $.initialize('canvas');
+  $.run(sl);
 
-  kz.L(resources).then(function () {
-    kz.run(scene_main_menu);
+  $.L(resources).then(function () {
+    $.run(smm);
     setInterval(function () {
-      incrementRecord('total_time', 1);
+      iR('total_time', 1);
     }, 1000);
   });
 };
@@ -4304,18 +4276,18 @@ var records = [
   });
 })();
 
-function incrementRecord(name, value) {
+function iR(name, value) {
   localStorage.setItem(
     name,
     parseInt(localStorage.getItem(name), 10) + value);
 }
 
-function maxRecord(name, value) {
+function mR(name, value) {
   localStorage.setItem(
     name,
     Math.max(parseInt(localStorage.getItem(name), 10), value));
 }
 
-function getRecord(name) {
+function gR(name) {
   return parseInt(localStorage.getItem(name),10);
 }
