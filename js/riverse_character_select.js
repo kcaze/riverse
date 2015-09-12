@@ -271,73 +271,73 @@ var scene_character_select = (function () {
   }
 
   scene.draw = function (now) {
-    kz.context.clearAll();
+    kz.x.clearAll();
 
-    kz.context.save();
-    kz.context.fillStyle = '#30403b';
-    kz.context.fillRect(
+    kz.x.save();
+    kz.x.fillStyle = '#30403b';
+    kz.x.fillRect(
       0,
       0,
-      kz.canvas.width,
-      kz.canvas.height
+      kz.v.width,
+      kz.v.height
     );
-    kz.context.restore();
+    kz.x.restore();
 
     for (var yy = 0; yy < 7; yy++) {
       for (var xx = 0; xx < 2; xx++) {
         var idx = yy*2 + xx;
         if (idx >= characters.length) break;
-        kz.context.strokeStyle = '#89928e';
-        kz.context.lineWidth = 0.5;
-        kz.context.fillStyle = '#50605b';
-        kz.context.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
-        kz.context.strokeRect(xx*49 + 10, yy*49 + 20, 50, 50) ;
-        kz.context.drawImage(
+        kz.x.strokeStyle = '#89928e';
+        kz.x.lineWidth = 0.5;
+        kz.x.fillStyle = '#50605b';
+        kz.x.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
+        kz.x.strokeRect(xx*49 + 10, yy*49 + 20, 50, 50) ;
+        kz.x.drawImage(
           characters[idx].image,
           xx*49 + 10,
           yy*49 + 20
         )
         if (!characters[idx].unlocked) {
-          kz.context.fillStyle = 'rgba(0,0,0,0.7)';
-          kz.context.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
+          kz.x.fillStyle = 'rgba(0,0,0,0.7)';
+          kz.x.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
         }
       }
     }
     if (Math.floor(now/200) % 3) {
-      kz.context.strokeStyle = '#fff';
-      kz.context.lineWidth = 1;
-      kz.context.strokeRect((state.selected%2)*49 + 10, Math.floor(state.selected/2)*49 + 20, 50, 50) ;
+      kz.x.strokeStyle = '#fff';
+      kz.x.lineWidth = 1;
+      kz.x.strokeRect((state.selected%2)*49 + 10, Math.floor(state.selected/2)*49 + 20, 50, 50) ;
     }
-    kz.context.textAlign = 'right';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '24px f';
-    kz.context.fillStyle = 'white';
-    kz.context.fillText(
+    kz.x.textAlign = 'right';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '24px f';
+    kz.x.fillStyle = 'white';
+    kz.x.fillText(
       characters[state.selected].name,
-      kz.canvas.width - 10,
+      kz.v.width - 10,
       330
     );
-    kz.context.textAlign = 'right';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '16px f';
-    kz.context.fillStyle = 'white';
+    kz.x.textAlign = 'right';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '16px f';
+    kz.x.fillStyle = 'white';
     if (characters[state.selected].unlocked) {
-      kz.context.fillText(
+      kz.x.fillText(
         characters[state.selected].description,
-        kz.canvas.width - 10,
+        kz.v.width - 10,
         360
       );
     } else {
-      kz.context.font = '12px f';
-      kz.context.fillStyle = '#50605b';
-      kz.context.fillText(
+      kz.x.font = '12px f';
+      kz.x.fillStyle = '#50605b';
+      kz.x.fillText(
         characters[state.selected].unlock_message,
-        kz.canvas.width - 10,
+        kz.v.width - 10,
         360
       );
     }
-    kz.context.fillStyle = 'rgba(0,0,0,'+state.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+    kz.x.fillStyle = 'rgba(0,0,0,'+state.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   scene.preUpdate = function (now) {

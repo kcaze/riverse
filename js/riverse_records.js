@@ -19,34 +19,34 @@ var scene_records = (function () {
   }
 
   scene.draw = function () {
-    kz.context.clearAll();
+    kz.x.clearAll();
 
-    kz.context.save();
-    kz.context.fillStyle = '#30403b';
-    kz.context.fillRect(
+    kz.x.save();
+    kz.x.fillStyle = '#30403b';
+    kz.x.fillRect(
       0,
       0,
-      kz.canvas.width,
-      kz.canvas.height
+      kz.v.width,
+      kz.v.height
     );
-    kz.context.restore();
+    kz.x.restore();
 
-    kz.context.textAlign = 'center';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '32px f';
-    kz.context.fillStyle = '#fff';
-    kz.context.fillText(
+    kz.x.textAlign = 'center';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '32px f';
+    kz.x.fillStyle = '#fff';
+    kz.x.fillText(
       'RECORDS',
-      kz.canvas.width / 2,
+      kz.v.width / 2,
       48
     );
-    kz.context.font = '12px f';
+    kz.x.font = '12px f';
     for (var ii = 0; ii < records.length; ii++) {
-      kz.context.fillStyle = '#fff';
-      kz.context.textAlign = 'left';
-      kz.context.fillText(records[ii].text + ': ', 12, 90 + ii*20);
-      kz.context.textAlign = 'right';
-      kz.context.fillStyle = '#8ed4a5';
+      kz.x.fillStyle = '#fff';
+      kz.x.textAlign = 'left';
+      kz.x.fillText(records[ii].text + ': ', 12, 90 + ii*20);
+      kz.x.textAlign = 'right';
+      kz.x.fillStyle = '#8ed4a5';
       var value;
       if (records[ii].name == 'total_time' || records[ii].name == 'max_time') {
         var time = getRecord(records[ii].name);
@@ -57,11 +57,11 @@ var scene_records = (function () {
       } else {
         value = getRecord(records[ii].name);
       }
-      kz.context.fillText(value, kz.canvas.width-12, 90+ii*20);
+      kz.x.fillText(value, kz.v.width-12, 90+ii*20);
     }
 
-    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   scene.preUpdate = function (now) {

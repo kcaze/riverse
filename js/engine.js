@@ -4,6 +4,8 @@
 // K -- KEYS
 // T -- TOUCHES
 // r -- resources
+// x -- context
+// v -- canvas
 
 var kz = {};
 
@@ -256,10 +258,10 @@ kz.Scene.prototype.exit = function () {
 
 /*^ Essential functions such as initialize, tick, and run */
 kz.initializeCanvas = function (canvas_id) {
-  kz.canvas = document.getElementById(canvas_id);
-  kz.context = kz.canvas.getContext('2d');
-  kz.context.clearAll = function () {
-    kz.context.clearRect(0, 0, kz.canvas.width, kz.canvas.height);
+  kz.v = document.getElementById(canvas_id);
+  kz.x = kz.v.getContext('2d');
+  kz.x.clearAll = function () {
+    kz.x.clearRect(0, 0, kz.v.width, kz.v.height);
   };
 };
 

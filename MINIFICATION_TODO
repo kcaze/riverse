@@ -1,6 +1,4 @@
 (in no particular order)
-2. Delete console.log statements.
-3. Address TODOs
 4. Replace strings with more compact equivalents when possible
 5. Remove all context.save, context.restore statements. Delete redundant fillstyle, font, baseheight, etc. settings.
 6. Change tween to take in keys that are shorter (i.e. 'o' for 'object', 'p' for 'property')

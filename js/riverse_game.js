@@ -49,7 +49,7 @@ var scene_game = (function () {
       pause_canvas.height
     );
     pause_context.drawImage(
-      kz.canvas,
+      kz.v,
       0,
       0
     );
@@ -123,7 +123,7 @@ var scene_game = (function () {
       gameover_canvas.height
     );
     gameover_context.drawImage(
-      kz.canvas,
+      kz.v,
       0,
       0
     );
@@ -393,7 +393,7 @@ var scene_game = (function () {
     };
   // initialize graphics
     graphics = {
-      background_pattern: kz.context.createPattern(
+      background_pattern: kz.x.createPattern(
         kz.r.images['background'],
         'repeat'),
       pause_alpha: 0,
@@ -414,6 +414,7 @@ var scene_game = (function () {
       begin: kz.performance.now(),
       board: [],
       can_restart: false,
+      exiting: false,
       score: 0,
       level: 1,
       rows_cleared: 0,
@@ -780,18 +781,18 @@ var scene_game = (function () {
     );
 
     // main context drawing
-    kz.context.fillStyle = '#50605b';
-    kz.context.fillRect(0, 0, kz.canvas.width, kz.canvas.height);
-    kz.context.fillStyle = graphics.background_pattern;
-    kz.context.fillRect(0, 0, kz.canvas.width, kz.canvas.height);
-    kz.context.drawImage(board_canvas, 10, 0);
-    kz.context.drawImage(
+    kz.x.fillStyle = '#50605b';
+    kz.x.fillRect(0, 0, kz.v.width, kz.v.height);
+    kz.x.fillStyle = graphics.background_pattern;
+    kz.x.fillRect(0, 0, kz.v.width, kz.v.height);
+    kz.x.drawImage(board_canvas, 10, 0);
+    kz.x.drawImage(
       info_canvas,
       10 + board_canvas.width + 7,
       0
     );
-    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   function preUpdateAlive(now) {
@@ -818,74 +819,76 @@ var scene_game = (function () {
   }
 
   function drawPause(now) {
-    kz.context.clearAll();
-    kz.context.save();
-    kz.context.globalAlpha = 1;
-    kz.context.drawImage(
+    kz.x.clearAll();
+    kz.x.save();
+    kz.x.globalAlpha = 1;
+    kz.x.drawImage(
       pause_canvas,
       0,
       0
     );
-    kz.context.globalAlpha = graphics.pause_alpha;
-    kz.context.fillStyle = '#000000';
-    kz.context.fillRect(
+    kz.x.globalAlpha = graphics.pause_alpha;
+    kz.x.fillStyle = '#000000';
+    kz.x.fillRect(
       0,
       0,
-      kz.canvas.width,
-      kz.canvas.height
+      kz.v.width,
+      kz.v.height
     );
-    kz.context.restore();
-    kz.context.save();
-    kz.context.textAlign = 'center';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '24px f';
-    kz.context.fillStyle = pause_choice == 0 ? '#fff' : '#666';
-    kz.context.fillText('RESUME', kz.canvas.width/2, kz.canvas.height/2-48);
-    kz.context.fillStyle = pause_choice == 1 ? '#fff' : '#666';
-    kz.context.fillText('RESTART', kz.canvas.width/2, kz.canvas.height/2);
-    kz.context.fillStyle = pause_choice == 2 ? '#fff' : '#666';
-    kz.context.fillText('QUIT', kz.canvas.width/2, kz.canvas.height/2+48);
-    kz.context.restore();
-    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+    kz.x.restore();
+    kz.x.save();
+    kz.x.textAlign = 'center';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '24px f';
+    kz.x.fillStyle = pause_choice == 0 ? '#fff' : '#666';
+    kz.x.fillText('RESUME', kz.v.width/2, kz.v.height/2-48);
+    kz.x.fillStyle = pause_choice == 1 ? '#fff' : '#666';
+    kz.x.fillText('RESTART', kz.v.width/2, kz.v.height/2);
+    kz.x.fillStyle = pause_choice == 2 ? '#fff' : '#666';
+    kz.x.fillText('QUIT', kz.v.width/2, kz.v.height/2+48);
+    kz.x.restore();
+    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   function drawDead(now) {
-    kz.context.clearAll();
-    kz.context.save();
-    kz.context.globalAlpha = 1;
-    kz.context.drawImage(
+    kz.x.clearAll();
+    kz.x.save();
+    kz.x.globalAlpha = 1;
+    kz.x.drawImage(
       gameover_canvas,
       0,
       0
     );
-    kz.context.globalAlpha = graphics.gameover_background_alpha;
-    kz.context.fillStyle = 'rgb(142, 212, 165)';
-    kz.context.fillRect(
+    kz.x.globalAlpha = graphics.gameover_background_alpha;
+    kz.x.fillStyle = 'rgb(142, 212, 165)';
+    kz.x.fillRect(
       10,
-      (kz.canvas.height / 2) - 28,
+      (kz.v.height / 2) - 28,
       160,
       42
     );
-    kz.context.globalAlpha = graphics.gameover_text_alpha;
-    kz.context.textAlign = 'center';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '24px f';
-    kz.context.fillStyle = '#fff';
-    kz.context.fillText(
+    kz.x.globalAlpha = graphics.gameover_text_alpha;
+    kz.x.textAlign = 'center';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '24px f';
+    kz.x.fillStyle = '#fff';
+    kz.x.fillText(
       'GAME OVER',
-      kz.canvas.width / 2 - 46,
-      kz.canvas.height / 2);
-    kz.context.restore();
-    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+      kz.v.width / 2 - 46,
+      kz.v.height / 2);
+    kz.x.restore();
+    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   function preUpdateDead(now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
+      if (state.exiting) continue;
       if (kz.events[ii].kztype == 'keypress' &&
           kz.events[ii].which == kz.K.Z &&
           state.can_restart) {
+        state.exiting = true;
         kz.tween({
           object: graphics,
           property: 'fadeAlpha',
@@ -901,6 +904,7 @@ var scene_game = (function () {
   function preUpdatePause(now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress') {
+        if (state.exiting) continue;
         if (kz.events[ii].which == kz.K.X) {
           resume();
         } else if (kz.events[ii].which == kz.K.D) {
@@ -911,7 +915,7 @@ var scene_game = (function () {
           resume();
           if (pause_choice == 0) {
           } else if (pause_choice == 1) {
-            // TODO: this is dangerous. need to add an exiting variable in state.
+            state.exiting = true;
             kz.tween({
               object: graphics,
               property: 'fadeAlpha',
@@ -920,6 +924,7 @@ var scene_game = (function () {
                 kz.run(scene_game);
               });
           } else {
+            state.exiting = true;
             kz.tween({
               object: graphics,
               property: 'fadeAlpha',

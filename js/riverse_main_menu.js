@@ -24,69 +24,64 @@ var scene_main_menu = (function () {
   }
 
   scene_main_menu.draw = function () {
-    kz.context.clearAll();
+    kz.x.clearAll();
 
-    kz.context.save();
-    kz.context.fillStyle = '#30403b';
-    kz.context.fillRect(
+    kz.x.save();
+    kz.x.fillStyle = '#30403b';
+    kz.x.fillRect(
       0,
       0,
-      kz.canvas.width,
-      kz.canvas.height
+      kz.v.width,
+      kz.v.height
     );
-    kz.context.restore();
+    kz.x.restore();
 
-    kz.context.textAlign = 'center';
-    kz.context.textBaseline = 'center';
-    kz.context.font = '48px f';
-    ///kz.context.fillStyle = 'rgb(142, 212, 165)';
-    kz.context.fillStyle = '#8ed4a5';
-    kz.context.fillText(
+    kz.x.textAlign = 'center';
+    kz.x.textBaseline = 'center';
+    kz.x.font = '48px f';
+    kz.x.fillStyle = '#8ed4a5';
+    kz.x.fillText(
       'ZODIAC 13',
-      kz.canvas.width / 2,
+      kz.v.width / 2,
       125
     );
 
     if (graphics.state == 0 && graphics.press_space_visible) {
-      kz.context.save();
-      kz.context.globalAlpha = graphics.text_alpha;
-      ///kz.context.textAlign = 'center';
-      ///kz.context.textBaseline = 'center';
-      kz.context.font = '24px f';
-      kz.context.fillStyle = 'white';
-      kz.context.fillText(
+      kz.x.save();
+      kz.x.globalAlpha = graphics.text_alpha;
+      kz.x.font = '24px f';
+      kz.x.fillStyle = 'white';
+      kz.x.fillText(
         'PRESS   Z',
-        kz.canvas.width / 2,
+        kz.v.width / 2,
         250
       );
-      kz.context.restore();
+      kz.x.restore();
     }
     if (graphics.state == 1) {
-      kz.context.textAlign = 'center';
-      kz.context.textBaseline = 'center';
-      kz.context.font = '24px f';
-      kz.context.fillStyle = graphics.choice == 0 ? '#fff' : '#666';
-      kz.context.fillText('GAME START', kz.canvas.width/2, kz.canvas.height/2+40);
-      kz.context.fillStyle = graphics.choice == 1 ? '#fff' : '#666';
-      kz.context.fillText('RECORDS', kz.canvas.width/2, kz.canvas.height/2+88);
-      kz.context.restore();
+      kz.x.textAlign = 'center';
+      kz.x.textBaseline = 'center';
+      kz.x.font = '24px f';
+      kz.x.fillStyle = graphics.choice == 0 ? '#fff' : '#666';
+      kz.x.fillText('GAME START', kz.v.width/2, kz.v.height/2+40);
+      kz.x.fillStyle = graphics.choice == 1 ? '#fff' : '#666';
+      kz.x.fillText('RECORDS', kz.v.width/2, kz.v.height/2+88);
+      kz.x.restore();
     }
 
-    kz.context.save();
-    kz.context.globalAlpha = graphics.text_alpha;
-    ///kz.context.textAlign = 'center';
-    ///kz.context.textBaseline = 'center';
-    kz.context.font = '10px f';
-    kz.context.fillStyle = '#50605b';
-    kz.context.lineWidth = 2;
-    kz.context.fillText(
+    kz.x.save();
+    kz.x.globalAlpha = graphics.text_alpha;
+    kz.x.font = '10px f';
+    kz.x.fillStyle = '#50605b';
+    kz.x.lineWidth = 2;
+    kz.x.fillText(
       'HERMAN CHAU (KCAZE)',
-      kz.canvas.width / 2,
+      kz.v.width / 2,
       380
     );
-    kz.context.restore();
-    kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
-    kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
+    kz.x.restore();
+    kz.x.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
+    kz.x.fillRect(0,0,kz.v.width,kz.v.height);
   }
 
   scene_main_menu.preUpdate = function (now) {
