@@ -93,7 +93,7 @@ var scene_main_menu = (function () {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress') {
         if (graphics.exiting) continue;
-        if (kz.events[ii].which == kz.KEYS.Z) {
+        if (kz.events[ii].which == kz.K.Z) {
           kz.resources.sounds['sfx_select'].play();
           if (!graphics.state) {
             graphics.state = 1;
@@ -112,12 +112,12 @@ var scene_main_menu = (function () {
           }
         }
       }
-      if (kz.events[ii].which == kz.KEYS.UP) {
+      if (kz.events[ii].which == kz.K.U) {
         if (graphics.state) {
           graphics.choice = Math.max(0, graphics.choice-1);
         }
       }
-      if (kz.events[ii].which == kz.KEYS.DOWN) {
+      if (kz.events[ii].which == kz.K.D) {
         if (graphics.state) {
           graphics.choice = Math.min(1, graphics.choice+1);
         }

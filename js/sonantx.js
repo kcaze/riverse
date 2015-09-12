@@ -1,3 +1,8 @@
+//$a = sonantx
+//M = MusicGenerator
+//A = AudioGenerator
+//S = SoundGenerator
+
 // a -- osc2_waveform
 // b -- osc2_xenv
 // c -- fx_pan_amt
@@ -61,10 +66,10 @@
 // 3. This notice may not be removed or altered from any source
 //    distribution.
 
-var sonantx;
+var $x;
 (function() {
 "use strict";
-sonantx = {};
+$x = {};
 
 var WAVE_SPS = 44100;                    // Samples per second
 var WAVE_CHAN = 2;                       // Channels
@@ -174,11 +179,11 @@ function applyDelay(chnBuf, waveSamples, instr, rowLen, callBack) {
 /**
  * @constructor
  */
-sonantx.AudioGenerator = function(mixBuf) {
+$x.A = function(mixBuf) {
     this.mixBuf = mixBuf;
     this.waveSize = mixBuf.length / WAVE_CHAN / 2;
 };
-sonantx.AudioGenerator.prototype.getWave = function() {
+$x.A.prototype.getWave = function() {
     var mixBuf = this.mixBuf;
     var waveSize = this.waveSize;
     // Local variables
@@ -212,14 +217,14 @@ sonantx.AudioGenerator.prototype.getWave = function() {
     }
     return wave;
 };
-sonantx.AudioGenerator.prototype.getAudio = function() {
+$x.A.prototype.getAudio = function() {
     var wave = this.getWave();
     var a = new Audio("data:audio/wav;base64," + btoa(wave));
     a.preload = "none";
     a.load();
     return a;
 };
-sonantx.AudioGenerator.prototype.getAudioBuffer = function(callBack) {
+$x.A.prototype.getAudioBuffer = function(callBack) {
     if (audioCtx === null)
         audioCtx = new AudioContext();
     var mixBuf = this.mixBuf;
@@ -254,7 +259,7 @@ sonantx.AudioGenerator.prototype.getAudioBuffer = function(callBack) {
 /**
  * @constructor
  */
-sonantx.SoundGenerator = function(instr, rowLen) {
+$x.S = function(instr, rowLen) {
     this.instr = instr;
     this.rowLen = rowLen || 5605;
 
@@ -267,7 +272,7 @@ sonantx.SoundGenerator = function(instr, rowLen) {
     this.panFreq = Math.pow(2, instr.l - 8) / this.rowLen;
     this.lfoFreq = Math.pow(2, instr.z - 8) / this.rowLen;
 };
-sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
+$x.S.prototype.genSound = function(n, chnBuf, currentpos) {
     var marker = new Date();
     var c1 = 0;
     var c2 = 0;
@@ -352,22 +357,22 @@ sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
         }
     }
 };
-sonantx.SoundGenerator.prototype.getAudioGenerator = function(n, callBack) {
+$x.S.prototype.getAudioGenerator = function(n, callBack) {
     var bufferSize = (this.attack + this.sustain + this.release - 1) + (32 * this.rowLen);
     var self = this;
     genBuffer(bufferSize, function(buffer) {
         self.genSound(n, buffer, 0);
         applyDelay(buffer, bufferSize, self.instr, self.rowLen, function() {
-            callBack(new sonantx.AudioGenerator(buffer));
+            callBack(new $x.A(buffer));
         });
     });
 };
-sonantx.SoundGenerator.prototype.createAudio = function(n, callBack) {
+$x.S.prototype.createAudio = function(n, callBack) {
     this.getAudioGenerator(n, function(ag) {
         callBack(ag.getAudio());
     });
 };
-sonantx.SoundGenerator.prototype.createAudioBuffer = function(n, callBack) {
+$x.S.prototype.createAudioBuffer = function(n, callBack) {
     this.getAudioGenerator(n, function(ag) {
         ag.getAudioBuffer(callBack);
     });
@@ -376,19 +381,19 @@ sonantx.SoundGenerator.prototype.createAudioBuffer = function(n, callBack) {
 /**
  * @constructor
  */
-sonantx.MusicGenerator = function(song) {
+$x.M = function(song) {
     this.song = song;
     // Wave data configuration
     this.waveSize = WAVE_SPS * song.songLen; // Total song size (in samples)
 };
-sonantx.MusicGenerator.prototype.generateTrack = function (instr, mixBuf, callBack) {
+$x.M.prototype.generateTrack = function (instr, mixBuf, callBack) {
     var self = this;
     genBuffer(this.waveSize, function(chnBuf) {
         // Preload/precalc some properties/expressions (for improved performance)
         var waveSamples = self.waveSize,
             waveBytes = self.waveSize * WAVE_CHAN * 2,
             rowLen = self.song.rowLen,
-            soundGen = new sonantx.SoundGenerator(instr, rowLen);
+            soundGen = new $x.S(instr, rowLen);
 
         var endPattern = instr.notes.length;
         var currentpos = 0;
@@ -439,7 +444,7 @@ sonantx.MusicGenerator.prototype.generateTrack = function (instr, mixBuf, callBa
         setTimeout(recordSounds, 0);
     });
 };
-sonantx.MusicGenerator.prototype.getAudioGenerator = function(callBack) {
+$x.M.prototype.getAudioGenerator = function(callBack) {
     var self = this;
     genBuffer(this.waveSize, function(mixBuf) {
         var t = 0;
@@ -448,18 +453,18 @@ sonantx.MusicGenerator.prototype.getAudioGenerator = function(callBack) {
                 t += 1;
                 self.generateTrack(self.song.songData[t - 1], mixBuf, recu);
             } else {
-                callBack(new sonantx.AudioGenerator(mixBuf));
+                callBack(new $x.A(mixBuf));
             }
         };
         recu();
     });
 };
-sonantx.MusicGenerator.prototype.createAudio = function(callBack) {
+$x.M.prototype.createAudio = function(callBack) {
     this.getAudioGenerator(function(ag) {
         callBack(ag.getAudio());
     });
 };
-sonantx.MusicGenerator.prototype.createAudioBuffer = function(callBack) {
+$x.M.prototype.createAudioBuffer = function(callBack) {
     this.getAudioGenerator(function(ag) {
         ag.getAudioBuffer(callBack);
     });

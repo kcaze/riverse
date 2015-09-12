@@ -344,15 +344,15 @@ var scene_character_select = (function () {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (state.exiting) continue;
       if (kz.events[ii].kztype == 'keypress') {
-        if (kz.events[ii].which == kz.KEYS.RIGHT) {
+        if (kz.events[ii].which == kz.K.R) {
           state.selected = Math.min(13, state.selected+1);
-        } else if (kz.events[ii].which == kz.KEYS.DOWN) {
+        } else if (kz.events[ii].which == kz.K.D) {
           state.selected = Math.min(13, state.selected+2);
-        } else if (kz.events[ii].which == kz.KEYS.LEFT) {
+        } else if (kz.events[ii].which == kz.K.L) {
           state.selected = Math.max(0, state.selected-1);
-        } else if (kz.events[ii].which == kz.KEYS.UP) {
+        } else if (kz.events[ii].which == kz.K.U) {
           state.selected = Math.max(0, state.selected-2);
-        } else if (kz.events[ii].which == kz.KEYS.Z) {
+        } else if (kz.events[ii].which == kz.K.Z) {
           if (state.selected == 13) {
             state.selected = Math.floor(Math.random() * 13);
             while (!characters[state.selected].unlocked) {
@@ -374,7 +374,7 @@ var scene_character_select = (function () {
           } else {
             kz.resources.sounds['sfx_denied'].play();
           }
-        } else if (kz.events[ii].which == kz.KEYS.ESCAPE) {
+        } else if (kz.events[ii].which == kz.K.X) {
           state.exiting = true;
           kz.tween({
             object: state,

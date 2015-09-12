@@ -68,7 +68,7 @@ var scene_records = (function () {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (state.exiting) continue;
       if (kz.events[ii].kztype == 'keypress') {
-        if (kz.events[ii].which == kz.KEYS.ESCAPE || kz.events[ii].which == kz.KEYS.Z) {
+        if (kz.events[ii].which == kz.K.X || kz.events[ii].which == kz.K.Z) {
           state.exiting = true;
           kz.tween({
             object: graphics,

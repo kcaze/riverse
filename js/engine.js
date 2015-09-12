@@ -1,14 +1,18 @@
+// L -- loadResources
+// I -- loadImages
+// S -- loadSounds
+// K -- KEYS
 
 var kz = {};
 
 /*^ Functions for loading resources */
 // queue is an object with names as keys and image paths as values
-kz.loadResources = function (resources) {
+kz.L = function (resources) {
   var promises = [];
   kz.resources = {};
 
-  promises.push(kz.loadImages(resources.images));
-  promises.push(kz.loadSounds(resources.sounds));
+  promises.push(kz.I(resources.images));
+  promises.push(kz.S(resources.sounds));
 
   return Promise.all(promises)
     .then(function () {
@@ -16,7 +20,7 @@ kz.loadResources = function (resources) {
     });
 };
 
-kz.loadImages = function (queue) {
+kz.I = function (queue) {
   var images = {};
   var promises = [];
 
@@ -49,7 +53,7 @@ kz.loadImages = function (queue) {
 };
 
 kz.audio_context = new AudioContext();
-kz.loadSounds = function (queue) {
+kz.S = function (queue) {
   var sounds = {};
   var promises = [];
 
@@ -86,15 +90,13 @@ kz.loadSounds = function (queue) {
 /*$ Functions for loading resources */
 
 /*^ Keys */
-kz.KEYS = {
-  ENTER: 13,
-  ESCAPE: 27,
-  SPACE: 32,
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40,
-  Z: 90
+kz.K = {
+  X: 27, // ESCAPE
+  L: 37, // LEFT
+  U: 38, // UP
+  R: 39, // RIGHT
+  D: 40, // DOWN
+  Z: 90 // Z
 };
 
 kz.keys_status = {};
@@ -317,35 +319,35 @@ kz.initialize = function (canvas_id) {
       if (Math.abs(start_x - end_x) + Math.abs(start_y - end_y) < 20) {
         kz.events.push({
           kztype: 'keypress',
-          which: kz.KEYS.Z
+          which: kz.K.Z
         });
       }
       if (Math.abs(start_y - end_y) < 60
                  && start_x - end_x > 20) {
         kz.events.push({
           kztype: 'keypress',
-          which: kz.KEYS.LEFT
+          which: kz.K.L
         });
       }
       if (Math.abs(start_y - end_y) < 60
                  && end_x - start_x > 20) {
         kz.events.push({
           kztype: 'keypress',
-          which: kz.KEYS.RIGHT
+          which: kz.K.R
         });
       }
       if (Math.abs(start_x - end_x) < 60
                  && end_y - start_y > 20) {
         kz.events.push({
           kztype: 'keypress',
-          which: kz.KEYS.DOWN
+          which: kz.K.D
         });
       }
       if (Math.abs(start_x - end_x) < 60
                  && start_y - end_y > 20) {
         kz.events.push({
           kztype: 'keypress',
-          which: kz.KEYS.UP
+          which: kz.K.U
         });
       }
 

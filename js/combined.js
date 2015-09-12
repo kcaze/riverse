@@ -1,3 +1,73 @@
+function base64ToArrayBuffer(base64) {
+    var binary_string =  window.atob(base64);
+    var len = binary_string.length;
+    var bytes = new Uint8Array( len );
+    for (var i = 0; i < len; i++)        {
+        bytes[i] = binary_string.charCodeAt(i);
+    }
+    return bytes.buffer;
+}
+/**
+ * So that this actually runs on ios
+ */
+var performance = window.performance ? window.performance : window.Date;
+var AudioContext = window.AudioContext ? window.AudioContext : window.webkitAudioContext;
+if (!String.prototype.repeat) {
+  String.prototype.repeat = function(count) {
+    var str = '' + this;
+    var rpt = '';
+    for (;;) {
+      if ((count & 1) == 1) {
+        rpt += str;
+      }
+      count >>>= 1;
+      if (count == 0) {
+        break;
+      }
+      str += str;
+    }
+    return rpt;
+  }
+}
+document.addEventListener('touchstart', function(event) {
+  /* EXTREMELY DUMB HACK TO GET AUDIO WORKING ON IOS */
+	var buffer = kz.audio_context.createBuffer(1, 1, 22050);
+	var source = kz.audio_context.createBufferSource();
+	source.buffer = buffer;
+	source.connect(kz.audio_context.destination);
+	source.noteOn(0);
+}, false);
+// a -- osc2_waveform
+// b -- osc2_xenv
+// c -- fx_pan_amt
+// d -- osc2_vol
+// e -- lfo_amt
+// f -- lfo_osc1_freq
+// g -- noise_fader
+// h -- osc1_detune
+// i -- osc2_oct
+// j -- fx_filter
+// k -- fx_resonance
+// l -- fx_pan_freq
+// m -- osc2_det
+// n -- fx_delay_time
+// o -- fx_freq
+// p -- lfo_waveform
+// r -- osc1_vol
+// s -- fx_delay_amt
+// t -- osc1_waveform
+// u -- lfo_fx_freq
+// v -- osc2_detune
+// w -- env_release
+// x -- env_sustain
+// y -- osc1_xenv
+// z -- lfo_freq
+// _ -- env_master
+// aa -- osc1_det
+// ab -- env_attack
+// ac -- osc1_oct
+
+
 // NOTE: This is an altered version of Sonant-X by Herman Chau for
 // use in js13kgames.
 //
@@ -105,8 +175,8 @@ function genBuffer(waveSize, callBack) {
 }
 
 function applyDelay(chnBuf, waveSamples, instr, rowLen, callBack) {
-    var p1 = (instr.fx_delay_time * rowLen) >> 1;
-    var t1 = instr.fx_delay_amt / 255;
+    var p1 = (instr.n * rowLen) >> 1;
+    var t1 = instr.s / 255;
 
     var n1 = 0;
     var iterate = function() {
@@ -227,14 +297,14 @@ sonantx.SoundGenerator = function(instr, rowLen) {
     this.instr = instr;
     this.rowLen = rowLen || 5605;
 
-    this.osc_lfo = oscillators[instr.lfo_waveform];
-    this.osc1 = oscillators[instr.osc1_waveform];
-    this.osc2 = oscillators[instr.osc2_waveform];
-    this.attack = instr.env_attack;
-    this.sustain = instr.env_sustain;
-    this.release = instr.env_release;
-    this.panFreq = Math.pow(2, instr.fx_pan_freq - 8) / this.rowLen;
-    this.lfoFreq = Math.pow(2, instr.lfo_freq - 8) / this.rowLen;
+    this.osc_lfo = oscillators[instr.p];
+    this.osc1 = oscillators[instr.t];
+    this.osc2 = oscillators[instr.a];
+    this.attack = instr.ab;
+    this.sustain = instr.x;
+    this.release = instr.w;
+    this.panFreq = Math.pow(2, instr.l - 8) / this.rowLen;
+    this.lfoFreq = Math.pow(2, instr.z - 8) / this.rowLen;
 };
 sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
     var marker = new Date();
@@ -242,11 +312,11 @@ sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
     var c2 = 0;
 
     // Precalculate frequencues
-    var o1t = getnotefreq(n + (this.instr.osc1_oct - 8) * 12 + this.instr.osc1_det) * (1 + 0.0008 * this.instr.osc1_detune);
-    var o2t = getnotefreq(n + (this.instr.osc2_oct - 8) * 12 + this.instr.osc2_det) * (1 + 0.0008 * this.instr.osc2_detune);
+    var o1t = getnotefreq(n + (this.instr.ac - 8) * 12 + this.instr.aa) * (1 + 0.0008 * this.instr.h);
+    var o2t = getnotefreq(n + (this.instr.i - 8) * 12 + this.instr.m) * (1 + 0.0008 * this.instr.v);
 
     // State variable init
-    var q = this.instr.fx_resonance / 255;
+    var q = this.instr.k / 255;
     var low = 0;
     var band = 0;
     for (var j = this.attack + this.sustain + this.release - 1; j >= 0; --j)
@@ -254,7 +324,7 @@ sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
         var k = j + currentpos;
 
         // LFO
-        var lfor = this.osc_lfo(k * this.lfoFreq) * this.instr.lfo_amt / 512 + 0.5;
+        var lfor = this.osc_lfo(k * this.lfoFreq) * this.instr.e / 512 + 0.5;
 
         // Envelope
         var e = 1;
@@ -265,30 +335,30 @@ sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
 
         // Oscillator 1
         var t = o1t;
-        if(this.instr.lfo_osc1_freq) t += lfor;
-        if(this.instr.osc1_xenv) t *= e * e;
+        if(this.instr.f) t += lfor;
+        if(this.instr.y) t *= e * e;
         c1 += t;
-        var rsample = this.osc1(c1) * this.instr.osc1_vol;
+        var rsample = this.osc1(c1) * this.instr.r;
 
         // Oscillator 2
         t = o2t;
-        if(this.instr.osc2_xenv) t *= e * e;
+        if(this.instr.b) t *= e * e;
         c2 += t;
-        rsample += this.osc2(c2) * this.instr.osc2_vol;
+        rsample += this.osc2(c2) * this.instr.d;
 
         // Noise oscillator
-        if(this.instr.noise_fader) rsample += (2*Math.random()-1) * this.instr.noise_fader * e;
+        if(this.instr.g) rsample += (2*Math.random()-1) * this.instr.g * e;
 
         rsample *= e / 255;
 
         // State variable filter
-        var f = this.instr.fx_freq;
-        if(this.instr.lfo_fx_freq) f *= lfor;
+        var f = this.instr.o;
+        if(this.instr.u) f *= lfor;
         f = 1.5 * Math.sin(f * 3.141592 / WAVE_SPS);
         low += f * band;
         var high = q * (rsample - band) - low;
         band += f * high;
-        switch(this.instr.fx_filter)
+        switch(this.instr.j)
         {
             case 1: // Hipass
                 rsample = high;
@@ -306,8 +376,8 @@ sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
         }
 
         // Panning & master volume
-        t = osc_sin(k * this.panFreq) * this.instr.fx_pan_amt / 512 + 0.5;
-        rsample *= 39 * this.instr.env_master;
+        t = osc_sin(k * this.panFreq) * this.instr.c / 512 + 0.5;
+        rsample *= 39 * this.instr._;
 
         // Add to 16-bit channel buffer
         k = k * 4;
@@ -914,9 +984,10 @@ window['jsfxr'] = function(settings) {
   {
     var a = data[i] << 16 | data[i + 1] << 8 | data[i + 2];
     output += base64Characters[a >> 18] + base64Characters[a >> 12 & 63] + base64Characters[a >> 6 & 63] + base64Characters[a & 63];
-  }
+  }
   return output;
 }
+
 var kz = {};
 
 /*^ Functions for loading resources */
@@ -940,29 +1011,22 @@ kz.loadImages = function (queue) {
 
   for (var key in queue) {
     promises.push(new Promise(function(resolve) {
-      var name = key;
+      var c = queue[key];
+      var canvas = document.createElement('canvas');
+      images[key] = canvas;
       var image = new Image();
       image.addEventListener('load', function() {
-        var canvas = document.createElement('canvas');
         var context = canvas.getContext('2d');
-        var crop;
-        if (!queue[name].crop) {
-          crop = {
-            x: 0,
-            y: 0,
-            w: image.width,
-            h: image.height
-          };
+        canvas.width = c.w
+        canvas.height = c.h;
+        if (c.f) {
+          context.drawImage(image, c.x, c.y, c.W, c.H, (c.w-c.W)/2, (c.h-c.H)/2, c.W, c.H);
         } else {
-          crop = queue[name].crop;
+          context.drawImage(image, c.x, c.y, c.w, c.h, 0, 0, c.w, c.h);
         }
-        canvas.width = crop.w;
-        canvas.height = crop.h;
-        context.drawImage(image, crop.x, crop.y, crop.w, crop.h, 0, 0, crop.w, crop.h);
-        images[name] = canvas;
         resolve();
       });
-      image.src = queue[key].data;
+      image.src = 's.png';
     }));
   }
 
@@ -973,8 +1037,8 @@ kz.loadImages = function (queue) {
                 });
 };
 
+kz.audio_context = new AudioContext();
 kz.loadSounds = function (queue) {
-  kz.audio_context = new AudioContext();
   var sounds = {};
   var promises = [];
 
@@ -985,7 +1049,6 @@ kz.loadSounds = function (queue) {
     promises.push(new Promise(function(resolve) {
       var name = key;
       queue[key].loader(queue[key].data, function(buffer) {
-        console.log("Loaded ", name);
         sounds[name] = {
           play: function (loop) {
             loop = typeof loop == undefined ? false : loop;
@@ -1208,16 +1271,15 @@ kz.initialize = function (canvas_id) {
 
   // touch events
   document.addEventListener('touchstart', function(event) {
-    event.preventDefault();
+    //event.preventDefault();
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
       if (kz.TOUCHES[touch.identifier]) continue;
       kz.TOUCHES[touch.identifier] = {
-        initial: touch,
-        current: touch
+        initial: {x: touch.screenX, y: touch.screenY},
+        current: {x: touch.screenX, y: touch.screenY}
       };
     }
-    console.log('touchstart:', event, JSON.stringify(kz.TOUCHES));
   });
 
   document.addEventListener('touchmove', function(event) {
@@ -1225,9 +1287,8 @@ kz.initialize = function (canvas_id) {
     for (var ii = 0; ii < event.touches.length; ii++) {
       var touch = event.touches[ii];
       if (!kz.TOUCHES[touch.identifier]) continue;
-      kz.TOUCHES[touch.identifier].current = touch;
+      kz.TOUCHES[touch.identifier].current = {x: touch.screenX, y:touch.screenY};
     }
-    console.log('touchmove:', event, JSON.stringify(kz.TOUCHES));
   });
 
   document.addEventListener('touchend', function(event) {
@@ -1238,32 +1299,48 @@ kz.initialize = function (canvas_id) {
         if (event.touches[ii].identifier == id) found = true;
       }
       if (found) continue;
-      var start_x = kz.TOUCHES[id].initial.screenX;
-      var start_y = kz.TOUCHES[id].initial.screenY;
-      var end_x = kz.TOUCHES[id].current.screenX;
-      var end_y = kz.TOUCHES[id].current.screenY;
+      var start_x = kz.TOUCHES[id].initial.x;
+      var start_y = kz.TOUCHES[id].initial.y;
+      var end_x = kz.TOUCHES[id].current.x;
+      var end_y = kz.TOUCHES[id].current.y;
       if (Math.abs(start_x - end_x) + Math.abs(start_y - end_y) < 20) {
         kz.events.push({
           kztype: 'keypress',
           which: kz.KEYS.Z
         });
-      } else if (Math.abs(start_y - end_y) < 40
+      }
+      if (Math.abs(start_y - end_y) < 60
                  && start_x - end_x > 20) {
         kz.events.push({
           kztype: 'keypress',
           which: kz.KEYS.LEFT
         });
-      } else if (Math.abs(start_y - end_y) < 40
+      }
+      if (Math.abs(start_y - end_y) < 60
                  && end_x - start_x > 20) {
         kz.events.push({
           kztype: 'keypress',
           which: kz.KEYS.RIGHT
         });
       }
+      if (Math.abs(start_x - end_x) < 60
+                 && end_y - start_y > 20) {
+        kz.events.push({
+          kztype: 'keypress',
+          which: kz.KEYS.DOWN
+        });
+      }
+      if (Math.abs(start_x - end_x) < 60
+                 && start_y - end_y > 20) {
+        kz.events.push({
+          kztype: 'keypress',
+          which: kz.KEYS.UP
+        });
+      }
+
 
       delete kz.TOUCHES[id];
     }
-    console.log('touchend:', event, JSON.stringify(kz.TOUCHES));
   });
 };
 
@@ -1291,15 +1368,16 @@ kz.run = function (scene) {
   tickID = window.requestAnimationFrame(kz.tick);
 };
 
-kz.performance = Object.create(performance);
-kz.performance.pauseTime = 0;
-kz.performance.now = function () {
-  if (kz.paused) {
-      return kz.pauseNow;
-  } else {
-    return performance.now() - kz.performance.pauseTime;
+kz.performance = {
+  pauseTime: 0,
+  now: function () {
+    if (kz.paused) {
+        return kz.pauseNow;
+    } else {
+      return performance.now() - kz.performance.pauseTime;
+    }
   }
-}
+};
 kz.paused = false;
 kz.pauseTime = 0;
 kz.pause = function () {
@@ -1335,7 +1413,7 @@ scene_loading.draw = function (now) {
   kz.context.save();
   kz.context.textAlign = 'center';
   kz.context.textBaseline = 'center';
-  kz.context.font = '18px font';
+  kz.context.font = '18px f';
   kz.context.fillStyle = 'rgb(142, 212, 165)';
   kz.context.lineWidth = 2;
   kz.context.fillText(
@@ -1352,11 +1430,12 @@ var scene_main_menu = (function () {
 
   scene_main_menu.initialize = function () {
     graphics = {
-      press_space_visible: true,
-      blink: true,
+      press_space_visible: 1,
       text_alpha: 1,
       fadeAlpha: 1,
-      exiting: false
+      exiting: false,
+      choice: 0,
+      state: 0
     };
     kz.tween({
       object: graphics,
@@ -1364,6 +1443,9 @@ var scene_main_menu = (function () {
       value: 0,
       duration: 100
     });
+    graphics.blinkID = setInterval(function() {
+      graphics.press_space_visible ^= 1;
+    }, 400);
   }
 
   scene_main_menu.draw = function () {
@@ -1381,7 +1463,7 @@ var scene_main_menu = (function () {
 
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '48px font';
+    kz.context.font = '48px f';
     ///kz.context.fillStyle = 'rgb(142, 212, 165)';
     kz.context.fillStyle = '#8ed4a5';
     kz.context.fillText(
@@ -1390,12 +1472,12 @@ var scene_main_menu = (function () {
       125
     );
 
-    if (graphics.press_space_visible) {
+    if (graphics.state == 0 && graphics.press_space_visible) {
       kz.context.save();
       kz.context.globalAlpha = graphics.text_alpha;
       ///kz.context.textAlign = 'center';
       ///kz.context.textBaseline = 'center';
-      kz.context.font = '24px font';
+      kz.context.font = '24px f';
       kz.context.fillStyle = 'white';
       kz.context.fillText(
         'PRESS   Z',
@@ -1404,12 +1486,22 @@ var scene_main_menu = (function () {
       );
       kz.context.restore();
     }
+    if (graphics.state == 1) {
+      kz.context.textAlign = 'center';
+      kz.context.textBaseline = 'center';
+      kz.context.font = '24px f';
+      kz.context.fillStyle = graphics.choice == 0 ? '#fff' : '#666';
+      kz.context.fillText('GAME START', kz.canvas.width/2, kz.canvas.height/2+40);
+      kz.context.fillStyle = graphics.choice == 1 ? '#fff' : '#666';
+      kz.context.fillText('RECORDS', kz.canvas.width/2, kz.canvas.height/2+88);
+      kz.context.restore();
+    }
 
     kz.context.save();
     kz.context.globalAlpha = graphics.text_alpha;
     ///kz.context.textAlign = 'center';
     ///kz.context.textBaseline = 'center';
-    kz.context.font = '10px font';
+    kz.context.font = '10px f';
     kz.context.fillStyle = '#50605b';
     kz.context.lineWidth = 2;
     kz.context.fillText(
@@ -1424,32 +1516,39 @@ var scene_main_menu = (function () {
 
   scene_main_menu.preUpdate = function (now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
-      if (kz.events[ii].kztype == 'keypress' &&
-          kz.events[ii].which == kz.KEYS.Z &&
-          !graphics.exiting) {
-        kz.resources.sounds['sfx_select'].play();
-        graphics.exiting = true;
-        graphics.blink = false;
-        graphics.press_space_visible = false;
-        kz.tween({
-          object: graphics,
-          property: 'fadeAlpha',
-          value: 1,
-          duration: 100
-        }).then(function () {
-          kz.run(scene_character_select);
-        });
+      if (kz.events[ii].kztype == 'keypress') {
+        if (graphics.exiting) continue;
+        if (kz.events[ii].which == kz.KEYS.Z) {
+          kz.resources.sounds['sfx_select'].play();
+          if (!graphics.state) {
+            graphics.state = 1;
+          } else {
+            var s = graphics.choice ? scene_records : scene_character_select;
+            graphics.exiting = true;
+            kz.tween({
+              object: graphics,
+              property: 'fadeAlpha',
+              value: 1,
+              duration: 100
+            }).then(function () {
+              clearInterval(graphics.blinkID);
+              kz.run(s);
+            });
+          }
+        }
+      }
+      if (kz.events[ii].which == kz.KEYS.UP) {
+        if (graphics.state) {
+          graphics.choice = Math.max(0, graphics.choice-1);
+        }
+      }
+      if (kz.events[ii].which == kz.KEYS.DOWN) {
+        if (graphics.state) {
+          graphics.choice = Math.min(1, graphics.choice+1);
+        }
       }
     }
     kz.events = [];
-
-    if (graphics.blink) {
-      if (Math.floor(now/500)%4 < 2) {
-        graphics.press_space_visible = true;
-      } else {
-        graphics.press_space_visible = false;
-      }
-    }
   }
 
   return scene_main_menu;
@@ -1489,13 +1588,32 @@ var scene_records = (function () {
 
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '48px font';
-    kz.context.fillStyle = 'rgb(142, 212, 165)';
+    kz.context.font = '32px f';
+    kz.context.fillStyle = '#fff';
     kz.context.fillText(
       'RECORDS',
       kz.canvas.width / 2,
-      125
+      48
     );
+    kz.context.font = '12px f';
+    for (var ii = 0; ii < records.length; ii++) {
+      kz.context.fillStyle = '#fff';
+      kz.context.textAlign = 'left';
+      kz.context.fillText(records[ii].text + ': ', 12, 90 + ii*20);
+      kz.context.textAlign = 'right';
+      kz.context.fillStyle = '#8ed4a5';
+      var value;
+      if (records[ii].name == 'total_time' || records[ii].name == 'max_time') {
+        var time = getRecord(records[ii].name);
+        var sec_string = '' + time%60;
+        var min_string = '' + (Math.floor(time/60)%60);
+        var hour_string = records[ii].name == 'total_time' ? '' + Math.floor(time/3600) + ':' : '';
+        value = hour_string+'0'.repeat(2-min_string.length) + min_string + ':'  + '0'.repeat(2-sec_string.length)+sec_string;
+      } else {
+        value = getRecord(records[ii].name);
+      }
+      kz.context.fillText(value, kz.canvas.width-12, 90+ii*20);
+    }
 
     kz.context.fillStyle = 'rgba(0,0,0,'+graphics.fadeAlpha+')';
     kz.context.fillRect(0,0,kz.canvas.width,kz.canvas.height);
@@ -1505,15 +1623,15 @@ var scene_records = (function () {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (state.exiting) continue;
       if (kz.events[ii].kztype == 'keypress') {
-        if (kz.events[ii].which == kz.KEYS.ESCAPE) {
+        if (kz.events[ii].which == kz.KEYS.ESCAPE || kz.events[ii].which == kz.KEYS.Z) {
           state.exiting = true;
           kz.tween({
-            object: state,
+            object: graphics,
             property: 'fadeAlpha',
             value: 1,
             duration: 100
           }).then(function () {
-            kz.run(scene);
+            kz.run(scene_main_menu);
           });
         }
       }
@@ -1523,7 +1641,6 @@ var scene_records = (function () {
 
   return scene;
 })();
-
 var character;
 var scene_character_select = (function () {
   var scene = new kz.Scene();
@@ -1672,7 +1789,7 @@ var scene_character_select = (function () {
         name: 'HORSE',
         image: kz.resources.images['character_horse'],
         unlock_message: 'ZODIAC 13 TIMES',
-        unlocked: getRecord('total_zodiac') >= 13,
+        unlocked: getRecord('total_zodiac') >= 13,
         zodiac: function(data) {
           data.incrementScore(2);
         }
@@ -1813,6 +1930,11 @@ var scene_character_select = (function () {
       for (var xx = 0; xx < 2; xx++) {
         var idx = yy*2 + xx;
         if (idx >= characters.length) break;
+        kz.context.strokeStyle = '#89928e';
+        kz.context.lineWidth = 0.5;
+        kz.context.fillStyle = '#50605b';
+        kz.context.fillRect(xx*49 + 11, yy*49 + 21, 48, 48) ;
+        kz.context.strokeRect(xx*49 + 10, yy*49 + 20, 50, 50) ;
         kz.context.drawImage(
           characters[idx].image,
           xx*49 + 10,
@@ -1831,7 +1953,7 @@ var scene_character_select = (function () {
     }
     kz.context.textAlign = 'right';
     kz.context.textBaseline = 'center';
-    kz.context.font = '24px font';
+    kz.context.font = '24px f';
     kz.context.fillStyle = 'white';
     kz.context.fillText(
       characters[state.selected].name,
@@ -1840,7 +1962,7 @@ var scene_character_select = (function () {
     );
     kz.context.textAlign = 'right';
     kz.context.textBaseline = 'center';
-    kz.context.font = '16px font';
+    kz.context.font = '16px f';
     kz.context.fillStyle = 'white';
     if (characters[state.selected].unlocked) {
       kz.context.fillText(
@@ -1849,7 +1971,7 @@ var scene_character_select = (function () {
         360
       );
     } else {
-      kz.context.font = '12px font';
+      kz.context.font = '12px f';
       kz.context.fillStyle = '#50605b';
       kz.context.fillText(
         characters[state.selected].unlock_message,
@@ -1875,9 +1997,9 @@ var scene_character_select = (function () {
           state.selected = Math.max(0, state.selected-2);
         } else if (kz.events[ii].which == kz.KEYS.Z) {
           if (state.selected == 13) {
-            state.selected = Math.floor(Math.random() * 14);
+            state.selected = Math.floor(Math.random() * 13);
             while (!characters[state.selected].unlocked) {
-              state.selected = Math.floor(Math.random() * 14);
+              state.selected = Math.floor(Math.random() * 13);
             }
           }
           if (characters[state.selected].unlocked) {
@@ -2027,10 +2149,8 @@ var scene_game = (function () {
 
   /*^ Messy section of game logic */
   function lose() {
-    bgm.stop();
+    bgm.mystop();
     state.alive = false;
-    incrementRecord('playcount', 1);
-    console.log('Lost :(');
 
     // copy over game picture at losing time
     gameover_context.clearRect(
@@ -2042,7 +2162,7 @@ var scene_game = (function () {
     gameover_context.drawImage(
       kz.canvas,
       0,
-      0
+      0
     );
     // fade to black
     kz.tween({
@@ -2102,7 +2222,6 @@ var scene_game = (function () {
       state.level += 1;
       maxRecord('max_level', state.level);
       state.next_row_interval = Math.max(3000, state.next_row_interval - 750);
-      console.log(state.next_row_interval);
     }
 
     // capture row pieces before we update board so we can animate them
@@ -2125,7 +2244,7 @@ var scene_game = (function () {
     if (!activateAbility) return;
     state.zodiacs++;
     incrementRecord('total_zodiac', 1);
-    maxRecord('total_zodiac', state.zodiacs);
+    maxRecord('max_zodiac', state.zodiacs);
     character.zodiac({
       state: state,
       animateClearPieces: animateClearPieces,
@@ -2304,8 +2423,11 @@ var scene_game = (function () {
   /*$ Messy section of game logic */
 
   function initialize() {
+    incrementRecord('play_count', 1);
     bgm = kz.resources.sounds['bgm_game'].play(true);
-    bgm.stop();
+    bgm.mystop = function () {
+      if (!bgm.stopped) {bgm.stop(0); bgm.stopped = 1;}
+    };
   // initialize graphics
     graphics = {
       background_pattern: kz.context.createPattern(
@@ -2494,7 +2616,6 @@ var scene_game = (function () {
         // update consecutive counts
         if (state.consecutive[piece_type]) {
           state.consecutive[piece_type]++;
-          console.log("Consecutives: ", state.consecutive);
         } else {
           state.consecutive[PieceTypes.Red] = 0;
           state.consecutive[PieceTypes.Blue] = 0;
@@ -2548,12 +2669,11 @@ var scene_game = (function () {
 
   function drawAlive(now) {
     // clear contexts
-    kz.context.clearAll();
     board_context.clearRect(
       0,
       0,
       board_canvas.width,
-      board_canvas.height
+      board_canvas.height
     );
     info_context.clearRect(
       0,
@@ -2673,17 +2793,17 @@ var scene_game = (function () {
       // draw text
     info_context.textAlign = 'center';
     info_context.textBaseline = 'top';
-    info_context.font = '24px font';
+    info_context.font = '24px f';
     info_context.fillStyle = 'white';
     info_context.fillText('NEXT', 48, 120);
     info_context.fillText('SCORE', 48, 211);
     info_context.fillText('LEVEL', 48, 272);
     info_context.fillText('TIME', 48, 333);
-    info_context.font = '20px font';
+    info_context.font = '20px f';
     info_context.textBaseline = 'bottom';
     info_context.fillText(character.name, 48, 101);
 
-    info_context.font = '20px font';
+    info_context.font = '20px f';
     info_context.fillText('' + state.level, 48, 316);
     var score_string = '' + state.score;
         // pad with zeroes
@@ -2711,6 +2831,8 @@ var scene_game = (function () {
     );
 
     // main context drawing
+    kz.context.fillStyle = '#50605b';
+    kz.context.fillRect(0, 0, kz.canvas.width, kz.canvas.height);
     kz.context.fillStyle = graphics.background_pattern;
     kz.context.fillRect(0, 0, kz.canvas.width, kz.canvas.height);
     kz.context.drawImage(board_canvas, 10, 0);
@@ -2724,7 +2846,7 @@ var scene_game = (function () {
   }
 
   function preUpdateAlive(now) {
-    maxRecord('max_time', Math.floor(now - state.begin));
+    maxRecord('max_time', Math.floor((now - state.begin)/1000));
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress' &&
           kz.events[ii].which == kz.KEYS.ESCAPE) {
@@ -2767,7 +2889,7 @@ var scene_game = (function () {
     kz.context.save();
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '24px font';
+    kz.context.font = '24px f';
     kz.context.fillStyle = pause_choice == 0 ? '#fff' : '#666';
     kz.context.fillText('RESUME', kz.canvas.width/2, kz.canvas.height/2-48);
     kz.context.fillStyle = pause_choice == 1 ? '#fff' : '#666';
@@ -2799,7 +2921,7 @@ var scene_game = (function () {
     kz.context.globalAlpha = graphics.gameover_text_alpha;
     kz.context.textAlign = 'center';
     kz.context.textBaseline = 'center';
-    kz.context.font = '24px font';
+    kz.context.font = '24px f';
     kz.context.fillStyle = '#fff';
     kz.context.fillText(
       'GAME OVER',
@@ -2880,26 +3002,13 @@ var scene_game = (function () {
     }
   };
   scene_game.exit = function () {
-    bgm.stop();
+    bgm.mystop();
   }
   return scene_game
 })();
-// three '/' represents comments for minification purposes
-///var isMobile = false;
-// From http://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery
-///if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent)
-    ///|| /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0,4))) isMobile = true;
-
-var audio_context = new AudioContext();
 function loadJSFXR(data, resolve) {
-  var request = new XMLHttpRequest();
-  request.open('GET', data, true);
-  request.responseType = 'arraybuffer';
-
-  request.onload = function() {
-    audio_context.decodeAudioData(request.response, resolve);
-  };
-  request.send();
+  var buff = base64ToArrayBuffer(data.substr(22));
+  kz.audio_context.decodeAudioData(buff, resolve);
 }
 
 function loadSonant(data, resolve) {
@@ -2909,86 +3018,28 @@ function loadSonant(data, resolve) {
 
 var resources = {
   images: {
-    background: {
-      data: 'images/background.gif'
-    },
-    character_boar: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:0, w:50, h:50}
-    },
-    character_cat: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:0, w:50, h:50}
-    },
-    character_dog: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:49, w:50, h:50}
-    },
-    character_dragon: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:49, w:50, h:50}
-    },
-    character_hare: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:98, w:50, h:50}
-    },
-    character_horse: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:98, w:50, h:50}
-    },
-    character_monkey: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:147, w:50, h:50}
-    },
-    character_ox: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:147, w:50, h:50}
-    },
-    character_rat: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:196, w:50, h:50}
-    },
-    character_rooster: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:196, w:50, h:50}
-    },
-    character_sheep: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:245, w:50, h:50}
-    },
-    character_snake: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:245, w:50, h:50}
-    },
-    character_tiger: {
-      data: 'images/characters.gif',
-      crop: {x:0, y:294, w:50, h:50}
-    },
-    character_random: {
-      data: 'images/characters.gif',
-      crop: {x:49, y:294, w:50, h:50}
-    },
-    piece_blue: {
-      data: 'images/piece_black.gif'
-    },
-    piece_red: {
-      data: 'images/piece_white.gif'
-    },
-    piece_zodiac: {
-      data: 'images/piece_zodiac.gif'
-    },
-    shooter_0: {
-      data: 'images/shooter0.gif'
-    },
-    shooter_1: {
-      data: 'images/shooter1.gif'
-    },
-    shooter_2: {
-      data: 'images/shooter2.gif'
-    },
-    shooter_3: {
-      data: 'images/shooter1.gif'
-    }
+    background: {x:36,y:263,w:32,h:32},
+    character_boar: {x:0,y:0,w:50,h:50,W:37,H:39,f:1},
+    character_cat: {x:37,y:0,w:50,h:50,W:42,H:38,f:1},
+    character_dog: {x:0,y:39,w:50,h:50,W:40,H:42,f:1},
+    character_dragon: {x:40,y:38,w:50,h:50,W:45,H:40,f:1},
+    character_hare: {x:0,y:81,w:50,h:50,W:35,H:40,f:1},
+    character_horse: {x:35,y:81,w:50,h:50,W:41,H:43,f:1},
+    character_monkey: {x:0,y:121,w:50,h:50,W:30,H:44,f:1},
+    character_ox: {x:30,y:124,w:50,h:50,W:42,H:32,f:1},
+    character_rat: {x:0,y:165,w:50,h:50,W:41,H:39,f:1},
+    character_rooster: {x:41,y:156,w:50,h:50,W:35,H:36,f:1},
+    character_sheep: {x:0,y:205,w:50,h:50,W:43,H:43,f:1},
+    character_snake: {x:43,y:192,w:50,h:50,W:34,H:34,f:1},
+    character_tiger: {x:0,y:248,w:50,h:50,W:36,H:41,f:1},
+    character_random: {x:43,y:226,w:50,h:50,W:21,H:37,f:1},
+    piece_blue: {x:65,y:226,w:17,h:17},
+    piece_red: {x:64,y:243,w:17,h:17},
+    piece_zodiac: {x:72,y:124,w:17,h:17},
+    shooter_0: {x:68,y:260,w:9,h:22,W:9,H:22,f:1},
+    shooter_1: {x:76,y:81,w:9,h:22,W:5,H:22,f:1},
+    shooter_2: {x:76,y:156,w:9,h:22,W:1,H:22,f:1},
+    shooter_3: {x:68,y:260,w:9,h:22,W:9,H:22,f:1}
   },
   sounds: {
     'sfx_shoot': {
@@ -3018,25 +3069,25 @@ var resources = {
     "endPattern": 382,
     "songData": [
         {
-            "osc2_waveform": 0,
-            "osc2_xenv": 0,
-            "fx_pan_amt": 108,
-            "osc2_vol": 0,
-            "lfo_amt": 187,
-            "lfo_osc1_freq": 0,
-            "noise_fader": 60,
-            "osc1_detune": 0,
-            "osc2_oct": 8,
-            "fx_filter": 1,
-            "fx_resonance": 120,
-            "fx_pan_freq": 5,
-            "osc2_det": 0,
-            "fx_delay_time": 4,
-            "fx_freq": 10332,
-            "lfo_waveform": 0,
-            "osc1_vol": 0,
-            "fx_delay_amt": 16,
-            "osc1_waveform": 0,
+            "a": 0,
+            "b": 0,
+            "c": 108,
+            "d": 0,
+            "e": 187,
+            "f": 0,
+            "g": 60,
+            "h": 0,
+            "i": 8,
+            "j": 1,
+            "k": 120,
+            "l": 5,
+            "m": 0,
+            "n": 4,
+            "o": 10332,
+            "p": 0,
+            "r": 0,
+            "s": 16,
+            "t": 0,
             "notes": [
                 147,
                 0,
@@ -3102,7 +3153,7 @@ var resources = {
                 0,
                 0,
                 0,
-                147,
+                147,
                 0,
                 0,
                 0,
@@ -3152,7 +3203,7 @@ var resources = {
                 0,
                 147,
                 0,
-                0,
+                0,
                 0,
                 147,
                 0,
@@ -3419,37 +3470,37 @@ var resources = {
                 0,
                 0
             ],
-            "lfo_fx_freq": 0,
-            "osc2_detune": 0,
-            "env_release": 4607,
-            "env_sustain": 419,
-            "osc1_xenv": 0,
-            "lfo_freq": 5,
-            "env_master": 130,
-            "osc1_det": 0,
-            "env_attack": 50,
-            "osc1_oct": 8
+            "u": 0,
+            "v": 0,
+            "w": 4607,
+            "x": 419,
+            "y": 0,
+            "z": 5,
+            "_": 130,
+            "aa": 0,
+            "ab": 50,
+            "ac": 8
         },
         {
-            "osc2_waveform": 0,
-            "osc2_xenv": 0,
-            "fx_pan_amt": 0,
-            "osc2_vol": 255,
-            "lfo_amt": 96,
-            "lfo_osc1_freq": 0,
-            "noise_fader": 0,
-            "osc1_detune": 0,
-            "osc2_oct": 8,
-            "fx_filter": 2,
-            "fx_resonance": 60,
-            "fx_pan_freq": 0,
-            "osc2_det": 0,
-            "fx_delay_time": 1,
-            "fx_freq": 4067,
-            "lfo_waveform": 0,
-            "osc1_vol": 255,
-            "fx_delay_amt": 45,
-            "osc1_waveform": 0,
+            "a": 0,
+            "b": 0,
+            "c": 0,
+            "d": 255,
+            "e": 96,
+            "f": 0,
+            "g": 0,
+            "h": 0,
+            "i": 8,
+            "j": 2,
+            "k": 60,
+            "l": 0,
+            "m": 0,
+            "n": 1,
+            "o": 4067,
+            "p": 0,
+            "r": 255,
+            "s": 45,
+            "t": 0,
             "notes": [
                 160,
                 0,
@@ -3834,37 +3885,37 @@ var resources = {
                 155,
                 0
             ],
-            "lfo_fx_freq": 1,
-            "osc2_detune": 0,
-            "env_release": 13163,
-            "env_sustain": 0,
-            "osc1_xenv": 0,
-            "lfo_freq": 3,
-            "env_master": 255,
-            "osc1_det": 0,
-            "env_attack": 22,
-            "osc1_oct": 7
+            "u": 1,
+            "v": 0,
+            "w": 13163,
+            "x": 0,
+            "y": 0,
+            "z": 3,
+            "_": 255,
+            "aa": 0,
+            "ab": 22,
+            "ac": 7
         },
         {
-            "osc2_waveform": 2,
-            "osc2_xenv": 0,
-            "fx_pan_amt": 0,
-            "osc2_vol": 157,
-            "lfo_amt": 0,
-            "lfo_osc1_freq": 0,
-            "noise_fader": 0,
-            "osc1_detune": 0,
-            "osc2_oct": 6,
-            "fx_filter": 2,
-            "fx_resonance": 76,
-            "fx_pan_freq": 2,
-            "osc2_det": 0,
-            "fx_delay_time": 3,
-            "fx_freq": 3900,
-            "lfo_waveform": 0,
-            "osc1_vol": 192,
-            "fx_delay_amt": 0,
-            "osc1_waveform": 2,
+            "a": 2,
+            "b": 0,
+            "c": 0,
+            "d": 157,
+            "e": 0,
+            "f": 0,
+            "g": 0,
+            "h": 0,
+            "i": 6,
+            "j": 2,
+            "k": 76,
+            "l": 2,
+            "m": 0,
+            "n": 3,
+            "o": 3900,
+            "p": 0,
+            "r": 192,
+            "s": 0,
+            "t": 2,
             "notes": [
                 160,
                 0,
@@ -4235,16 +4286,16 @@ var resources = {
                 158,
                 170
             ],
-            "lfo_fx_freq": 1,
-            "osc2_detune": 0,
-            "env_release": 12631,
-            "env_sustain": 2418,
-            "osc1_xenv": 0,
-            "lfo_freq": 0,
-            "env_master": 139,
-            "osc1_det": 0,
-            "env_attack": 0,
-            "osc1_oct": 5
+            "u": 1,
+            "v": 0,
+            "w": 12631,
+            "x": 2418,
+            "y": 0,
+            "z": 0,
+            "_": 139,
+            "aa": 0,
+            "ab": 0,
+            "ac": 5
         }
     ],
     "rowLen": 1739,
@@ -4262,7 +4313,6 @@ window.onload = function() {
   kz.run(scene_loading);
 
   kz.loadResources(resources).then(function () {
-    console.log("Loaded resources!");
     kz.run(scene_main_menu);
     setInterval(function () {
       incrementRecord('total_time', 1);
@@ -4285,24 +4335,24 @@ window.onload = function() {
  * 12. Total number of rows cleared ever (total_rows)
  * 13. Maximum time survived in one single game in seconds (max_time)
  */
+var records = [
+  {text: 'GAMES PLAYED', name:'play_count'},
+  {text: 'TOTAL TIME SPENT', name:'total_time'},
+  {text: 'LONGEST TIME SURVIVED', name: 'max_time'},
+  {text: 'HIGHEST SCORE OBTAINED', name:'max_score'},
+  {text: 'HIGHEST LEVEL REACHED', name:'max_level'},
+  {text: 'TOTAL ROWS CLEARED', name: 'total_rows'},
+  {text: 'MOST ROWS CLEARED IN ONE GAME', name: 'max_rows'},
+  {text: 'TOTAL ZODIAC CLEARS', name:'total_zodiac'},
+  {text: 'MOST ZODIACS CLEARS IN ONE GAME', name:'max_zodiac'},
+  {text: 'TOTAL ORBS SHOT', name:'total_orbs'},
+  {text: 'MAX CONSECUTIVE WHITE ORBS', name:'max_white_orbs'},
+  {text: 'MAX CONSECUTIVE BLACK ORBS', name:'max_black_orbs'},
+  {text: 'MAX CONSECUTIVE ZODIAC ORBS', name:'max_zodiac_orbs'}];
 (function() {
-  var records = [
-    'play_count', // done
-    'total_time', // done
-    'max_score', // done
-    'max_level', // done
-    'total_zodiac', // done
-    'max_zodiac', // done
-    'total_orbs', // done
-    'max_white_orbs', // done
-    'max_black_orbs', // done
-    'max_zodiac_orbs', // done
-    'max_rows', // done
-    'total_rows', // done
-    'max_time']; // done
   records.forEach(function (record) {
-    if (!localStorage.getItem(record)) {
-      localStorage.setItem(record, '0');
+    if (!localStorage.getItem(record.name)) {
+      localStorage.setItem(record.name, '0');
     }
   });
 })();

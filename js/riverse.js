@@ -1,10 +1,14 @@
+// Globals(prefixed with $):
+// $x -- sonantx
+
+
 function loadJSFXR(data, resolve) {
   var buff = base64ToArrayBuffer(data.substr(22));
   kz.audio_context.decodeAudioData(buff, resolve);
 }
 
 function loadSonant(data, resolve) {
-  var songGen = new sonantx.MusicGenerator(data);
+  var songGen = new $x.M(data);
   songGen.createAudioBuffer(resolve);
 }
 
@@ -1304,7 +1308,7 @@ window.onload = function() {
   kz.initialize('canvas');
   kz.run(scene_loading);
 
-  kz.loadResources(resources).then(function () {
+  kz.L(resources).then(function () {
     kz.run(scene_main_menu);
     setInterval(function () {
       incrementRecord('total_time', 1);

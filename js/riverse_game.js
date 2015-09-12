@@ -523,26 +523,12 @@ var scene_game = (function () {
       },
       listen: function (event) {
         if (event.kztype == 'keypress') {
-          switch (event.which) {
-            case kz.KEYS.LEFT:
-              this.move(-1);
-              break;
-            case kz.KEYS.RIGHT:
-              this.move(1);
-              break;
-            case kz.KEYS.Z:
-              this.shoot();
-              break;
-          }
+          if (event.which == kz.K.L) this.move(-1);
+          if (event.which == kz.K.R) this.move(1);
+          if (event.which == kz.K.Z) this.shoot();
         } else if (event.kztype == 'keyheld') {
-          switch (event.which) {
-            case kz.KEYS.LEFT:
-              this.move(-1);
-              break;
-            case kz.KEYS.RIGHT:
-              this.move(1);
-              break;
-          }
+          if (event.which == kz.K.L) this.move(-1);
+          if (event.which == kz.K.R) this.move(1);
         }
       },
       move: function (dx) {
@@ -812,7 +798,7 @@ var scene_game = (function () {
     maxRecord('max_time', Math.floor((now - state.begin)/1000));
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress' &&
-          kz.events[ii].which == kz.KEYS.ESCAPE) {
+          kz.events[ii].which == kz.K.X) {
         pause();
         kz.events = [];
         return;
@@ -898,7 +884,7 @@ var scene_game = (function () {
   function preUpdateDead(now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress' &&
-          kz.events[ii].which == kz.KEYS.Z &&
+          kz.events[ii].which == kz.K.Z &&
           state.can_restart) {
         kz.tween({
           object: graphics,
@@ -915,13 +901,13 @@ var scene_game = (function () {
   function preUpdatePause(now) {
     for (var ii = 0; ii < kz.events.length; ii++) {
       if (kz.events[ii].kztype == 'keypress') {
-        if (kz.events[ii].which == kz.KEYS.ESCAPE) {
+        if (kz.events[ii].which == kz.K.X) {
           resume();
-        } else if (kz.events[ii].which == kz.KEYS.DOWN) {
+        } else if (kz.events[ii].which == kz.K.D) {
           pause_choice = Math.min(2, pause_choice+1);
-        } else if (kz.events[ii].which == kz.KEYS.UP) {
+        } else if (kz.events[ii].which == kz.K.U) {
           pause_choice = Math.max(0, pause_choice-1);
-        } else if (kz.events[ii].which == kz.KEYS.Z) {
+        } else if (kz.events[ii].which == kz.K.Z) {
           resume();
           if (pause_choice == 0) {
           } else if (pause_choice == 1) {
