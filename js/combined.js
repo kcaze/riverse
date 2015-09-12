@@ -1,5 +1,72 @@
 var $W = window;
 var $D = document;
+
+var txt_v = $D.createElement('canvas');
+var txt_x = txt_v.getContext('2d');
+// align is 0 for left, 1 for center, 2 for right
+function tx(context, px, str, x, y, xalign, yalign) {
+  letters = {
+    ' ':'000,000,000,000',
+    '(':'01,10,10,10,01',
+    ')':'10,01,01,01,10',
+    '+':'000,010,111,010,000',
+    '/':'00001,00010,00100,01000,10000',
+    '0':'0110,1001,1001,1001,0110',
+    '1':'11,01,01,01,01',
+    '2':'1110,0001,0110,1000,1111',
+    '3':'1110,0001,0110,0001,1110',
+    '4':'0010,0110,1010,1111,0010',
+    '5':'1111,1000,1110,0001,1110',
+    '6':'0110,1000,1110,1001,0110',
+    '7':'1111,0001,0010,0100,0100',
+    '8':'0110,1001,0110,1001,0110',
+    '9':'0110,1001,0111,0001,0110',
+    '.':'0,0,0,0,1',
+    A:'0110,1001,1001,1111,1001',
+    B:'1110,1001,1110,1001,1110',
+    C:'011,100,100,100,011',
+    D:'1110,1001,1001,1001,1110',
+    E:'111,100,111,100,111',
+    F:'111,100,111,100,100',
+    G:'0111,1000,1011,1001,0111',
+    H:'1001,1001,1111,1001,1001',
+    I:'111,010,010,010,111',
+    K:'1001,1010,1100,1010,1001',
+    L:'100,100,100,100,111',
+    M:'10001,11011,10101,10001,10001',
+    N:'1001,1101,1011,1001,1001',
+    O:'0110,1001,1001,1001,0110',
+    P:'1110,1001,1001,1110,1000',
+    Q:'0110,1001,1001,1001,0110,0001',
+    R:'1110,1001,1001,1110,1001',
+    S:'0111,1000,0110,0001,1110',
+    T:'111,010,010,010,010',
+    U:'1001,1001,1001,1001,0110',
+    V:'1001,1001,1010,1010,0100',
+    W:'10001,10101,10101,10101,01010',
+    X:'1001,1001,0110,1001,1001',
+    Y:'1001,1001,0111,0001,0110',
+    Z:'111,001,010,100,111'};
+  var w = 0, h = 0;
+  var a = []
+  for (var ii = 0; ii < str.length; ii++) {a.push(letters[str[ii]].split(',')); w += a[ii][0].length*px; h = Math.max(h,a[ii].length)}
+  w += (str.length-1)*px;
+  h *= px;
+  w += w%2;
+  h += h%2;
+  txt_v.width = w;
+  txt_v.height = h;
+  txt_x.clearRect(0,0,w,h);
+  txt_x.fillStyle = context.fillStyle;
+  for (var ii = 0, ww = 0; ii < str.length; ii++) {
+    for (var yy = 0; yy < a[ii].length; yy++)
+      for (var xx = 0; xx < a[ii][yy].length; xx++)
+        if (a[ii][yy][xx] == '1') txt_x.fillRect(xx*px+ww+ii*px, yy*px, px, px);
+    ww += px*a[ii][0].length;
+  }
+  context.drawImage(txt_v,x-xalign*w/2,y-yalign*h/2);
+}
+
 /**
  * So that this actually runs on ios
  */
@@ -1330,31 +1397,10 @@ sl.preUpdate = function (now) {
 };
 
 sl.draw = function (now) {
-  $.x.clearAll();
-  $.x.save();
   $.x.fillStyle = '#30403b';
-  $.x.fillRect(
-    0,
-    0,
-    $.v.width,
-    $.v.height
-  );
-  $.x.restore();
-
-  text = ['', '.', '..', '...']
-
-  $.x.save();
-  $.x.textAlign = 'center';
-  $.x.textBaseline = 'center';
-  $.x.font = '18px f';
+  $.x.fillRect(0,0,280,390);
   $.x.fillStyle = '#8ed4a5';
-  $.x.lineWidth = 2;
-  $.x.fillText(
-    'LOADING'+text[Math.round(now/500)%4],
-    $.v.width / 2,
-    $.v.height / 2
-  );
-  $.x.restore();
+  tx($.x,2,'LOADING'+'...'.substr(0,Math.round(now/500)%4),140,195,1,1);
 };
 // three '/' represents comments for minification purposes
 var smm = (function () {
@@ -1364,7 +1410,6 @@ var smm = (function () {
   smm.initialize = function () {
     gfx = {
       a: 1, //press_space_visible
-      text_alpha: 1,
       f: 1,
       exiting: false,
       choice: 0,
@@ -1394,50 +1439,22 @@ var smm = (function () {
     );
     $.x.restore();
 
-    $.x.textAlign = 'center';
-    $.x.textBaseline = 'center';
-    $.x.font = '48px f';
     $.x.fillStyle = '#8ed4a5';
-    $.x.fillText(
-      'ZODIAC 13',
-      $.v.width / 2,
-      125
-    );
+    tx($.x,6,'ZODIAC 13',140,125,1,1);
 
     if (gfx.$S == 0 && gfx.a) {
-      $.x.save();
-      $.x.globalAlpha = gfx.text_alpha;
-      $.x.font = '24px f';
-      $.x.fillStyle = 'white';
-      $.x.fillText(
-        'PRESS   Z',
-        $.v.width / 2,
-        250
-      );
-      $.x.restore();
+      $.x.fillStyle = '#fff';
+      tx($.x,3,'PRESS   Z',140,250,1,1);
     }
     if (gfx.$S == 1) {
-      $.x.textAlign = 'center';
-      $.x.textBaseline = 'center';
-      $.x.font = '24px f';
       $.x.fillStyle = gfx.choice == 0 ? '#fff' : '#666';
-      $.x.fillText('GAME START', $.v.width/2, $.v.height/2+40);
+      tx($.x,3,'GAME START',140,230,1,1);
       $.x.fillStyle = gfx.choice == 1 ? '#fff' : '#666';
-      $.x.fillText('RECORDS', $.v.width/2, $.v.height/2+88);
-      $.x.restore();
+      tx($.x,3,'RECORDS',140,278,1,1);
     }
 
-    $.x.save();
-    $.x.globalAlpha = gfx.text_alpha;
-    $.x.font = '10px f';
     $.x.fillStyle = '#50605b';
-    $.x.lineWidth = 2;
-    $.x.fillText(
-      'HERMAN CHAU (KCAZE)',
-      $.v.width / 2,
-      380
-    );
-    $.x.restore();
+    tx($.x,1,'HERMAN CHAU (KCAZE)',140,380,1,1);
     $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
     $.x.fillRect(0,0,$.v.width,$.v.height);
   }
@@ -4202,9 +4219,6 @@ var resources = {
 };
 
 $W.onload = function() {
-  var fontHack = $D.getElementById('fontHack');
-  fontHack.parentNode.removeChild(fontHack);
-
   $.initialize('canvas');
   $.run(sl);
 
