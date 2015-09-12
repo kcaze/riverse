@@ -1597,12 +1597,12 @@ var scs = (function () {
         zodiac: function (data) {
           var $S = data.$S;
           for (var yy = 0; yy < 8; yy++) {
-            if ($S.board[yy][0].piece_type && $S.board[yy][0].piece_type != 1) {
-              $S.board[yy][0].piece_type = 1;
+            if ($S.board[yy][0].t && $S.board[yy][0].t != 1) {
+              $S.board[yy][0].t = 1;
               data.animateColorChange($S.board[yy][0].piece, 1);
             }
-            if ($S.board[yy][7].piece_type && $S.board[yy][7].piece_type != 1) {
-              $S.board[yy][7].piece_type = 1;
+            if ($S.board[yy][7].t && $S.board[yy][7].t != 1) {
+              $S.board[yy][7].t = 1;
               data.animateColorChange($S.board[yy][7].piece, 1);
             }
           }
@@ -1622,7 +1622,7 @@ var scs = (function () {
               row_pieces.push($S.board[row][xx].piece);
             }
             $S.board[row][xx] = {
-              piece_type: 0
+              t: 0
             };
           }
           data.animateClearPieces(row_pieces);
@@ -1638,9 +1638,9 @@ var scs = (function () {
           var board = data.$S.board;
           var pieces = [];
           for (var yy = 0; yy < 8; yy++) {
-            if (board[yy][0].piece_type) {
+            if (board[yy][0].t) {
               pieces.push(board[yy][0].piece);
-              board[yy][0].piece_type = 0;
+              board[yy][0].t = 0;
             }
           }
           data.animateClearPieces(pieces);
@@ -1659,16 +1659,16 @@ var scs = (function () {
           var board = data.$S.board;
           for (var yy = 7; yy >= 0; yy--) {
             if (leftCounter) {
-              if (board[yy][0].piece_type) {
+              if (board[yy][0].t) {
                 pieces.push(board[yy][0].piece);
-                board[yy][0].piece_type = 0;
+                board[yy][0].t = 0;
                 leftCounter--;
               }
             }
             if (rightCounter) {
-              if (board[yy][7].piece_type) {
+              if (board[yy][7].t) {
                 pieces.push(board[yy][7].piece);
-                board[yy][7].piece_type = 0;
+                board[yy][7].t = 0;
                 rightCounter--;
               }
             }
@@ -1689,7 +1689,7 @@ var scs = (function () {
           var piece_locs = [];
           for (var yy = 0; yy < 17; yy++) {
             for (var xx = 0; xx < 8; xx++) {
-              if (board[yy][xx].piece_type) {
+              if (board[yy][xx].t) {
                 piece_locs.push({x:xx,y:yy});
               }
             }
@@ -1700,7 +1700,7 @@ var scs = (function () {
             var xx = piece_locs[idx].x;
             var yy = piece_locs[idx].y;
             pieces.push(board[yy][xx].piece);
-            board[yy][xx].piece_type = 0;
+            board[yy][xx].t = 0;
             pieces.splice(idx, 1);
           }
           data.animateClearPieces(pieces);
@@ -1740,12 +1740,12 @@ var scs = (function () {
         zodiac: function (data) {
           var $S = data.$S;
           for (var yy = 0; yy < 17; yy++) {
-            if ($S.board[yy][0].piece_type && $S.board[yy][0].piece_type != 2) {
-              $S.board[yy][0].piece_type = 2;
+            if ($S.board[yy][0].t && $S.board[yy][0].t != 2) {
+              $S.board[yy][0].t = 2;
               data.animateColorChange($S.board[yy][0].piece, 2);
             }
-            if ($S.board[yy][7].piece_type && $S.board[yy][7].piece_type != 2) {
-              $S.board[yy][7].piece_type = 2;
+            if ($S.board[yy][7].t && $S.board[yy][7].t != 2) {
+              $S.board[yy][7].t = 2;
               data.animateColorChange($S.board[yy][7].piece, 2);
             }
           }
@@ -1773,9 +1773,9 @@ var scs = (function () {
           var board = data.$S.board;
           var pieces = [];
           for (var yy = 0; yy < 17; yy++) {
-            if (board[yy][7].piece_type) {
+            if (board[yy][7].t) {
               pieces.push(board[yy][7].piece);
-              board[yy][7].piece_type = 0;
+              board[yy][7].t = 0;
             }
           }
           data.animateClearPieces(pieces);
@@ -1795,7 +1795,7 @@ var scs = (function () {
               row_pieces.push($S.board[0][xx].piece);
             }
             $S.board[0][xx] = {
-              piece_type: 0
+              t: 0
             };
           }
           data.animateClearPieces(row_pieces);
@@ -2054,7 +2054,7 @@ var sg = (function () {
   /*^ Messy section of game logic */
   function lose() {
     bgm.mystop();
-    $S.alive = false;
+    $S.a = false;
 
     // copy over game picture at losing time
     g_x.clearRect(
@@ -2091,17 +2091,17 @@ var sg = (function () {
     var activateAbility = false;
 
     for (var yy = 0; yy < 17; yy++) {
-      var piece_type = $S.board[yy][0].piece_type;
+      var piece_type = $S.board[yy][0].t;
       var zodiacCounter = 0;
       var cleared = true;
       for (var xx = 0; xx < 8; xx++) {
-        if ($S.board[yy][xx].piece_type == 3) {
+        if ($S.board[yy][xx].t == 3) {
           zodiacCounter++;
         }
         // wow, much hack. this works because zodiac = 3, so it ANDs with
         // both 1 (black) and 2 (white) to be nonzero.
-        piece_type &= $S.board[yy][xx].piece_type;
-        if (piece_type == 0) {
+        piece_type &= $S.board[yy][xx].t;
+        if (!piece_type) {
           cleared = false;
           break;
         }
@@ -2137,7 +2137,7 @@ var sg = (function () {
     // update of underlying board
     for (xx = 0; xx < 8; xx++) {
       $S.board[row][xx] = {
-        piece_type:0
+        t:0
       };
     }
 
@@ -2185,10 +2185,10 @@ var sg = (function () {
   function drop() {
     for (var yy = 16; yy > 0; yy--) {
       for (var xx = 0; xx < 8; xx++) {
-        if ($S.board[yy][xx].piece_type && !$S.board[yy-1][xx].piece_type) {
+        if ($S.board[yy][xx].t && !$S.board[yy-1][xx].t) {
           $S.board[yy-1][xx] = $S.board[yy][xx];
           $S.board[yy][xx] = {
-            piece_type:0
+            t:0
           };
           var piece = $S.board[yy-1][xx].piece;
           (function (piece) {
@@ -2210,7 +2210,7 @@ var sg = (function () {
   function reverse(board_x, board_y) {
     var dxs = [1, -1, 0, 0, 1, 1, -1, -1];
     var dys = [0, 0, 1, -1, 1, -1, 1, -1];
-    var piece_type = $S.board[board_y][board_x].piece_type;
+    var piece_type = $S.board[board_y][board_x].t;
 
     if (piece_type == 0|| piece_type == 3) return
 
@@ -2225,9 +2225,9 @@ var sg = (function () {
              && 0 <= y
              && x < 8
              && y < 17) {
-        if ($S.board[y][x].piece_type ==0
-          || $S.board[y][x].piece_type == 3) break;
-        if ($S.board[y][x].piece_type == piece_type) {
+        if ($S.board[y][x].t ==0
+          || $S.board[y][x].t == 3) break;
+        if ($S.board[y][x].t == piece_type) {
           reverse = true;
           break;
         }
@@ -2239,7 +2239,7 @@ var sg = (function () {
       for (var jj = 1; jj < length; jj++) {
         var xx = board_x + jj * dx;
         var yy = board_y + jj * dy;
-        $S.board[yy][xx].piece_type = piece_type;
+        $S.board[yy][xx].t = piece_type;
         var piece = $S.board[yy][xx].piece;
         animateColorChange(piece, piece_type);
       }
@@ -2276,7 +2276,7 @@ var sg = (function () {
     for (var ii = 0; ii < 8; ii++) {
       var piece_type = randomPieceType([1,2]);
       new_row.push({
-        piece_type: piece_type,
+        t: piece_type,
         piece: makePiece(
           board_to_piece(ii),
           board_to_piece(-1),
@@ -2285,19 +2285,18 @@ var sg = (function () {
       });
     }
     // if all colors the same, change the color of last one
-    var piece_type = new_row[7].piece_type;
+    var piece_type = new_row[7].t;
     for (var ii = 0; ii < 8; ii++) {
-      piece_type ^= new_row[ii].piece_type;
+      piece_type ^= new_row[ii].t;
     }
     if (piece_type) {
-      new_row[7].piece_type ^= 3;
+      new_row[7].t ^= 3;
       new_row[7].piece.type ^= 3;
     }
 
     // update board
     for (var xx = 0; xx < 8; xx++) {
-      if ($S.board[16][xx].piece_type
-          != 0) {
+      if ($S.board[16][xx].t) {
         lose();
         return;
       }
@@ -2350,8 +2349,8 @@ var sg = (function () {
 
   // intialize $S
     $S = {
-      alive: true,
-      begin: $.performance.now(),
+      a: true,
+      b: $.performance.now(),
       board: [],
       can_restart: false,
       exiting: false,
@@ -2383,23 +2382,23 @@ var sg = (function () {
             piece_type
           );
           $S.board[yy].push({
-            piece_type: piece_type,
+            t: piece_type,
             piece: piece
           });
           // check if all colors if the same. if so, change the color of the last
           if (xx == 7) {
-            var piece_type = $S.board[yy][0].piece_type;
+            var piece_type = $S.board[yy][0].t;
             for (var xxx = 0; xxx < 8; xxx++) {
-              piece_type &= $S.board[yy][xxx].piece_type
+              piece_type &= $S.board[yy][xxx].t
             }
             if (piece_type) {
-              $S.board[yy][7].piece_type ^= 3;
+              $S.board[yy][7].t ^= 3;
               $S.board[yy][7].piece.type ^= 3;
             }
           }
         } else {
           $S.board[yy].push({
-            piece_type:0
+            t:0
           });
         }
       }
@@ -2441,7 +2440,7 @@ var sg = (function () {
         // draw aiming line
         var h;
         for (h = 16; h >= 0; h--) {
-          if ($S.board[h][this.x].piece_type != 0) {
+          if ($S.board[h][this.x].t) {
             break;
           }
         }
@@ -2489,8 +2488,7 @@ var sg = (function () {
       },
       next: [],
       shoot : function() {
-        if ($S.board[16][this.x].piece_type
-            != 0) {
+        if ($S.board[16][this.x].t) {
           lose();
           return;
         }
@@ -2521,7 +2519,7 @@ var sg = (function () {
 
         var target_y = 16;
         while (target_y > 0) {
-          if ($S.board[target_y-1][this.x].piece_type
+          if ($S.board[target_y-1][this.x].t
               != 0) {
             break;
           }
@@ -2533,7 +2531,7 @@ var sg = (function () {
           piece_type
         );
         $S.board[target_y][this.x] = {
-          piece_type: piece_type,
+          t: piece_type,
           piece: piece
         };
         reverse(this.x, target_y);
@@ -2699,7 +2697,7 @@ var sg = (function () {
         // pad with zeroes
     score_string = '0'.repeat(5 - score_string.length) + score_string;
     i_x.fillText(score_string, 48, 255);
-    var time = Math.floor(($.performance.now() - $S.begin)/1000);
+    var time = Math.floor(($.performance.now() - $S.b)/1000);
     var sec_string = '' + time%60;
     var min_string = '' + Math.floor(time/60);
     time_string = '0'.repeat(2-min_string.length) + min_string + ':'  + '0'.repeat(2-sec_string.length)+sec_string;
@@ -2736,7 +2734,7 @@ var sg = (function () {
   }
 
   function preUpdateAlive(now) {
-    mR('max_time', Math.floor((now - $S.begin)/1000));
+    mR('max_time', Math.floor((now - $S.b)/1000));
     for (var ii = 0; ii < $.events.length; ii++) {
       if ($.events[ii].$type == 'keypress' &&
           $.events[ii].which == $.K.X) {
@@ -2883,14 +2881,14 @@ var sg = (function () {
   sg.initialize = initialize;
   sg.draw = function (now) {
     if (!$.paused) {
-      $S.alive ? drawAlive(now) : drawDead(now);
+      $S.a ? drawAlive(now) : drawDead(now);
     } else {
       drawPause(now);
     }
   };
   sg.preUpdate = function (now) {
     if (!$.paused) {
-      $S.alive ? preUpdateAlive(now) : preUpdateDead(now);
+      $S.a ? preUpdateAlive(now) : preUpdateDead(now);
     } else {
       preUpdatePause(now);
     }
