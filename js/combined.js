@@ -1596,15 +1596,14 @@ var scs = (function () {
         u: gR('max_white_orbs') >= 13,
         zodiac: function (data) {
           var $S = data.$S;
-          var config = data.$c;
-          for (var yy = 0; yy < config.w; yy++) {
+          for (var yy = 0; yy < 8; yy++) {
             if ($S.board[yy][0].piece_type && $S.board[yy][0].piece_type != 1) {
               $S.board[yy][0].piece_type = 1;
               data.animateColorChange($S.board[yy][0].piece, 1);
             }
-            if ($S.board[yy][config.w-1].piece_type && $S.board[yy][config.w-1].piece_type != 1) {
-              $S.board[yy][config.w-1].piece_type = 1;
-              data.animateColorChange($S.board[yy][config.w-1].piece, 1);
+            if ($S.board[yy][7].piece_type && $S.board[yy][7].piece_type != 1) {
+              $S.board[yy][7].piece_type = 1;
+              data.animateColorChange($S.board[yy][7].piece, 1);
             }
           }
         }
@@ -1616,16 +1615,12 @@ var scs = (function () {
         u: true,
         zodiac: function (data) {
           var $S = data.$S;
-          var config = data.$c;
-          var row = data.row;
-          row--;
+          var row = data.row-1;
           var row_pieces = [];
-          for (var xx = 0; xx < config.w; xx++) {
+          for (var xx = 0; xx < 8; xx++) {
             if ($S.board[row][xx].piece) {
               row_pieces.push($S.board[row][xx].piece);
             }
-          }
-          for (xx = 0; xx < config.w; xx++) {
             $S.board[row][xx] = {
               piece_type: 0
             };
@@ -1642,7 +1637,7 @@ var scs = (function () {
         zodiac: function (data) {
           var board = data.$S.board;
           var pieces = [];
-          for (var yy = 0; yy < data.$c.w; yy++) {
+          for (var yy = 0; yy < 8; yy++) {
             if (board[yy][0].piece_type) {
               pieces.push(board[yy][0].piece);
               board[yy][0].piece_type = 0;
@@ -1662,8 +1657,7 @@ var scs = (function () {
           var rightCounter = 4;
           var pieces = [];
           var board = data.$S.board;
-          var width = data.$c.w;
-          for (var yy = data.$c.w - 1; yy >= 0; yy--) {
+          for (var yy = 7; yy >= 0; yy--) {
             if (leftCounter) {
               if (board[yy][0].piece_type) {
                 pieces.push(board[yy][0].piece);
@@ -1672,9 +1666,9 @@ var scs = (function () {
               }
             }
             if (rightCounter) {
-              if (board[yy][width-1].piece_type) {
-                pieces.push(board[yy][width-1].piece);
-                board[yy][width-1].piece_type = 0;
+              if (board[yy][7].piece_type) {
+                pieces.push(board[yy][7].piece);
+                board[yy][7].piece_type = 0;
                 rightCounter--;
               }
             }
@@ -1693,8 +1687,8 @@ var scs = (function () {
           var count = 0;
           var pieces = [];
           var piece_locs = [];
-          for (var yy = 0; yy < data.$c.w; yy++) {
-            for (var xx = 0; xx < data.$c.w; xx++) {
+          for (var yy = 0; yy < 17; yy++) {
+            for (var xx = 0; xx < 8; xx++) {
               if (board[yy][xx].piece_type) {
                 piece_locs.push({x:xx,y:yy});
               }
@@ -1745,15 +1739,14 @@ var scs = (function () {
         u: gR('max_black_orbs') >= 13,
         zodiac: function (data) {
           var $S = data.$S;
-          var config = data.$c;
-          for (var yy = 0; yy < $c.w; yy++) {
+          for (var yy = 0; yy < 17; yy++) {
             if ($S.board[yy][0].piece_type && $S.board[yy][0].piece_type != 2) {
               $S.board[yy][0].piece_type = 2;
               data.animateColorChange($S.board[yy][0].piece, 2);
             }
-            if ($S.board[yy][config.w-1].piece_type && $S.board[yy][config.w-1].piece_type != 2) {
-              $S.board[yy][config.w-1].piece_type = 2;
-              data.animateColorChange($S.board[yy][config.w-1].piece, 2);
+            if ($S.board[yy][7].piece_type && $S.board[yy][7].piece_type != 2) {
+              $S.board[yy][7].piece_type = 2;
+              data.animateColorChange($S.board[yy][7].piece, 2);
             }
           }
         }
@@ -1779,11 +1772,10 @@ var scs = (function () {
         zodiac: function (data) {
           var board = data.$S.board;
           var pieces = [];
-          var width = data.$S.w;
-          for (var yy = 0; yy < data.$c.w; yy++) {
-            if (board[yy][width-1].piece_type) {
-              pieces.push(board[yy][width-1].piece);
-              board[yy][width-1].piece_type = 0;
+          for (var yy = 0; yy < 17; yy++) {
+            if (board[yy][7].piece_type) {
+              pieces.push(board[yy][7].piece);
+              board[yy][7].piece_type = 0;
             }
           }
           data.animateClearPieces(pieces);
@@ -1797,9 +1789,8 @@ var scs = (function () {
         u: gR('max_score') >= 13,
         zodiac: function (data) {
           var $S = data.$S;
-          var config = data.$c;
           var row_pieces = [];
-          for (var xx = 0; xx < config.w; xx++) {
+          for (var xx = 0; xx < 8; xx++) {
             if ($S.board[0][xx].piece) {
               row_pieces.push($S.board[0][xx].piece);
             }
@@ -1967,18 +1958,11 @@ var scs = (function () {
 var previous_time;
 
 var sg = (function () {
-  var $c = {
-    w: 8, // board_width
-    h: 17, // board_height
-    g: 20, // grid_size
-    next_length: 8,
-    next_row_interval: 20000
-  };
   var b_v = $D.createElement('canvas');
   var i_v = $D.createElement('canvas');
   var p_v = $D.createElement('canvas');
   var g_v = $D.createElement('canvas');
-  b_v.width = $c.w*$c.g;
+  b_v.width = 160;
   b_v.height = 390;
   i_v.width = 96;
   i_v.height = 390;
@@ -2110,7 +2094,7 @@ var sg = (function () {
       var piece_type = $S.board[yy][0].piece_type;
       var zodiacCounter = 0;
       var cleared = true;
-      for (var xx = 0; xx < $c.w; xx++) {
+      for (var xx = 0; xx < 8; xx++) {
         if ($S.board[yy][xx].piece_type == 3) {
           zodiacCounter++;
         }
@@ -2146,12 +2130,12 @@ var sg = (function () {
 
     // capture row pieces before we update board so we can animate them
     var row_pieces = [];
-    for (var xx = 0; xx < $c.w; xx++) {
+    for (var xx = 0; xx < 8; xx++) {
       row_pieces.push($S.board[row][xx].piece);
     }
 
     // update of underlying board
-    for (xx = 0; xx < $c.w; xx++) {
+    for (xx = 0; xx < 8; xx++) {
       $S.board[row][xx] = {
         piece_type:0
       };
@@ -2169,7 +2153,6 @@ var sg = (function () {
       $S: $S,
       animateClearPieces: animateClearPieces,
       animateColorChange: animateColorChange,
-      $c: $c,
       incrementScore: incrementScore,
       row: row
     });
@@ -2214,7 +2197,7 @@ var sg = (function () {
               return $.t({
                 o: piece,
                 p: 'y',
-                v: piece.y - $c.g,
+                v: piece.y - 20,
                 d: 100
               });
             });
@@ -2290,7 +2273,7 @@ var sg = (function () {
   function addRow() {
     $.r.sounds['sfx_drop'].play();
     var new_row = [];
-    for (var ii = 0; ii < $c.w; ii++) {
+    for (var ii = 0; ii < 8; ii++) {
       var piece_type = randomPieceType([1,2]);
       new_row.push({
         piece_type: piece_type,
@@ -2302,13 +2285,13 @@ var sg = (function () {
       });
     }
     // if all colors the same, change the color of last one
-    var piece_type = new_row[$c.w-1].piece_type;
-    for (var ii = 0; ii < $c.w; ii++) {
+    var piece_type = new_row[7].piece_type;
+    for (var ii = 0; ii < 8; ii++) {
       piece_type ^= new_row[ii].piece_type;
     }
     if (piece_type) {
-      new_row[$c.w-1].piece_type ^= 3;
-      new_row[$c.w-1].piece.type ^= 3;
+      new_row[7].piece_type ^= 3;
+      new_row[7].piece.type ^= 3;
     }
 
     // update board
@@ -2333,7 +2316,7 @@ var sg = (function () {
           return $.t({
             o: piece,
             p: 'y',
-            v: piece.y + $c.g,
+            v: piece.y + 20,
             r: 1
           });
         });
@@ -2375,7 +2358,7 @@ var sg = (function () {
       score: 0,
       level: 1,
       rows_cleared: 0,
-      next_row_interval: $c.next_row_interval,
+      next_row_interval: 20000,
       next_row_time: 0,
       next_row_time_diff: 0,
       next_row_freeze: false,
@@ -2404,14 +2387,14 @@ var sg = (function () {
             piece: piece
           });
           // check if all colors if the same. if so, change the color of the last
-          if (xx == $c.w - 1) {
+          if (xx == 7) {
             var piece_type = $S.board[yy][0].piece_type;
-            for (var xxx = 0; xxx < $c.w; xxx++) {
+            for (var xxx = 0; xxx < 8; xxx++) {
               piece_type &= $S.board[yy][xxx].piece_type
             }
             if (piece_type) {
-              $S.board[yy][$c.w - 1].piece_type ^= 3;
-              $S.board[yy][$c.w - 1].piece.type ^= 3;
+              $S.board[yy][7].piece_type ^= 3;
+              $S.board[yy][7].piece.type ^= 3;
             }
           }
         } else {
@@ -2723,10 +2706,10 @@ var sg = (function () {
     i_x.fillText(time_string, 48, 377);
 
       // draw sprites
-    for (var ii = 0; ii < $c.next_length; ii++) {
+    for (var ii = 0; ii < 8; ii++) {
       i_x.drawImage(
         pieceTypeImage($S.player.next[ii]),
-        9+(ii%4)*$c.g,
+        9+(ii%4)*20,
         148 + Math.floor(ii/4)*23
       );
     }
