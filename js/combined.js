@@ -2106,7 +2106,7 @@ var sg = (function () {
     var row;
     var activateAbility = false;
 
-    for (var yy = 0; yy < $c.h; yy++) {
+    for (var yy = 0; yy < 17; yy++) {
       var piece_type = $S.board[yy][0].piece_type;
       var zodiacCounter = 0;
       var cleared = true;
@@ -2200,8 +2200,8 @@ var sg = (function () {
   }
 
   function drop() {
-    for (var yy = $c.h-1; yy > 0; yy--) {
-      for (var xx = 0; xx < $c.w; xx++) {
+    for (var yy = 16; yy > 0; yy--) {
+      for (var xx = 0; xx < 8; xx++) {
         if ($S.board[yy][xx].piece_type && !$S.board[yy-1][xx].piece_type) {
           $S.board[yy-1][xx] = $S.board[yy][xx];
           $S.board[yy][xx] = {
@@ -2240,8 +2240,8 @@ var sg = (function () {
       var y = board_y + length * dy;
       while (0 <= x
              && 0 <= y
-             && x < $c.w
-             && y < $c.h) {
+             && x < 8
+             && y < 17) {
         if ($S.board[y][x].piece_type ==0
           || $S.board[y][x].piece_type == 3) break;
         if ($S.board[y][x].piece_type == piece_type) {
@@ -2312,13 +2312,13 @@ var sg = (function () {
     }
 
     // update board
-    for (var xx = 0; xx < $c.w; xx++) {
-      if ($S.board[$c.h-1][xx].piece_type
+    for (var xx = 0; xx < 8; xx++) {
+      if ($S.board[16][xx].piece_type
           != 0) {
         lose();
         return;
       }
-      for (var yy = $c.h-1; yy > 0; yy--) {
+      for (var yy = 16; yy > 0; yy--) {
         $S.board[yy][xx] = $S.board[yy-1][xx];
       }
       $S.board[0][xx] = new_row[xx];
@@ -2388,9 +2388,9 @@ var sg = (function () {
     };
     $S.next_row_time = $.performance.now() + $S.next_row_interval;
     // initialize board
-    for (var yy = 0; yy < $c.h; yy++) {
+    for (var yy = 0; yy < 17; yy++) {
       $S.board.push([]);
-      for (var xx = 0; xx < $c.w; xx++) {
+      for (var xx = 0; xx < 8; xx++) {
         // initialize board to have two random rows
         if (yy < 2) {
           var piece_type = randomPieceType([1,2]);
@@ -2446,9 +2446,9 @@ var sg = (function () {
           this.animate_timer = now;
         }
       },
-      x: Math.floor($c.w/2),
-      sprite_x: 4+Math.floor($c.w/2)*$c.g,
-      sprite_y: $c.h*$c.g+23,
+      x: 4,
+      sprite_x: 84,
+      sprite_y: 363,
       a: blankPromise(),
       draw: function (context) {
         context.drawImage(
@@ -2457,7 +2457,7 @@ var sg = (function () {
           this.sprite_y);
         // draw aiming line
         var h;
-        for (h = $c.h-1; h >= 0; h--) {
+        for (h = 16; h >= 0; h--) {
           if ($S.board[h][this.x].piece_type != 0) {
             break;
           }
@@ -2469,12 +2469,12 @@ var sg = (function () {
         b_x.strokeStyle = '#8ed4a5';
         b_x.beginPath();
         b_x.moveTo(
-          this.sprite_x+$c.g/2-5,
+          this.sprite_x+5,
           this.sprite_y-8
         );
         b_x.lineTo(
-          this.sprite_x+$c.g/2-5,
-          (h+1) * $c.g + 20
+          this.sprite_x+5,
+          (h+1) * 20 + 20
         );
         b_x.stroke();
         b_x.restore();
@@ -2490,13 +2490,13 @@ var sg = (function () {
         }
       },
       move: function (dx) {
-        if (this.x+dx >= 0 && this.x+dx < $c.w) {
+        if (this.x+dx >= 0 && this.x+dx < 8) {
           this.x += dx;
           this.a = this.a.then(function () {
             return $.t({
               o: this,
               p: 'sprite_x',
-              v: this.sprite_x + dx*$c.g,
+              v: this.sprite_x + dx*20,
               r: 0.7
             }).then(function () {
               return blankPromise();
@@ -2506,7 +2506,7 @@ var sg = (function () {
       },
       next: [],
       shoot : function() {
-        if ($S.board[$c.h-1][this.x].piece_type
+        if ($S.board[16][this.x].piece_type
             != 0) {
           lose();
           return;
@@ -2536,7 +2536,7 @@ var sg = (function () {
         };
         mR(pieceTypeRecordMap[piece_type], $S.consecutive[piece_type]);
 
-        var target_y = $c.h-1;
+        var target_y = 16;
         while (target_y > 0) {
           if ($S.board[target_y-1][this.x].piece_type
               != 0) {
@@ -2545,8 +2545,8 @@ var sg = (function () {
           target_y--;
         }
         var piece = makePiece(
-          this.x*$c.g + 1,
-          ($c.h-1)*$c.g + 1,
+          this.x*20 + 1,
+          321,
           piece_type
         );
         $S.board[target_y][this.x] = {
@@ -2606,11 +2606,11 @@ var sg = (function () {
     b_x.beginPath();
     b_x.moveTo(
       0,
-      $c.h * $c.g + 20
+      360
     );
     b_x.lineTo(
-      $c.w * $c.g,
-      $c.h * $c.g + 20
+      160,
+      360
     );
     b_x.stroke();
     b_x.restore();
