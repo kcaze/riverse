@@ -3,35 +3,35 @@
 //A = AudioGenerator
 //S = SoundGenerator
 
-// a -- osc2_waveform
-// b -- osc2_xenv
-// c -- fx_pan_amt
-// d -- osc2_vol
-// e -- lfo_amt
-// f -- lfo_osc1_freq
-// g -- noise_fader
-// h -- osc1_detune
-// i -- osc2_oct
-// j -- fx_filter
-// k -- fx_resonance
-// l -- fx_pan_freq
-// m -- osc2_det
-// n -- fx_delay_time
-// o -- fx_freq
-// p -- lfo_waveform
-// r -- osc1_vol
-// s -- fx_delay_amt
-// t -- osc1_waveform
-// u -- lfo_fx_freq
-// v -- osc2_detune
-// w -- env_release
-// x -- env_sustain
-// y -- osc1_xenv
-// z -- lfo_freq
-// _ -- env_master
-// aa -- osc1_det
-// ab -- env_attack
 // ac -- osc1_oct
+// aa -- osc1_det
+// h -- osc1_detune
+// y -- osc1_xenv
+// r -- osc1_vol
+// t -- osc1_waveform
+// i -- osc2_oct
+// m -- osc2_det
+// v -- osc2_detune
+// b -- osc2_xenv
+// d -- osc2_vol
+// a -- osc2_waveform
+// g -- noise_fader
+// ab -- env_attack
+// x -- env_sustain
+// w -- env_release
+// _ -- env_master
+// j -- fx_filter
+// o -- fx_freq
+// k -- fx_resonance
+// n -- fx_delay_time
+// s -- fx_delay_amt
+// l -- fx_pan_freq
+// c -- fx_pan_amt
+// f -- lfo_osc1_freq
+// u -- lfo_fx_freq
+// z -- lfo_freq
+// e -- lfo_amt
+// p -- lfo_waveform
 
 
 // NOTE: This is an altered version of Sonant-X by Herman Chau for
