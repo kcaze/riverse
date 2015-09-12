@@ -21,7 +21,6 @@ if (!String.prototype.repeat) {
   }
 }
 document.addEventListener('touchstart', function(event) {
-  console.log("Ran ios audio hack");
   /* EXTREMELY DUMB HACK TO GET AUDIO WORKING ON IOS */
 	var buffer = kz.audio_context.createBuffer(1, 1, 22050);
 	var source = kz.audio_context.createBufferSource();

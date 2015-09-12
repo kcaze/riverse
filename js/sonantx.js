@@ -1,4 +1,35 @@
-// NOTE: This is an altered version of Sonant-X by Herman Chau for 
+// a -- osc2_waveform
+// b -- osc2_xenv
+// c -- fx_pan_amt
+// d -- osc2_vol
+// e -- lfo_amt
+// f -- lfo_osc1_freq
+// g -- noise_fader
+// h -- osc1_detune
+// i -- osc2_oct
+// j -- fx_filter
+// k -- fx_resonance
+// l -- fx_pan_freq
+// m -- osc2_det
+// n -- fx_delay_time
+// o -- fx_freq
+// p -- lfo_waveform
+// r -- osc1_vol
+// s -- fx_delay_amt
+// t -- osc1_waveform
+// u -- lfo_fx_freq
+// v -- osc2_detune
+// w -- env_release
+// x -- env_sustain
+// y -- osc1_xenv
+// z -- lfo_freq
+// _ -- env_master
+// aa -- osc1_det
+// ab -- env_attack
+// ac -- osc1_oct
+
+
+// NOTE: This is an altered version of Sonant-X by Herman Chau for
 // use in js13kgames.
 //
 // Sonant-X
@@ -105,8 +136,8 @@ function genBuffer(waveSize, callBack) {
 }
 
 function applyDelay(chnBuf, waveSamples, instr, rowLen, callBack) {
-    var p1 = (instr.fx_delay_time * rowLen) >> 1;
-    var t1 = instr.fx_delay_amt / 255;
+    var p1 = (instr.n * rowLen) >> 1;
+    var t1 = instr.s / 255;
 
     var n1 = 0;
     var iterate = function() {
@@ -227,14 +258,14 @@ sonantx.SoundGenerator = function(instr, rowLen) {
     this.instr = instr;
     this.rowLen = rowLen || 5605;
 
-    this.osc_lfo = oscillators[instr.lfo_waveform];
-    this.osc1 = oscillators[instr.osc1_waveform];
-    this.osc2 = oscillators[instr.osc2_waveform];
-    this.attack = instr.env_attack;
-    this.sustain = instr.env_sustain;
-    this.release = instr.env_release;
-    this.panFreq = Math.pow(2, instr.fx_pan_freq - 8) / this.rowLen;
-    this.lfoFreq = Math.pow(2, instr.lfo_freq - 8) / this.rowLen;
+    this.osc_lfo = oscillators[instr.p];
+    this.osc1 = oscillators[instr.t];
+    this.osc2 = oscillators[instr.a];
+    this.attack = instr.ab;
+    this.sustain = instr.x;
+    this.release = instr.w;
+    this.panFreq = Math.pow(2, instr.l - 8) / this.rowLen;
+    this.lfoFreq = Math.pow(2, instr.z - 8) / this.rowLen;
 };
 sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
     var marker = new Date();
@@ -242,11 +273,11 @@ sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
     var c2 = 0;
 
     // Precalculate frequencues
-    var o1t = getnotefreq(n + (this.instr.osc1_oct - 8) * 12 + this.instr.osc1_det) * (1 + 0.0008 * this.instr.osc1_detune);
-    var o2t = getnotefreq(n + (this.instr.osc2_oct - 8) * 12 + this.instr.osc2_det) * (1 + 0.0008 * this.instr.osc2_detune);
+    var o1t = getnotefreq(n + (this.instr.ac - 8) * 12 + this.instr.aa) * (1 + 0.0008 * this.instr.h);
+    var o2t = getnotefreq(n + (this.instr.i - 8) * 12 + this.instr.m) * (1 + 0.0008 * this.instr.v);
 
     // State variable init
-    var q = this.instr.fx_resonance / 255;
+    var q = this.instr.k / 255;
     var low = 0;
     var band = 0;
     for (var j = this.attack + this.sustain + this.release - 1; j >= 0; --j)
@@ -254,7 +285,7 @@ sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
         var k = j + currentpos;
 
         // LFO
-        var lfor = this.osc_lfo(k * this.lfoFreq) * this.instr.lfo_amt / 512 + 0.5;
+        var lfor = this.osc_lfo(k * this.lfoFreq) * this.instr.e / 512 + 0.5;
 
         // Envelope
         var e = 1;
@@ -265,30 +296,30 @@ sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
 
         // Oscillator 1
         var t = o1t;
-        if(this.instr.lfo_osc1_freq) t += lfor;
-        if(this.instr.osc1_xenv) t *= e * e;
+        if(this.instr.f) t += lfor;
+        if(this.instr.y) t *= e * e;
         c1 += t;
-        var rsample = this.osc1(c1) * this.instr.osc1_vol;
+        var rsample = this.osc1(c1) * this.instr.r;
 
         // Oscillator 2
         t = o2t;
-        if(this.instr.osc2_xenv) t *= e * e;
+        if(this.instr.b) t *= e * e;
         c2 += t;
-        rsample += this.osc2(c2) * this.instr.osc2_vol;
+        rsample += this.osc2(c2) * this.instr.d;
 
         // Noise oscillator
-        if(this.instr.noise_fader) rsample += (2*Math.random()-1) * this.instr.noise_fader * e;
+        if(this.instr.g) rsample += (2*Math.random()-1) * this.instr.g * e;
 
         rsample *= e / 255;
 
         // State variable filter
-        var f = this.instr.fx_freq;
-        if(this.instr.lfo_fx_freq) f *= lfor;
+        var f = this.instr.o;
+        if(this.instr.u) f *= lfor;
         f = 1.5 * Math.sin(f * 3.141592 / WAVE_SPS);
         low += f * band;
         var high = q * (rsample - band) - low;
         band += f * high;
-        switch(this.instr.fx_filter)
+        switch(this.instr.j)
         {
             case 1: // Hipass
                 rsample = high;
@@ -306,8 +337,8 @@ sonantx.SoundGenerator.prototype.genSound = function(n, chnBuf, currentpos) {
         }
 
         // Panning & master volume
-        t = osc_sin(k * this.panFreq) * this.instr.fx_pan_amt / 512 + 0.5;
-        rsample *= 39 * this.instr.env_master;
+        t = osc_sin(k * this.panFreq) * this.instr.c / 512 + 0.5;
+        rsample *= 39 * this.instr._;
 
         // Add to 16-bit channel buffer
         k = k * 4;

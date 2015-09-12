@@ -60,7 +60,6 @@ kz.loadSounds = function (queue) {
     promises.push(new Promise(function(resolve) {
       var name = key;
       queue[key].loader(queue[key].data, function(buffer) {
-        console.log("Loaded ", name);
         sounds[name] = {
           play: function (loop) {
             loop = typeof loop == undefined ? false : loop;
@@ -292,7 +291,6 @@ kz.initialize = function (canvas_id) {
         current: {x: touch.screenX, y: touch.screenY}
       };
     }
-    console.log('touchstart:', event, JSON.stringify(kz.TOUCHES));
   });
 
   document.addEventListener('touchmove', function(event) {
@@ -302,7 +300,6 @@ kz.initialize = function (canvas_id) {
       if (!kz.TOUCHES[touch.identifier]) continue;
       kz.TOUCHES[touch.identifier].current = {x: touch.screenX, y:touch.screenY};
     }
-    console.log('touchmove:', event, JSON.stringify(kz.TOUCHES));
   });
 
   document.addEventListener('touchend', function(event) {
@@ -355,7 +352,6 @@ kz.initialize = function (canvas_id) {
 
       delete kz.TOUCHES[id];
     }
-    console.log('touchend:', event, JSON.stringify(kz.TOUCHES));
   });
 };
 

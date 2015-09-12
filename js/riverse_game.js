@@ -114,7 +114,6 @@ var scene_game = (function () {
   function lose() {
     bgm.mystop();
     state.alive = false;
-    console.log('Lost :(');
 
     // copy over game picture at losing time
     gameover_context.clearRect(
@@ -186,7 +185,6 @@ var scene_game = (function () {
       state.level += 1;
       maxRecord('max_level', state.level);
       state.next_row_interval = Math.max(3000, state.next_row_interval - 750);
-      console.log(state.next_row_interval);
     }
 
     // capture row pieces before we update board so we can animate them
@@ -581,7 +579,6 @@ var scene_game = (function () {
         // update consecutive counts
         if (state.consecutive[piece_type]) {
           state.consecutive[piece_type]++;
-          console.log("Consecutives: ", state.consecutive);
         } else {
           state.consecutive[PieceTypes.Red] = 0;
           state.consecutive[PieceTypes.Blue] = 0;

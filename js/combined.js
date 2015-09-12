@@ -1,4 +1,4 @@
-// NOTE: This is an altered version of Sonant-X by Herman Chau for 
+// NOTE: This is an altered version of Sonant-X by Herman Chau for
 // use in js13kgames.
 //
 // Sonant-X
@@ -1696,7 +1696,7 @@ var scene_character_select = (function () {
         description: 'ENDS TURN BLACK',
         name: 'OX',
         image: kz.resources.images['character_ox'],
-        unlock_message: '13 BLACK ORBS IN A ROW', 
+        unlock_message: '13 BLACK ORBS IN A ROW',
         unlocked: getRecord('max_black_orbs') >= 13,
         zodiac: function (data) {
           var state = data.state;
@@ -1779,7 +1779,7 @@ var scene_character_select = (function () {
       },
       {
         description: 'SCORE +LEVEL/3',
-        name: 'TIGER', 
+        name: 'TIGER',
         image: kz.resources.images['character_tiger'],
         unlock_message: '169 ROWS CLEARED',
         unlocked: getRecord('total_rows') >= 169,
@@ -2124,8 +2124,8 @@ var scene_game = (function () {
     // activate zodiac
     if (!activateAbility) return;
     state.zodiacs++;
-    incrementRecord('total_zodiac', 1); 
-    maxRecord('total_zodiac', state.zodiacs); 
+    incrementRecord('total_zodiac', 1);
+    maxRecord('total_zodiac', state.zodiacs);
     character.zodiac({
       state: state,
       animateClearPieces: animateClearPieces,
@@ -4287,7 +4287,7 @@ window.onload = function() {
  */
 (function() {
   var records = [
-    'play_count', // done 
+    'play_count', // done
     'total_time', // done
     'max_score', // done
     'max_level', // done
@@ -4309,17 +4309,16 @@ window.onload = function() {
 
 function incrementRecord(name, value) {
   localStorage.setItem(
-    name, 
+    name,
     parseInt(localStorage.getItem(name), 10) + value);
 }
 
 function maxRecord(name, value) {
   localStorage.setItem(
-    name, 
+    name,
     Math.max(parseInt(localStorage.getItem(name), 10), value));
 }
 
 function getRecord(name) {
   return parseInt(localStorage.getItem(name),10);
 }
-
