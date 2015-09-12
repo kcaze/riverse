@@ -12,10 +12,10 @@ var scene_character_select = (function () {
       f: 1 //fadeAlpha
     }
     kz.t({
-      object: state,
-      property: 'f',
-      value: 0,
-      duration: 100});
+      o: state,
+      p: 'f',
+      v: 0,
+      d: 100});
     characters = [
       {
         d: 'ENDS TURN WHITE',
@@ -364,10 +364,10 @@ var scene_character_select = (function () {
             character = characters[state.s];
             state.exiting = true;
             kz.t({
-              object: state,
-              property: 'f',
-              value: 1,
-              duration: 100
+              o: state,
+              p: 'f',
+              v: 1,
+              d: 100
             }).then(function () {
               kz.run(scene_game);
             });
@@ -377,10 +377,10 @@ var scene_character_select = (function () {
         } else if (kz.events[ii].which == kz.K.X) {
           state.exiting = true;
           kz.t({
-            object: state,
-            property: 'f',
-            value: 1,
-            duration: 100
+            o: state,
+            p: 'f',
+            v: 1,
+            d: 100
           }).then(function () {
             kz.run(scene_main_menu);
           });

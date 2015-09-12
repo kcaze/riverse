@@ -8,10 +8,10 @@ var scene_records = (function () {
       fadeAlpha: 1
     };
     kz.t({
-      object: graphics,
-      property: 'fadeAlpha',
-      value: 0,
-      duration: 100
+      o: graphics,
+      p: 'fadeAlpha',
+      v: 0,
+      d: 100
     });
     state = {
       exiting: false
@@ -71,10 +71,10 @@ var scene_records = (function () {
         if (kz.events[ii].which == kz.K.X || kz.events[ii].which == kz.K.Z) {
           state.exiting = true;
           kz.t({
-            object: graphics,
-            property: 'fadeAlpha',
-            value: 1,
-            duration: 100
+            o: graphics,
+            p: 'fadeAlpha',
+            v: 1,
+            d: 100
           }).then(function () {
             kz.run(scene_main_menu);
           });

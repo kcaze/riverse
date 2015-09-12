@@ -135,21 +135,21 @@ kz.T = {};
  */
 kz.t = function (tween) {
   var start_time = performance.now();
-  var old_value = tween.object[tween.property];
-  var new_value = tween.value;
-  var duration = tween.duration
-    ? tween.duration
-    : Math.abs(new_value - old_value) / tween.rate;
+  var old_value = tween.o[tween.p];
+  var new_value = tween.v;
+  var duration = tween.d
+    ? tween.d
+    : Math.abs(new_value - old_value) / tween.r;
 
   return new Promise(function (resolve) {
     function update() {
       var time_elapsed = performance.now() - start_time;
       var t = time_elapsed / duration;
       if (t >= 1) {
-        tween.object[tween.property] = new_value;
+        tween.o[tween.p] = new_value;
         resolve();
       } else {
-        tween.object[tween.property] = t * new_value + (1 - t) * old_value;
+        tween.o[tween.p] = t * new_value + (1 - t) * old_value;
         $W.requestAnimationFrame(update);
       }
     }

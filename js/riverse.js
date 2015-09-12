@@ -2,12 +2,12 @@
 // $x -- sonantx
 
 
-function loadJSFXR(data, resolve) {
+function lj(data, resolve) { //loadJSFXR
   var buff = base64ToArrayBuffer(data.substr(22));
   kz.a.decodeAudioData(buff, resolve);
 }
 
-function loadSonant(data, resolve) {
+function ls(data, resolve) { //loadsonant
   var songGen = new $x.M(data);
   songGen.createAudioBuffer(resolve);
 }
@@ -39,26 +39,26 @@ var resources = {
   sounds: {
     'sfx_shoot': {
       data: jsfxr([0,,0.1881,,0.3164,0.8042,0.2,-0.2915,,,,,,0.4661,0.156,,0.1754,-0.182,1,,,0.1755,,0.5]),
-      loader: loadJSFXR
+      loader: lj
     },
     'sfx_clear': {
       data: jsfxr([1,,0.06,0.4848,0.4938,0.8917,,,,,,,,,,,,,1,,,,,0.49]),
-      loader: loadJSFXR
+      loader: lj
     },
     'sfx_select': {
       data: jsfxr([0,,0.0538,0.4336,0.3186,0.4583,,,,,,0.5712,0.5566,,,,,,1,,,,,0.5]),
-      loader: loadJSFXR
+      loader: lj
     },
     'sfx_denied': {
       data: jsfxr([0,,0.24,0.51,0.3829,0.15,,,,,,,,,,,,,1,,,,,0.5]),
-      loader: loadJSFXR
+      loader: lj
     },
     'sfx_drop': {
       data: jsfxr([1,,0.0468,,0.2103,0.4979,,-0.4519,,,,,,,,,,,1,,,,,0.83]),
-      loader: loadJSFXR
+      loader: lj
     },
     'bgm_game': {
-      loader: loadSonant,
+      loader: ls,
       data:
       {
     "endPattern": 382,

@@ -47,19 +47,19 @@ var scene_game = (function () {
       0
     );
     kz.t({
-      object: graphics,
-      property: 'pause_alpha',
-      value: 0.8,
-      duration: 50
+      o: graphics,
+      p: 'pause_alpha',
+      v: 0.8,
+      d: 50
     });
   }
 
   function resume() {
     kz.t({
-      object: graphics,
-      property: 'pause_alpha',
-      value: 0,
-      duration: 50
+      o: graphics,
+      p: 'pause_alpha',
+      v: 0,
+      d: 50
     }).then(kz.resume);
   }
 
@@ -122,16 +122,16 @@ var scene_game = (function () {
     );
     // fade to black
     kz.t({
-      object: graphics,
-      property: 'gameover_background_alpha',
-      value: 1,
-      duration: 1000
+      o: graphics,
+      p: 'gameover_background_alpha',
+      v: 1,
+      d: 1000
     }).then(function () {
       return kz.t({
-        object: graphics,
-        property: 'gameover_text_alpha',
-        value: 1,
-        duration: 1000
+        o: graphics,
+        p: 'gameover_text_alpha',
+        v: 1,
+        d: 1000
       });
     }).then(function () {
       state.can_restart = true;
@@ -223,10 +223,10 @@ var scene_game = (function () {
     pieces.forEach(function (piece) {
       var piecePromise = promise.then(function () {
         return kz.t({
-          object: piece,
-          property: 'alpha',
-          value: 0,
-          duration: 100
+          o: piece,
+          p: 'alpha',
+          v: 0,
+          d: 100
         }).then(function () {
           piece.destroy();
         });
@@ -248,10 +248,10 @@ var scene_game = (function () {
             // ensure we start the animation AFTER the row fades away
             piece.a = piece.a.then(function () {
               return kz.t({
-                object: piece,
-                property: 'y',
-                value: piece.y - $c.g,
-                duration: 100
+                o: piece,
+                p: 'y',
+                v: piece.y - $c.g,
+                d: 100
               });
             });
           })(piece);
@@ -309,10 +309,10 @@ var scene_game = (function () {
       return new Promise(function(resolve) {
         piece.blend_type = to_type;
         kz.t({
-          object: piece,
-          property: 'blend_alpha',
-          value: 1,
-          duration: 100
+          o: piece,
+          p: 'blend_alpha',
+          v: 1,
+          d: 100
         }).then(function() {
           piece.type = to_type;
           piece.blend_type = 0;
@@ -367,10 +367,10 @@ var scene_game = (function () {
         if (!piece) return;
         piece.a = piece.a.then(function () {
           return kz.t({
-            object: piece,
-            property: 'y',
-            value: piece.y + $c.g,
-            rate: 1
+            o: piece,
+            p: 'y',
+            v: piece.y + $c.g,
+            r: 1
           });
         });
       });
@@ -395,10 +395,10 @@ var scene_game = (function () {
       fadeAlpha: 1
     }
     kz.t({
-      object: graphics,
-      property: 'fadeAlpha',
-      value: 0,
-      duration: 100});
+      o: graphics,
+      p: 'fadeAlpha',
+      v: 0,
+      d: 100});
 
 
   // intialize state
@@ -530,10 +530,10 @@ var scene_game = (function () {
           this.x += dx;
           this.a = this.a.then(function () {
             return kz.t({
-              object: this,
-              property: 'sprite_x',
-              value: this.sprite_x + dx*$c.g,
-              rate: 0.7
+              o: this,
+              p: 'sprite_x',
+              v: this.sprite_x + dx*$c.g,
+              r: 0.7
             }).then(function () {
               return blankPromise();
             }.bind(this));
@@ -594,10 +594,10 @@ var scene_game = (function () {
         piece.a = piece.a.then(function () {
           kz.r.sounds['sfx_shoot'].play();
           return kz.t({
-            object: piece,
-            property: 'y',
-            value: board_to_piece(target_y),
-            rate: 3
+            o: piece,
+            p: 'y',
+            v: board_to_piece(target_y),
+            r: 3
           });
         });
        }
@@ -883,10 +883,10 @@ var scene_game = (function () {
           state.can_restart) {
         state.exiting = true;
         kz.t({
-          object: graphics,
-          property: 'fadeAlpha',
-          value: 1,
-          duration: 100}).then(function () {
+          o: graphics,
+          p: 'fadeAlpha',
+          v: 1,
+          d: 100}).then(function () {
             kz.run(scene_main_menu);
           })
       }
@@ -910,19 +910,19 @@ var scene_game = (function () {
           } else if (pause_choice == 1) {
             state.exiting = true;
             kz.t({
-              object: graphics,
-              property: 'fadeAlpha',
-              value: 1,
-              duration: 100}).then(function () {
+              o: graphics,
+              p: 'fadeAlpha',
+              v: 1,
+              d: 100}).then(function () {
                 kz.run(scene_game);
               });
           } else {
             state.exiting = true;
             kz.t({
-              object: graphics,
-              property: 'fadeAlpha',
-              value: 1,
-              duration: 100}).then(function () {
+              o: graphics,
+              p: 'fadeAlpha',
+              v: 1,
+              d: 100}).then(function () {
                 kz.run(scene_main_menu);
               });
           }

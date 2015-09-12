@@ -5,7 +5,7 @@ var scene_main_menu = (function () {
 
   scene_main_menu.initialize = function () {
     graphics = {
-      press_space_visible: 1,
+      a: 1, //press_space_visible
       text_alpha: 1,
       fadeAlpha: 1,
       exiting: false,
@@ -13,13 +13,13 @@ var scene_main_menu = (function () {
       state: 0
     };
     kz.t({
-      object: graphics,
-      property: 'fadeAlpha',
-      value: 0,
-      duration: 100
+      o: graphics,
+      p: 'fadeAlpha',
+      v: 0,
+      d: 100
     });
     graphics.blinkID = setInterval(function() {
-      graphics.press_space_visible ^= 1;
+      graphics.a ^= 1;
     }, 400);
   }
 
@@ -46,7 +46,7 @@ var scene_main_menu = (function () {
       125
     );
 
-    if (graphics.state == 0 && graphics.press_space_visible) {
+    if (graphics.state == 0 && graphics.a) {
       kz.x.save();
       kz.x.globalAlpha = graphics.text_alpha;
       kz.x.font = '24px f';
@@ -96,10 +96,10 @@ var scene_main_menu = (function () {
             var s = graphics.choice ? scene_records : scene_character_select;
             graphics.exiting = true;
             kz.t({
-              object: graphics,
-              property: 'fadeAlpha',
-              value: 1,
-              duration: 100
+              o: graphics,
+              p: 'fadeAlpha',
+              v: 1,
+              d: 100
             }).then(function () {
               clearInterval(graphics.blinkID);
               kz.run(s);
