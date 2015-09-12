@@ -2,10 +2,10 @@
 var previous_time;
 
 var scene_game = (function () {
-  var config = {
-    board_width: 8,
-    board_height: 17,
-    grid_size: 20,
+  var $c = {
+    w: 8, // board_width
+    h: 17, // board_height
+    g: 20, // grid_size
     next_length: 8,
     next_row_interval: 20000
   };
@@ -13,7 +13,7 @@ var scene_game = (function () {
   var info_canvas = document.createElement('canvas');
   var pause_canvas = document.createElement('canvas');
   var gameover_canvas = document.createElement('canvas');
-  board_canvas.width = config.board_width*config.grid_size;
+  board_canvas.width = $c.w*$c.g;
   board_canvas.height = 390;
   info_canvas.width = 96;
   info_canvas.height = 390;
@@ -149,11 +149,11 @@ var scene_game = (function () {
     var row;
     var activateAbility = false;
 
-    for (var yy = 0; yy < config.board_height; yy++) {
+    for (var yy = 0; yy < $c.h; yy++) {
       var piece_type = state.board[yy][0].piece_type;
       var zodiacCounter = 0;
       var cleared = true;
-      for (var xx = 0; xx < config.board_width; xx++) {
+      for (var xx = 0; xx < $c.w; xx++) {
         if (state.board[yy][xx].piece_type == PieceTypes.Zodiac) {
           zodiacCounter++;
         }
@@ -189,12 +189,12 @@ var scene_game = (function () {
 
     // capture row pieces before we update board so we can animate them
     var row_pieces = [];
-    for (var xx = 0; xx < config.board_width; xx++) {
+    for (var xx = 0; xx < $c.w; xx++) {
       row_pieces.push(state.board[row][xx].piece);
     }
 
     // update of underlying board
-    for (xx = 0; xx < config.board_width; xx++) {
+    for (xx = 0; xx < $c.w; xx++) {
       state.board[row][xx] = {
         piece_type: PieceTypes.Empty
       };
@@ -212,7 +212,7 @@ var scene_game = (function () {
       state: state,
       animateClearPieces: animateClearPieces,
       animateColorChange: animateColorChange,
-      config: config,
+      $c: $c,
       incrementScore: incrementScore,
       row: row
     });
@@ -243,8 +243,8 @@ var scene_game = (function () {
   }
 
   function drop() {
-    for (var yy = config.board_height-1; yy > 0; yy--) {
-      for (var xx = 0; xx < config.board_width; xx++) {
+    for (var yy = $c.h-1; yy > 0; yy--) {
+      for (var xx = 0; xx < $c.w; xx++) {
         if (state.board[yy][xx].piece_type && !state.board[yy-1][xx].piece_type) {
           state.board[yy-1][xx] = state.board[yy][xx];
           state.board[yy][xx] = {
@@ -257,7 +257,7 @@ var scene_game = (function () {
               return kz.tween({
                 object: piece,
                 property: 'y',
-                value: piece.y - config.grid_size,
+                value: piece.y - $c.g,
                 duration: 100
               });
             });
@@ -283,8 +283,8 @@ var scene_game = (function () {
       var y = board_y + length * dy;
       while (0 <= x
              && 0 <= y
-             && x < config.board_width
-             && y < config.board_height) {
+             && x < $c.w
+             && y < $c.h) {
         if (state.board[y][x].piece_type == PieceTypes.Empty
           || state.board[y][x].piece_type == PieceTypes.Zodiac) break;
         if (state.board[y][x].piece_type == piece_type) {
@@ -333,7 +333,7 @@ var scene_game = (function () {
   function addRow() {
     kz.r.sounds['sfx_drop'].play();
     var new_row = [];
-    for (var ii = 0; ii < config.board_width; ii++) {
+    for (var ii = 0; ii < $c.w; ii++) {
       var piece_type = randomPieceType(normal_piece_types);
       new_row.push({
         piece_type: piece_type,
@@ -345,23 +345,23 @@ var scene_game = (function () {
       });
     }
     // if all colors the same, change the color of last one
-    var piece_type = new_row[config.board_width-1].piece_type;
-    for (var ii = 0; ii < config.board_width; ii++) {
+    var piece_type = new_row[$c.w-1].piece_type;
+    for (var ii = 0; ii < $c.w; ii++) {
       piece_type ^= new_row[ii].piece_type;
     }
     if (piece_type) {
-      new_row[config.board_width-1].piece_type ^= 3;
-      new_row[config.board_width-1].piece.type ^= 3;
+      new_row[$c.w-1].piece_type ^= 3;
+      new_row[$c.w-1].piece.type ^= 3;
     }
 
     // update board
-    for (var xx = 0; xx < config.board_width; xx++) {
-      if (state.board[config.board_height-1][xx].piece_type
+    for (var xx = 0; xx < $c.w; xx++) {
+      if (state.board[$c.h-1][xx].piece_type
           != PieceTypes.Empty) {
         lose();
         return;
       }
-      for (var yy = config.board_height-1; yy > 0; yy--) {
+      for (var yy = $c.h-1; yy > 0; yy--) {
         state.board[yy][xx] = state.board[yy-1][xx];
       }
       state.board[0][xx] = new_row[xx];
@@ -376,7 +376,7 @@ var scene_game = (function () {
           return kz.tween({
             object: piece,
             property: 'y',
-            value: piece.y + config.grid_size,
+            value: piece.y + $c.g,
             rate: 1
           });
         });
@@ -418,7 +418,7 @@ var scene_game = (function () {
       score: 0,
       level: 1,
       rows_cleared: 0,
-      next_row_interval: config.next_row_interval,
+      next_row_interval: $c.next_row_interval,
       next_row_time: 0,
       next_row_time_diff: 0,
       next_row_freeze: false,
@@ -431,9 +431,9 @@ var scene_game = (function () {
     };
     state.next_row_time = kz.performance.now() + state.next_row_interval;
     // initialize board
-    for (var yy = 0; yy < config.board_height; yy++) {
+    for (var yy = 0; yy < $c.h; yy++) {
       state.board.push([]);
-      for (var xx = 0; xx < config.board_width; xx++) {
+      for (var xx = 0; xx < $c.w; xx++) {
         // initialize board to have two random rows
         if (yy < 2) {
           var piece_type = randomPieceType(normal_piece_types);
@@ -447,14 +447,14 @@ var scene_game = (function () {
             piece: piece
           });
           // check if all colors if the same. if so, change the color of the last
-          if (xx == config.board_width - 1) {
+          if (xx == $c.w - 1) {
             var piece_type = state.board[yy][0].piece_type;
-            for (var xxx = 0; xxx < config.board_width; xxx++) {
+            for (var xxx = 0; xxx < $c.w; xxx++) {
               piece_type &= state.board[yy][xxx].piece_type
             }
             if (piece_type) {
-              state.board[yy][config.board_width - 1].piece_type ^= 3;
-              state.board[yy][config.board_width - 1].piece.type ^= 3;
+              state.board[yy][$c.w - 1].piece_type ^= 3;
+              state.board[yy][$c.w - 1].piece.type ^= 3;
             }
           }
         } else {
@@ -489,9 +489,9 @@ var scene_game = (function () {
           this.animate_timer = now;
         }
       },
-      x: Math.floor(config.board_width/2),
-      sprite_x: 4+Math.floor(config.board_width/2)*config.grid_size,
-      sprite_y: config.board_height*config.grid_size+23,
+      x: Math.floor($c.w/2),
+      sprite_x: 4+Math.floor($c.w/2)*$c.g,
+      sprite_y: $c.h*$c.g+23,
       actions_promise: blankPromise(),
       draw: function (context) {
         context.drawImage(
@@ -500,7 +500,7 @@ var scene_game = (function () {
           this.sprite_y);
         // draw aiming line
         var h;
-        for (h = config.board_height-1; h >= 0; h--) {
+        for (h = $c.h-1; h >= 0; h--) {
           if (state.board[h][this.x].piece_type != PieceTypes.Empty) {
             break;
           }
@@ -512,12 +512,12 @@ var scene_game = (function () {
         board_context.strokeStyle = '#8ed4a5';
         board_context.beginPath();
         board_context.moveTo(
-          this.sprite_x+config.grid_size/2-5,
+          this.sprite_x+$c.g/2-5,
           this.sprite_y-8
         );
         board_context.lineTo(
-          this.sprite_x+config.grid_size/2-5,
-          (h+1) * config.grid_size + 20
+          this.sprite_x+$c.g/2-5,
+          (h+1) * $c.g + 20
         );
         board_context.stroke();
         board_context.restore();
@@ -533,13 +533,13 @@ var scene_game = (function () {
         }
       },
       move: function (dx) {
-        if (this.x+dx >= 0 && this.x+dx < config.board_width) {
+        if (this.x+dx >= 0 && this.x+dx < $c.w) {
           this.x += dx;
           this.actions_promise = this.actions_promise.then(function () {
             return kz.tween({
               object: this,
               property: 'sprite_x',
-              value: this.sprite_x + dx*config.grid_size,
+              value: this.sprite_x + dx*$c.g,
               rate: 0.7
             }).then(function () {
               return blankPromise();
@@ -549,7 +549,7 @@ var scene_game = (function () {
       },
       next: [],
       shoot : function() {
-        if (state.board[config.board_height-1][this.x].piece_type
+        if (state.board[$c.h-1][this.x].piece_type
             != PieceTypes.Empty) {
           lose();
           return;
@@ -579,7 +579,7 @@ var scene_game = (function () {
         };
         maxRecord(pieceTypeRecordMap[piece_type], state.consecutive[piece_type]);
 
-        var target_y = config.board_height-1;
+        var target_y = $c.h-1;
         while (target_y > 0) {
           if (state.board[target_y-1][this.x].piece_type
               != PieceTypes.Empty) {
@@ -588,8 +588,8 @@ var scene_game = (function () {
           target_y--;
         }
         var piece = makePiece(
-          this.x*config.grid_size + 1,
-          (config.board_height-1)*config.grid_size + 1,
+          this.x*$c.g + 1,
+          ($c.h-1)*$c.g + 1,
           piece_type
         );
         state.board[target_y][this.x] = {
@@ -649,11 +649,11 @@ var scene_game = (function () {
     board_context.beginPath();
     board_context.moveTo(
       0,
-      config.board_height * config.grid_size + 20
+      $c.h * $c.g + 20
     );
     board_context.lineTo(
-      config.board_width * config.grid_size,
-      config.board_height * config.grid_size + 20
+      $c.w * $c.g,
+      $c.h * $c.g + 20
     );
     board_context.stroke();
     board_context.restore();
@@ -766,10 +766,10 @@ var scene_game = (function () {
     info_context.fillText(time_string, 48, 377);
 
       // draw sprites
-    for (var ii = 0; ii < config.next_length; ii++) {
+    for (var ii = 0; ii < $c.next_length; ii++) {
       info_context.drawImage(
         pieceTypeImage(state.player.next[ii]),
-        9+(ii%4)*config.grid_size,
+        9+(ii%4)*$c.g,
         148 + Math.floor(ii/4)*23
       );
     }

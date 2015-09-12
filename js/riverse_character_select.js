@@ -25,15 +25,15 @@ var scene_character_select = (function () {
         unlocked: getRecord('max_white_orbs') >= 13,
         zodiac: function (data) {
           var state = data.state;
-          var config = data.config;
-          for (var yy = 0; yy < config.board_height; yy++) {
+          var config = data.$c;
+          for (var yy = 0; yy < config.w; yy++) {
             if (state.board[yy][0].piece_type && state.board[yy][0].piece_type != 1) {
               state.board[yy][0].piece_type = 1;
               data.animateColorChange(state.board[yy][0].piece, 1);
             }
-            if (state.board[yy][config.board_width-1].piece_type && state.board[yy][config.board_width-1].piece_type != 1) {
-              state.board[yy][config.board_width-1].piece_type = 1;
-              data.animateColorChange(state.board[yy][config.board_width-1].piece, 1);
+            if (state.board[yy][config.w-1].piece_type && state.board[yy][config.w-1].piece_type != 1) {
+              state.board[yy][config.w-1].piece_type = 1;
+              data.animateColorChange(state.board[yy][config.w-1].piece, 1);
             }
           }
         }
@@ -45,16 +45,16 @@ var scene_character_select = (function () {
         unlocked: true,
         zodiac: function (data) {
           var state = data.state;
-          var config = data.config;
+          var config = data.$c;
           var row = data.row;
           row--;
           var row_pieces = [];
-          for (var xx = 0; xx < config.board_width; xx++) {
+          for (var xx = 0; xx < config.w; xx++) {
             if (state.board[row][xx].piece) {
               row_pieces.push(state.board[row][xx].piece);
             }
           }
-          for (xx = 0; xx < config.board_width; xx++) {
+          for (xx = 0; xx < config.w; xx++) {
             state.board[row][xx] = {
               piece_type: 0
             };
@@ -71,7 +71,7 @@ var scene_character_select = (function () {
         zodiac: function (data) {
           var board = data.state.board;
           var pieces = [];
-          for (var yy = 0; yy < data.config.board_height; yy++) {
+          for (var yy = 0; yy < data.$c.w; yy++) {
             if (board[yy][0].piece_type) {
               pieces.push(board[yy][0].piece);
               board[yy][0].piece_type = 0;
@@ -91,8 +91,8 @@ var scene_character_select = (function () {
           var rightCounter = 4;
           var pieces = [];
           var board = data.state.board;
-          var width = data.config.board_width;
-          for (var yy = data.config.board_height - 1; yy >= 0; yy--) {
+          var width = data.$c.w;
+          for (var yy = data.$c.w - 1; yy >= 0; yy--) {
             if (leftCounter) {
               if (board[yy][0].piece_type) {
                 pieces.push(board[yy][0].piece);
@@ -122,8 +122,8 @@ var scene_character_select = (function () {
           var count = 0;
           var pieces = [];
           var piece_locs = [];
-          for (var yy = 0; yy < data.config.board_height; yy++) {
-            for (var xx = 0; xx < data.config.board_width; xx++) {
+          for (var yy = 0; yy < data.$c.w; yy++) {
+            for (var xx = 0; xx < data.$c.w; xx++) {
               if (board[yy][xx].piece_type) {
                 piece_locs.push({x:xx,y:yy});
               }
@@ -174,15 +174,15 @@ var scene_character_select = (function () {
         unlocked: getRecord('max_black_orbs') >= 13,
         zodiac: function (data) {
           var state = data.state;
-          var config = data.config;
-          for (var yy = 0; yy < config.board_height; yy++) {
+          var config = data.$c;
+          for (var yy = 0; yy < $c.w; yy++) {
             if (state.board[yy][0].piece_type && state.board[yy][0].piece_type != 2) {
               state.board[yy][0].piece_type = 2;
               data.animateColorChange(state.board[yy][0].piece, 2);
             }
-            if (state.board[yy][config.board_width-1].piece_type && state.board[yy][config.board_width-1].piece_type != 2) {
-              state.board[yy][config.board_width-1].piece_type = 2;
-              data.animateColorChange(state.board[yy][config.board_width-1].piece, 2);
+            if (state.board[yy][config.w-1].piece_type && state.board[yy][config.w-1].piece_type != 2) {
+              state.board[yy][config.w-1].piece_type = 2;
+              data.animateColorChange(state.board[yy][config.w-1].piece, 2);
             }
           }
         }
@@ -208,8 +208,8 @@ var scene_character_select = (function () {
         zodiac: function (data) {
           var board = data.state.board;
           var pieces = [];
-          var width = data.state.board_width;
-          for (var yy = 0; yy < data.config.board_height; yy++) {
+          var width = data.state.w;
+          for (var yy = 0; yy < data.$c.w; yy++) {
             if (board[yy][width-1].piece_type) {
               pieces.push(board[yy][width-1].piece);
               board[yy][width-1].piece_type = 0;
@@ -226,9 +226,9 @@ var scene_character_select = (function () {
         unlocked: getRecord('max_score') >= 13,
         zodiac: function (data) {
           var state = data.state;
-          var config = data.config;
+          var config = data.$c;
           var row_pieces = [];
-          for (var xx = 0; xx < config.board_width; xx++) {
+          for (var xx = 0; xx < config.w; xx++) {
             if (state.board[0][xx].piece) {
               row_pieces.push(state.board[0][xx].piece);
             }
