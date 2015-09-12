@@ -11,6 +11,7 @@ function tx(context, px, str, x, y, xalign, yalign) {
     ')':'10,01,01,01,10',
     '+':'000,010,111,010,000',
     '/':'00001,00010,00100,01000,10000',
+    ':':'0,1,0,1,0',
     '0':'0110,1001,1001,1001,0110',
     '1':'11,01,01,01,01',
     '2':'1110,0001,0110,1000,1111',
@@ -1429,7 +1430,6 @@ var smm = (function () {
   smm.draw = function () {
     $.x.clearAll();
 
-    $.x.save();
     $.x.fillStyle = '#30403b';
     $.x.fillRect(
       0,
@@ -1437,7 +1437,6 @@ var smm = (function () {
       $.v.width,
       $.v.height
     );
-    $.x.restore();
 
     $.x.fillStyle = '#8ed4a5';
     tx($.x,6,'ZODIAC 13',140,125,1,1);
@@ -1455,6 +1454,7 @@ var smm = (function () {
 
     $.x.fillStyle = '#50605b';
     tx($.x,1,'HERMAN CHAU (KCAZE)',140,380,1,1);
+
     $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
     $.x.fillRect(0,0,$.v.width,$.v.height);
   }
@@ -1521,7 +1521,6 @@ var srs = (function () {
   scene.draw = function () {
     $.x.clearAll();
 
-    $.x.save();
     $.x.fillStyle = '#30403b';
     $.x.fillRect(
       0,
@@ -1529,23 +1528,13 @@ var srs = (function () {
       $.v.width,
       $.v.height
     );
-    $.x.restore();
 
-    $.x.textAlign = 'center';
-    $.x.textBaseline = 'center';
-    $.x.font = '32px f';
     $.x.fillStyle = '#fff';
-    $.x.fillText(
-      'RECORDS',
-      $.v.width / 2,
-      48
-    );
+    tx($.x, 3, 'RECORDS', 140, 48, 1, 1)
     $.x.font = '12px f';
     for (var ii = 0; ii < records.length; ii++) {
       $.x.fillStyle = '#fff';
-      $.x.textAlign = 'left';
-      $.x.fillText(records[ii].text + ': ', 12, 90 + ii*20);
-      $.x.textAlign = 'right';
+      tx($.x, 1, records[ii].text+': ', 12, 90+ii*20, 0, 1);
       $.x.fillStyle = '#8ed4a5';
       var value;
       if (records[ii].name == 'total_time' || records[ii].name == 'max_time') {
@@ -1555,9 +1544,9 @@ var srs = (function () {
         var hour_string = records[ii].name == 'total_time' ? '' + Math.floor(time/3600) + ':' : '';
         value = hour_string+'0'.repeat(2-min_string.length) + min_string + ':'  + '0'.repeat(2-sec_string.length)+sec_string;
       } else {
-        value = gR(records[ii].name);
+        value = ''+gR(records[ii].name);
       }
-      $.x.fillText(value, $.v.width-12, 90+ii*20);
+      tx($.x, 1, value, 268, 90+ii*20, 2, 1);
     }
 
     $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
@@ -1887,33 +1876,15 @@ var scs = (function () {
       $.x.lineWidth = 1;
       $.x.strokeRect(($S.s%2)*49 + 10, Math.floor($S.s/2)*49 + 20, 50, 50) ;
     }
-    $.x.textAlign = 'right';
-    $.x.textBaseline = 'center';
-    $.x.font = '24px f';
-    $.x.fillStyle = 'white';
-    $.x.fillText(
-      characters[$S.s].name,
-      $.v.width - 10,
-      330
-    );
-    $.x.textAlign = 'right';
-    $.x.textBaseline = 'center';
+    $.x.fillStyle = '#fff';
+    tx($.x, 3, characters[$S.s].name, 270, 330, 2, 1);
     $.x.font = '16px f';
-    $.x.fillStyle = 'white';
     if (characters[$S.s].u) {
-      $.x.fillText(
-        characters[$S.s].d,
-        $.v.width - 10,
-        360
-      );
+      $.x.fillStyle = 'white';
+      tx($.x, 1, characters[$S.s].d, 270, 355, 2, 1);
     } else {
-      $.x.font = '12px f';
       $.x.fillStyle = '#50605b';
-      $.x.fillText(
-        characters[$S.s].m,
-        $.v.width - 10,
-        360
-      );
+      tx($.x, 1, characters[$S.s].m, 270, 355, 2, 1);
     }
     $.x.fillStyle = 'rgba(0,0,0,'+$S.f+')';
     $.x.fillRect(0,0,$.v.width,$.v.height);
@@ -2696,27 +2667,23 @@ var sg = (function () {
     );
 
       // draw text
-    i_x.textAlign = 'center';
-    i_x.textBaseline = 'top';
     i_x.font = '24px f';
-    i_x.fillStyle = 'white';
-    i_x.fillText('NEXT', 48, 120);
-    i_x.fillText('SCORE', 48, 211);
-    i_x.fillText('LEVEL', 48, 272);
-    i_x.fillText('TIME', 48, 333);
-    i_x.font = '20px f';
-    i_x.textBaseline = 'bottom';
-    i_x.fillText(character.name, 48, 101);
-    i_x.fillText('' + $S.level, 48, 316);
+    i_x.fillStyle = '#fff';
+    tx(i_x, 3, 'NEXT', 48, 122, 1, 0);
+    tx(i_x, 3, 'SCORE', 48, 213, 1, 0);
+    tx(i_x, 3, 'LEVEL', 48, 273, 1, 0);
+    tx(i_x, 3, 'TIME', 48, 335, 1, 0);
+    tx(i_x, 3, character.name, 48, 97, 1, 2);
+    tx(i_x, 3, '' + $S.level, 48, 314, 1, 2);
     var score_string = '' + $S.score;
         // pad with zeroes
     score_string = '0'.repeat(5 - score_string.length) + score_string;
-    i_x.fillText(score_string, 48, 255);
+    tx(i_x, 3, score_string, 48, 255, 1, 2);
     var time = Math.floor(($.performance.now() - $S.b)/1000);
     var sec_string = '' + time%60;
     var min_string = '' + Math.floor(time/60);
     time_string = '0'.repeat(2-min_string.length) + min_string + ':'  + '0'.repeat(2-sec_string.length)+sec_string;
-    i_x.fillText(time_string, 48, 377);
+    tx(i_x, 3, time_string, 48, 377, 1, 2);
 
       // draw sprites
     for (var ii = 0; ii < 8; ii++) {
@@ -2787,15 +2754,12 @@ var sg = (function () {
       $.v.height
     );
     $.x.globalAlpha = 1;
-    $.x.textAlign = 'center';
-    $.x.textBaseline = 'center';
-    $.x.font = '24px f';
     $.x.fillStyle = pause_choice == 0 ? '#fff' : '#666';
-    $.x.fillText('RESUME', $.v.width/2, $.v.height/2-48);
+    tx($.x, 3, 'RESUME', 140, 147, 1, 1);
     $.x.fillStyle = pause_choice == 1 ? '#fff' : '#666';
-    $.x.fillText('RESTART', $.v.width/2, $.v.height/2);
+    tx($.x, 3, 'RESTART', 140, 195, 1, 1);
     $.x.fillStyle = pause_choice == 2 ? '#fff' : '#666';
-    $.x.fillText('QUIT', $.v.width/2, $.v.height/2+48);
+    tx($.x, 3, 'QUIT', 140, 243, 1, 1);
     $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
     $.x.fillRect(0,0,$.v.width,$.v.height);
   }
@@ -2818,14 +2782,8 @@ var sg = (function () {
       42
     );
     $.x.globalAlpha = gfx.gameover_text_alpha;
-    $.x.textAlign = 'center';
-    $.x.textBaseline = 'center';
-    $.x.font = '24px f';
     $.x.fillStyle = '#fff';
-    $.x.fillText(
-      'GAME OVER',
-      $.v.width / 2 - 46,
-      $.v.height / 2);
+    tx($.x, 3, 'GAME OVER', 90, 188, 1, 1);
     $.x.restore();
     $.x.fillStyle = 'rgba(0,0,0,'+gfx.f+')';
     $.x.fillRect(0,0,$.v.width,$.v.height);
